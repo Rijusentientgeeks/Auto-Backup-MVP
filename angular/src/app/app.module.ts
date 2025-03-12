@@ -22,6 +22,8 @@ import { SidebarComponent } from './layout/sidebar.component';
 import { SidebarLogoComponent } from './layout/sidebar-logo.component';
 import { SidebarUserPanelComponent } from './layout/sidebar-user-panel.component';
 import { SidebarMenuComponent } from './layout/sidebar-menu.component';
+import { BrowserModule } from '@node_modules/@angular/platform-browser';
+import { OAuthModule, OAuthService } from '@node_modules/angular-oauth2-oidc';
 
 @NgModule({
     declarations: [
@@ -50,8 +52,11 @@ import { SidebarMenuComponent } from './layout/sidebar-menu.component';
         TabsModule,
         ServiceProxyModule,
         NgxPaginationModule,
-        SharedModule
+        SharedModule,
+        BrowserModule,
+        OAuthModule.forRoot() // Import OAuthModule
     ],
-    providers: []
+    providers: [OAuthService],
+    bootstrap: [AppComponent]
 })
 export class AppModule {}

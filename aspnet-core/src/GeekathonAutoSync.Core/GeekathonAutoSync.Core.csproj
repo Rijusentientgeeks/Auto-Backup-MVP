@@ -18,5 +18,7 @@
     <PackageReference Include="Abp.AutoMapper" Version="9.4.1" />
     <PackageReference Include="Abp.ZeroCore.EntityFrameworkCore" Version="9.4.1" />
     <PackageReference Include="Castle.Windsor.MsDependencyInjection" Version="4.1.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="8.0.8" />
+    <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.6.0" />
   </ItemGroup>
 </Project>

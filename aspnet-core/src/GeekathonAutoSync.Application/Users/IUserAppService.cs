@@ -8,6 +8,7 @@ namespace GeekathonAutoSync.Users
 {
     public interface IUserAppService : IAsyncCrudAppService<UserDto, long, PagedUserResultRequestDto, CreateUserDto, UserDto>
     {
+        Task<UserDto> GetUserByEmail(string email);
         Task DeActivate(EntityDto<long> user);
         Task Activate(EntityDto<long> user);
         Task<ListResultDto<RoleDto>> GetRoles();

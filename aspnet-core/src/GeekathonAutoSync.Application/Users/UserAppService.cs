@@ -52,6 +52,11 @@ namespace GeekathonAutoSync.Users
             _abpSession = abpSession;
             _logInManager = logInManager;
         }
+        public async Task<UserDto> GetUserByEmail(string email)
+        {
+            var user = await _userManager.FindByEmailAsync(email);
+            return MapToEntityDto(user);
+        }
 
         public override async Task<UserDto> CreateAsync(CreateUserDto input)
         {

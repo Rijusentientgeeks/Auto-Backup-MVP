@@ -9,6 +9,7 @@ import { environment } from './environments/environment';
 import { AccountServiceProxy, IsTenantAvailableInput, IsTenantAvailableOutput, TenantAvailabilityState } from '@shared/service-proxies/service-proxies';
 import { SubdomainTenantResolver } from '@shared/multi-tenancy/tenant-resolvers/subdomain-tenant-resolver';
 import { QueryStringTenantResolver } from '@shared/multi-tenancy/tenant-resolvers/query-string-tenant-resolver';
+import { OidcService } from './oidc-service';  // Import your OIDC service
 
 @Injectable({
   providedIn: 'root',
@@ -17,43 +18,55 @@ export class AppInitializer {
   constructor(
     private _injector: Injector,
     private _platformLocation: PlatformLocation,
-    private _httpClient: HttpClient
+    private _httpClient: HttpClient,
+    private _oidcService: OidcService  // Inject OIDC service
   ) { }
 
   init(): () => Promise<boolean> {
+    debugger
     return () => {
       abp.ui.setBusy();
       return new Promise<boolean>((resolve, reject) => {
-        AppConsts.appBaseHref = this.getBaseHref();
-        const appBaseUrl = this.getDocumentOrigin() + AppConsts.appBaseHref;
-        this.getApplicationConfig(appBaseUrl, () => {
-          this.getUserConfiguration(() => {
-            abp.event.trigger('abp.dynamicScriptsInitialized');
-            // do not use constructor injection for AppSessionService
-            const appSessionService = this._injector.get(AppSessionService);
-            appSessionService.init().then(
-              (result) => {
-                abp.ui.clearBusy();
-                if (this.shouldLoadLocale()) {
-                  const angularLocale = this.convertAbpLocaleToAngularLocale(
-                    abp.localization.currentLanguage.name
-                  );
-                  import(`/node_modules/@angular/common/locales/${angularLocale}.mjs`).then(
-                    (module) => {
-                      registerLocaleData(module.default);
-                      resolve(result);
-                    },
-                    reject
-                  );
-                } else {
-                  resolve(result);
+        debugger
+        // Ensure user is authenticated before continuing
+        this._oidcService.isAuthenticated().then(isAuthenticated => {
+          debugger
+          if (!isAuthenticated) {
+            this._oidcService.login();  // Redirect to OpenID login if not authenticated
+            return;
+          }
+
+          AppConsts.appBaseHref = this.getBaseHref();
+          const appBaseUrl = this.getDocumentOrigin() + AppConsts.appBaseHref;
+          this.getApplicationConfig(appBaseUrl, () => {
+            this.getUserConfiguration(() => {
+              abp.event.trigger('abp.dynamicScriptsInitialized');
+              // do not use constructor injection for AppSessionService
+              const appSessionService = this._injector.get(AppSessionService);
+              appSessionService.init().then(
+                (result) => {
+                  abp.ui.clearBusy();
+                  if (this.shouldLoadLocale()) {
+                    const angularLocale = this.convertAbpLocaleToAngularLocale(
+                      abp.localization.currentLanguage.name
+                    );
+                    import(`/node_modules/@angular/common/locales/${angularLocale}.mjs`).then(
+                      (module) => {
+                        registerLocaleData(module.default);
+                        resolve(result);
+                      },
+                      reject
+                    );
+                  } else {
+                    resolve(result);
+                  }
+                },
+                (err) => {
+                  abp.ui.clearBusy();
+                  reject(err);
                 }
-              },
-              (err) => {
-                abp.ui.clearBusy();
-                reject(err);
-              }
-            );
+              );
+            });
           });
         });
       });
@@ -61,6 +74,7 @@ export class AppInitializer {
   }
 
   private getBaseHref(): string {
+    debugger
     const baseUrl = this._platformLocation.getBaseHrefFromDOM();
     if (baseUrl) {
       return baseUrl;
@@ -70,6 +84,7 @@ export class AppInitializer {
   }
 
   private getDocumentOrigin(): string {
+    debugger
     if (!document.location.origin) {
       const port = document.location.port ? ':' + document.location.port : '';
       return (
@@ -81,6 +96,7 @@ export class AppInitializer {
   }
 
   private shouldLoadLocale(): boolean {
+    debugger
     return (
       abp.localization.currentLanguage.name &&
       abp.localization.currentLanguage.name !== 'en-US'
@@ -88,6 +104,7 @@ export class AppInitializer {
   }
 
   private convertAbpLocaleToAngularLocale(locale: string): string {
+    debugger
     if (!AppConsts.localeMappings) {
       return locale;
     }
@@ -103,6 +120,7 @@ export class AppInitializer {
   private getCurrentClockProvider(
     currentProviderName: string
   ): abp.timing.IClockProvider {
+    debugger
     if (currentProviderName === 'unspecifiedClockProvider') {
       return abp.timing.unspecifiedClockProvider;
     }
@@ -115,12 +133,15 @@ export class AppInitializer {
   }
 
   private getUserConfiguration(callback: () => void): void {
+    debugger
     const cookieLangValue = abp.utils.getCookieValue(
       'Abp.Localization.CultureName'
     );
-    const token = abp.auth.getToken();
+    //const token = abp.auth.getToken();
+    const token = this._oidcService.getUser().then(user => user?.access_token);
 
     const requestHeaders = {
+      'Authorization': `Bearer ${token}`,
       'Abp.TenantId': `${abp.multiTenancy.getTenantIdCookie()}`,
       '.AspNetCore.Culture': `c=${cookieLangValue}|uic=${cookieLangValue}`,
     };
@@ -156,6 +177,7 @@ export class AppInitializer {
   }
 
   private getApplicationConfig(appRootUrl: string, callback: () => void) {
+    debugger
     this._httpClient
       .get<any>(`${appRootUrl}assets/${environment.appConfig}`, {
         headers: {
@@ -179,6 +201,7 @@ export class AppInitializer {
   }
 
   private ConfigureTenantIdCookie(tenancyName: string, callback: () => void) {
+    debugger
     let accountServiceProxy: AccountServiceProxy = this._injector.get(AccountServiceProxy);
     let input = new IsTenantAvailableInput();
     input.tenancyName = tenancyName;

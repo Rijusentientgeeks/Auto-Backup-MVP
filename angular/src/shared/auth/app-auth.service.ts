@@ -36,6 +36,7 @@ export class AppAuthService {
     }
 
     authenticate(finallyCallback?: () => void): void {
+        debugger
         finallyCallback = finallyCallback || (() => { });
 
         this._tokenAuthService
@@ -53,6 +54,7 @@ export class AppAuthService {
     private processAuthenticateResult(
         authenticateResult: AuthenticateResultModel
     ) {
+        debugger
         this.authenticateResult = authenticateResult;
 
         if (authenticateResult.accessToken) {
@@ -77,6 +79,7 @@ export class AppAuthService {
         expireInSeconds: number,
         rememberMe?: boolean
     ): void {
+        debugger
         const tokenExpireDate = rememberMe
             ? new Date(new Date().getTime() + 1000 * expireInSeconds)
             : undefined;
@@ -99,6 +102,7 @@ export class AppAuthService {
     }
 
     private clear(): void {
+        debugger
         this.authenticateModel = new AuthenticateModel();
         this.authenticateModel.rememberClient = false;
         this.authenticateResult = null;

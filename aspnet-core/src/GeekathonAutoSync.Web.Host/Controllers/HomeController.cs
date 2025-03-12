@@ -6,9 +6,11 @@ using Abp.Notifications;
 using Abp.Timing;
 using Abp.Web.Security.AntiForgery;
 using GeekathonAutoSync.Controllers;
+using Microsoft.AspNetCore.Authorization;
 
 namespace GeekathonAutoSync.Web.Host.Controllers
 {
+    [Authorize]
     public class HomeController : GeekathonAutoSyncControllerBase
     {
         private readonly INotificationPublisher _notificationPublisher;
