@@ -43,6 +43,11 @@ import { AppComponent } from './app.component';
                         loadChildren: () => import('./users/users.module').then((m) => m.UsersModule),
                         canActivate: [AppRouteGuard]
                     },
+                    {
+                        path: 'manage-storage',
+                        loadChildren: () => import('./Storage/manage-storage/manage-storage.module').then((m) => m.ManageStorageModule),
+                        canActivate: [AppRouteGuard]
+                    },
                 ]
             }
         ])
