@@ -33,10 +33,13 @@ export class ManageStorageComponent {
   ];
 
   storageForm!: FormGroup;
-  displayModal = false; // Controls modal visibility
+  displayModal = false;
+  isCloudStorage = false;
+  isAWS = false;
+  isAzure = false;
   openDialog() {
     this.displayModal = true;
-    this.storageForm.reset(); // Reset form when opening
+    this.storageForm.reset();
   }
   closeDialog() {
     this.displayModal = false;
@@ -75,8 +78,43 @@ export class ManageStorageComponent {
       console.log('Form Submitted', this.storageForm.value);
       this.closeDialog();
     } else {
-      this.storageForm.markAllAsTouched(); // Show validation errors
+      this.storageForm.markAllAsTouched();
     }
   }
+  onStorageTypeChange(event: any) {
+    debugger
+    this.isCloudStorage = event.value?.value === 'CLOUD';
+    this.isAWS = false;
+    this.isAzure = false;
+    this.storageForm.get('CloudStorageId')?.reset();
+  }
+  onCloudStorageChange(event: any) {
+    this.isAWS = event.value?.value === 'AWS';
+    this.isAzure = event.value?.value === 'AZURE';
+  }
+
   
+  get selectedStorageType() {
+    return this.storageForm.get('StorageTypeId')?.value;
+  }
+  
+  get selectedCloudStorage() {
+    return this.storageForm.get('CloudStorageId')?.value;
+  }
+  
+  isNFSSelected(): boolean {
+    return this.selectedStorageType === 'NFS';
+  }
+  
+  isCloudStorageSelected(): boolean {
+    return this.selectedStorageType === 'CLOUD';
+  }
+  
+  isAWSSelected(): boolean {
+    return this.isCloudStorageSelected() && this.selectedCloudStorage === 'AWS';
+  }
+  
+  isAzureSelected(): boolean {
+    return this.isCloudStorageSelected() && this.selectedCloudStorage === 'AZURE';
+  }
 }
