@@ -1,21 +1,12 @@
-<!-- <div class="storage-container">
-    <h2 class="page-title">Backup Storage Options</h2>
-    <div class="p-grid">
-      <div class="p-col-12 p-md-4" *ngFor="let storage of storages">
-        <p-card class="storage-card" [ngStyle]="{ backgroundColor: storage.color }">
-          <ng-template pTemplate="header">
-            <div class="icon-container">
-              <i [class]="storage.icon" class="storage-icon"></i>
-            </div>
-          </ng-template>
-          <ng-template pTemplate="title">
-            {{ storage.name }}
-          </ng-template>
-          <ng-template pTemplate="content">
-            <p>{{ storage.description }}</p>
-          </ng-template>
-        </p-card>
+<div class="storage-container">
+  <h2 class="page-title">Choose Your Storage Type</h2>
+  <div class="storage-grid">
+    <div class="storage-box" *ngFor="let storage of storages" [ngStyle]="{ backgroundColor: storage.color }">
+      <div class="icon-container">
+        <i [class]="storage.icon" class="storage-icon"></i>
       </div>
+      <h3 class="storage-title">{{ storage.name }}</h3>
+      <p class="storage-description">{{ storage.description }}</p>
     </div>
   </div>
-   -->
+</div>

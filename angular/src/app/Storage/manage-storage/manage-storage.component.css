@@ -1,26 +1,68 @@
 .storage-container {
-    text-align: center;
-    padding: 2rem;
+  text-align: center;
+  padding: 2rem;
+}
+
+.page-title {
+  margin-bottom: 1.5rem;
+  font-size: 1.8rem;
+  font-weight: bold;
+}
+
+.storage-grid {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.storage-box {
+  flex: 1 1 calc(33.33% - 1.5rem); 
+  max-width: 300px;
+  padding: 2rem;
+  border-radius: 10px;
+  text-align: center;
+  color: white;
+  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s, box-shadow 0.3s;
+  cursor: pointer;
+
+  &:hover {
+    transform: scale(1.05);
+    box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.2);
   }
-  
-  .page-title {
-    margin-bottom: 1.5rem;
+}
+
+.icon-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.storage-icon {
+  font-size: 3rem;
+}
+
+.storage-title {
+  font-size: 1.4rem;
+  font-weight: bold;
+}
+
+.storage-description {
+  font-size: 1rem;
+  opacity: 0.9;
+}
+
+/* Responsive Design */
+@media (max-width: 900px) {
+  .storage-box {
+    flex: 1 1 calc(50% - 1.5rem);
   }
-  
-  .storage-card {
-    border-radius: 10px;
-    color: #fff;
-    text-align: center;
+}
+
+@media (max-width: 600px) {
+  .storage-box {
+    flex: 1 1 100%; 
   }
-  
-  .icon-container {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 1rem;
-  }
-  
-  .storage-icon {
-    font-size: 3rem;
-  }
-  
+}
