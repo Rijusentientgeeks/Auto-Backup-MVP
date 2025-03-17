@@ -1,0 +1,26 @@
+.storage-container {
+    text-align: center;
+    padding: 2rem;
+  }
+  
+  .page-title {
+    margin-bottom: 1.5rem;
+  }
+  
+  .storage-card {
+    border-radius: 10px;
+    color: #fff;
+    text-align: center;
+  }
+  
+  .icon-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+  }
+  
+  .storage-icon {
+    font-size: 3rem;
+  }
+  
