@@ -1,7 +1,18 @@
 <div class="storage-container">
-  <h2 class="page-title">Choose Your Storage Type</h2>
+  <button
+    pButton
+    label="Add Backup Destination"
+    icon="pi pi-plus"
+    (click)="openDialog()"
+  ></button>
+  <h2 class="page-title">Backup Storage Options</h2>
+
   <div class="storage-grid">
-    <div class="storage-box" *ngFor="let storage of storages" [ngStyle]="{ backgroundColor: storage.color }">
+    <div
+      class="storage-box"
+      *ngFor="let storage of storages"
+      [ngStyle]="{ backgroundColor: storage.color }"
+    >
       <div class="icon-container">
         <i [class]="storage.icon" class="storage-icon"></i>
       </div>
@@ -9,4 +20,293 @@
       <p class="storage-description">{{ storage.description }}</p>
     </div>
   </div>
+  <p-dialog
+    header="Backup Destination Configuration"
+    [(visible)]="displayModal"
+    [modal]="true"
+    [style]="{ width: '90%' }"
+  >
+    <form [formGroup]="storageForm">
+      <div class="row">
+        <div class="col-md-4 mb-3">
+          <label for="storageType">Storage Type</label> &nbsp;
+          <p-dropdown
+            id="storageType"
+            formControlName="StorageTypeId"
+            [options]="storageTypes"
+            optionLabel="name"
+            placeholder="Select Storage Type"
+          ></p-dropdown>
+          <small
+            class="text-danger"
+            *ngIf="
+              storageForm.controls['StorageTypeId'].invalid &&
+              storageForm.controls['StorageTypeId'].touched
+            "
+          >
+            Storage Type is required
+          </small>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label for="cloudStorage">Cloud Storage</label> &nbsp;
+          <p-dropdown
+            id="cloudStorage"
+            formControlName="CloudStorageId"
+            [options]="cloudStorages"
+            optionLabel="name"
+            placeholder="Select Cloud Storage"
+          ></p-dropdown>
+          <small
+            class="text-danger"
+            *ngIf="
+              storageForm.controls['CloudStorageId'].invalid &&
+              storageForm.controls['CloudStorageId'].touched
+            "
+          >
+            Cloud Storage is required
+          </small>
+        </div>
+        <div class="col-md-4 mb-3"></div>
+        <div class="col-md-4 mb-3">
+          <label for="nfsIp">NFS IP</label>
+          <input
+            class="form-control"
+            id="nfsIp"
+            formControlName="NFS_IP"
+            type="text"
+            placeholder="Enter NFS IP"
+          />
+          <small
+            class="text-danger"
+            *ngIf="
+              storageForm.controls['NFS_IP'].invalid &&
+              storageForm.controls['NFS_IP'].touched
+            "
+          >
+            NFS IP is required
+          </small>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label for="nfsUser">NFS Access User ID</label>
+          <input
+            class="form-control"
+            id="nfsUser"
+            formControlName="NFS_AccessUserID"
+            type="text"
+            placeholder="Enter User ID"
+          />
+          <small
+            class="text-danger"
+            *ngIf="
+              storageForm.controls['NFS_AccessUserID'].invalid &&
+              storageForm.controls['NFS_AccessUserID'].touched
+            "
+          >
+            User ID is required
+          </small>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label for="nfsPassword">NFS Password</label>
+          <input
+            class="form-control"
+            id="nfsPassword"
+            formControlName="NFS_Password"
+            type="password"
+            placeholder="Enter Password"
+          />
+          <small
+            class="text-danger"
+            *ngIf="
+              storageForm.controls['NFS_Password'].invalid &&
+              storageForm.controls['NFS_Password'].touched
+            "
+          >
+            Password is required
+          </small>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label for="nfsLocationPath">NFS Location Path</label>
+          <input
+            class="form-control"
+            id="nfsLocationPath"
+            formControlName="NFS_LocationPath"
+            type="text"
+            placeholder="Enter Path"
+          />
+          <small
+            class="text-danger"
+            *ngIf="
+              storageForm.controls['NFS_LocationPath'].invalid &&
+              storageForm.controls['NFS_LocationPath'].touched
+            "
+          >
+          NFS Location Path required
+          </small>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label for="awsAccessKey">AWS Access Key</label>
+          <input
+            class="form-control"
+            id="awsAccessKey"
+            formControlName="AWS_AccessKey"
+            type="text"
+            placeholder="Enter AWS Access Key"
+          />
+          <small
+            class="text-danger"
+            *ngIf="
+              storageForm.controls['AWS_AccessKey'].invalid &&
+              storageForm.controls['AWS_AccessKey'].touched
+            "
+          >
+            AWS Access Key is required
+          </small>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label for="awsSecretKey">AWS Secret Key</label>
+          <input
+            class="form-control"
+            id="awsSecretKey"
+            formControlName="AWS_SecretKey"
+            type="password"
+            placeholder="Enter AWS Secret Key"
+          />
+          <small
+            class="text-danger"
+            *ngIf="
+              storageForm.controls['AWS_SecretKey'].invalid &&
+              storageForm.controls['AWS_SecretKey'].touched
+            "
+          >
+            AWS Secret Key is required
+          </small>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label for="awsBucket">AWS Bucket Name</label>
+          <input
+            class="form-control"
+            id="awsBucket"
+            formControlName="AWS_BucketName"
+            type="text"
+            placeholder="Enter AWS Bucket Name"
+          />
+          <small
+            class="text-danger"
+            *ngIf="
+              storageForm.controls['AWS_BucketName'].invalid &&
+              storageForm.controls['AWS_BucketName'].touched
+            "
+          >
+            AWS Bucket Name is required
+          </small>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label for="awsRegion">AWS Region</label>
+          <input
+            class="form-control"
+            id="awsRegion"
+            formControlName="AWS_Region"
+            type="text"
+            placeholder="Enter AWS Region"
+          />
+          <small
+            class="text-danger"
+            *ngIf="
+              storageForm.controls['AWS_Region'].invalid &&
+              storageForm.controls['AWS_Region'].touched
+            "
+          >
+            AWS Region is required
+          </small>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label for="awsBackupPath">AWS Backup path</label>
+          <input
+            class="form-control"
+            id="awsBackupPath"
+            formControlName="AWS_backUpPath"
+            type="text"
+            placeholder="Enter Path"
+          />
+          <small
+            class="text-danger"
+            *ngIf="
+              storageForm.controls['AWS_backUpPath'].invalid &&
+              storageForm.controls['AWS_backUpPath'].touched
+            "
+          >
+          Backup path required
+          </small>
+        </div>
+
+
+        <div class="col-md-4 mb-3">
+          <label for="azAccountName">AZ Account Name</label>
+          <input
+            class="form-control"
+            id="azAccountName"
+            formControlName="AZ_AccountName"
+            type="text"
+            placeholder="Enter Account Name"
+          />
+          <small
+            class="text-danger"
+            *ngIf="
+              storageForm.controls['AZ_AccountName'].invalid &&
+              storageForm.controls['AZ_AccountName'].touched
+            "
+          >
+          AZ Account Name required
+          </small>
+        </div>
+        <div class="col-md-4 mb-3">
+          <label for="azKey">AZ Account key</label>
+          <input
+            class="form-control"
+            id="azKey"
+            formControlName="AZ_AccountKey"
+            type="text"
+            placeholder="Enter Key"
+          />
+          <small
+            class="text-danger"
+            *ngIf="
+              storageForm.controls['AZ_AccountKey'].invalid &&
+              storageForm.controls['AZ_AccountKey'].touched
+            "
+          >
+          AZ Account key required
+          </small>
+        </div>
+      </div>
+
+      <div class="d-flex justify-content-end mt-3">
+        <div class="col-md-8 mb-3"></div>
+        <div class="col-md-2 mb-3">
+          <button class="btn btn-success" type="submit" (click)="saveStorage()">
+            Save
+          </button>
+        </div>
+
+        <div class="col-md-2 mb-3">
+          <button
+            class="btn btn-danger me-2"
+            type="button"
+            (click)="closeDialog()"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </form>
+  </p-dialog>
 </div>

@@ -33,12 +33,14 @@
     "moment-timezone": "0.5.45",
     "ngx-bootstrap": "^18.0.2",
     "ngx-pagination": "^6.0.3",
-    "primeng": "^18.0.0",
     "push.js": "1.0.12",
     "rxjs": "^7.8.1",
     "sweetalert2": "^11.12.2",
     "ts-helpers": "^1.1.2",
-    "tslib": "^2.6.3"
+    "tslib": "^2.6.3",
+    "primeflex": "^3.3.1",
+    "primeicons": "^6.0.1",
+    "primeng": "^17.18.0"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "^18.1.2",

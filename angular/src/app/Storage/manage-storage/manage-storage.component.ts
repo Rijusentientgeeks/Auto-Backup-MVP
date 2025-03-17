@@ -1,10 +1,24 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { CardModule } from 'primeng/card';
+import { DropdownModule } from 'primeng/dropdown';
+import { InputTextModule } from 'primeng/inputtext';
+import { ButtonModule } from 'primeng/button';
+import { PasswordModule } from 'primeng/password';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from '@node_modules/@angular/forms';
+import { DialogModule } from 'primeng/dialog';
+
 @Component({
   selector: 'app-manage-storage',
   standalone: true,
-  imports: [CommonModule,CardModule],
+  imports: [CommonModule,CardModule,
+    ReactiveFormsModule,
+    DropdownModule,
+    InputTextModule,
+    ButtonModule,
+    PasswordModule,
+    DialogModule
+  ],
   templateUrl: './manage-storage.component.html',
   styleUrl: './manage-storage.component.css'
 })
@@ -17,5 +31,52 @@ export class ManageStorageComponent {
     { name: 'Database Backup', icon: 'pi pi-database', color: '#FFC107', description: 'Ensure your database is safely stored and recoverable.' },
     { name: 'Remote Server', icon: 'pi pi-server', color: '#607D8B', description: 'Backup your application data on a remote server for security.' }
   ];
+
+  storageForm!: FormGroup;
+  displayModal = false; // Controls modal visibility
+  openDialog() {
+    this.displayModal = true;
+    this.storageForm.reset(); // Reset form when opening
+  }
+  closeDialog() {
+    this.displayModal = false;
+  }
+  storageTypes = [
+    { name: 'NFS', value: 'NFS' },
+    { name: 'Cloud Storage', value: 'CLOUD' }
+  ];
+
+  cloudStorages = [
+    { name: 'AWS', value: 'AWS' },
+    { name: 'Azure', value: 'AZURE' }
+  ];
+
+  constructor(private fb: FormBuilder) {
+    this.storageForm = this.fb.group({
+      StorageTypeId: ['', Validators.required],
+      CloudStorageId: ['', Validators.required],
+      NFS_IP: ['', Validators.required],
+      NFS_AccessUserID: ['', Validators.required],
+      NFS_Password: ['', Validators.required],
+      NFS_LocationPath: ['', Validators.required],
+      AWS_AccessKey: ['', Validators.required],
+      AWS_SecretKey: ['', Validators.required],
+      AWS_BucketName: ['', Validators.required],
+      AWS_Region: ['', Validators.required],
+      AWS_backUpPath: ['', Validators.required],
+      AZ_AccountName: ['', Validators.required],
+      AZ_AccountKey: ['', Validators.required],
+    });
+  }
+
+
+  saveStorage() {
+    if (this.storageForm.valid) {
+      console.log('Form Submitted', this.storageForm.value);
+      this.closeDialog();
+    } else {
+      this.storageForm.markAllAsTouched(); // Show validation errors
+    }
+  }
   
 }
