@@ -10,9 +10,12 @@ using System.Linq.Dynamic.Core;
 using Abp.UI;
 using GeekathonAutoSync.CloudStorages;
 using GeekathonAutoSync.StorageMasterTypes;
+using Abp.Authorization;
+using GeekathonAutoSync.Authorization;
 
 namespace GeekathonAutoSync.BackUpStorageConfiguations
 {
+    [AbpAuthorize(PermissionNames.Pages_BackupStorageConfiguration)]
     public class BackUpStorageConfiguationAppService : GeekathonAutoSyncAppServiceBase, IBackUpStorageConfiguationAppService
     {
         private readonly IRepository<BackUpStorageConfiguation, Guid> _backUpStorageConfiguationRepository;
@@ -51,7 +54,8 @@ namespace GeekathonAutoSync.BackUpStorageConfiguations
                 .Include(i => i.CloudStorage)
                 .Include(i => i.StorageMasterType)
                 .Include(i => i.SourceConfiguations)
-                .Include(i => i.BackUpLogs);
+                .Include(i => i.BackUpLogs)
+                .Where(i => i.TenantId == AbpSession.TenantId);
                 //.WhereIf(!input.FilterText.IsNullOrWhiteSpace(),
                 //u => u.PlatformOrderId.Contains(input.FilterText)).AsQueryable()
             return query;
