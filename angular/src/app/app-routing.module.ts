@@ -48,6 +48,11 @@ import { AppComponent } from './app.component';
                         loadChildren: () => import('./Storage/manage-storage/manage-storage.module').then((m) => m.ManageStorageModule),
                         canActivate: [AppRouteGuard]
                     },
+                    {
+                        path: 'backup-logs',
+                        loadChildren: () => import('./backup-logs/backup-logs.module').then((m) => m.BackupLogsModule),
+                        canActivate: [AppRouteGuard]
+                    }
                 ]
             }
         ])

@@ -81,7 +81,22 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
                             'Pages.Users'
                         ),
                     ]
-                )
+                ),
+                new MenuItem(
+                    this.l('BackupLogs'),
+                    '',
+                    'fas fa-file-archive', // Updated icon for backup logs
+                    '',
+                    [
+                      new MenuItem(
+                        this.l('BackupLogs'),
+                        '/app/backup-logs',
+                        'fas fa-history', // Icon for individual log entries
+                        'Pages.Users'
+                      ),
+                    ]
+                  )
+            
                 
             // new MenuItem(this.l('MultiLevelMenu'), '', 'fas fa-circle', '', [
             //     new MenuItem('ASP.NET Boilerplate', '', 'fas fa-dot-circle', '', [

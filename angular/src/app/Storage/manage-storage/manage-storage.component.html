@@ -1,11 +1,19 @@
 <div class="storage-container">
-  <button
-    pButton
-    label="Add Backup Destination"
-    icon="pi pi-plus"
-    (click)="openDialog()"
-  ></button>
-  <h2 class="page-title">Backup Storage Options</h2>
+  <div class="row">
+    <div class="col-md-4">
+      <h2 class="page-title">Backup Storage Options</h2>
+    </div>
+    <div class="col-md-4"></div>
+    <div class="col-md-4">
+      <button
+        pButton
+        label="Add Backup Destination"
+        icon="pi pi-plus"
+        style="width: 72%"
+        (click)="openDialog()"
+      ></button>
+    </div>
+  </div>
 
   <div class="storage-grid">
     <div
@@ -25,34 +33,52 @@
     [(visible)]="displayModal"
     [modal]="true"
     [style]="{ width: '90%', height: '80vh' }"
+    (onHide)="closeDialog()"
   >
     <form [formGroup]="storageForm">
       <div class="row">
-        <div class="col-md-4 mb-3">
-          <label for="storageType">Storage Type</label> &nbsp;
+        <div class="col-md-2 mb-3">
+          <label for="storageType">Storage Type</label> <br />
           <p-dropdown
             id="storageType"
             formControlName="StorageTypeId"
             [options]="storageTypes"
             optionLabel="name"
-            
+            optionValue="value"
             placeholder="Select Storage Type"
+            [ngClass]="{ 'is-invalid': isInvalid('StorageTypeId') }"
             (onChange)="onStorageTypeChange($event)"
           ></p-dropdown>
+          <div
+            *ngIf="isInvalid('StorageTypeId')"
+            class="invalid-feedback d-block"
+          >
+            Storage Type is required.
+          </div>
         </div>
 
-        <div class="col-md-4 mb-3" *ngIf="isCloudStorage">
-          <label for="cloudStorage">Cloud Storage</label> &nbsp;
+        <div class="col-md-2 mb-3" *ngIf="isCloudStorage">
+          <label for="cloudStorage">Cloud Storage</label><br />
           <p-dropdown
             id="cloudStorage"
             formControlName="CloudStorageId"
             [options]="cloudStorages"
             optionLabel="name"
+            optionValue="value"
             placeholder="Select Cloud Storage"
+            [ngClass]="{ 'is-invalid': isInvalid('CloudStorageId') }"
             (onChange)="onCloudStorageChange($event)"
           ></p-dropdown>
+          <div
+            *ngIf="isInvalid('CloudStorageId')"
+            class="invalid-feedback d-block"
+          >
+            Cloud Storage is required.
+          </div>
         </div>
+        <div class="col-md-8"></div>
       </div>
+
       <div class="row">
         <ng-container *ngIf="!isCloudStorage">
           <div class="col-md-4 mb-3">
@@ -63,7 +89,11 @@
               formControlName="NFS_IP"
               type="text"
               placeholder="Enter NFS IP"
+              [ngClass]="{ 'is-invalid': isInvalid('NFS_IP') }"
             />
+            <div *ngIf="isInvalid('NFS_IP')" class="invalid-feedback d-block">
+              NFS IP is required.
+            </div>
           </div>
 
           <div class="col-md-4 mb-3">
@@ -74,7 +104,14 @@
               formControlName="NFS_AccessUserID"
               type="text"
               placeholder="Enter User ID"
+              [ngClass]="{ 'is-invalid': isInvalid('NFS_AccessUserID') }"
             />
+            <div
+              *ngIf="isInvalid('NFS_AccessUserID')"
+              class="invalid-feedback d-block"
+            >
+              User ID is required.
+            </div>
           </div>
 
           <div class="col-md-4 mb-3">
@@ -85,7 +122,14 @@
               formControlName="NFS_Password"
               type="password"
               placeholder="Enter Password"
+              [ngClass]="{ 'is-invalid': isInvalid('NFS_Password') }"
             />
+            <div
+              *ngIf="isInvalid('NFS_Password')"
+              class="invalid-feedback d-block"
+            >
+              Password is required.
+            </div>
           </div>
 
           <div class="col-md-4 mb-3">
@@ -96,7 +140,14 @@
               formControlName="NFS_LocationPath"
               type="text"
               placeholder="Enter Path"
+              [ngClass]="{ 'is-invalid': isInvalid('NFS_LocationPath') }"
             />
+            <div
+              *ngIf="isInvalid('NFS_LocationPath')"
+              class="invalid-feedback d-block"
+            >
+              Location Path is required.
+            </div>
           </div>
         </ng-container>
 
@@ -109,7 +160,14 @@
               formControlName="AWS_AccessKey"
               type="text"
               placeholder="Enter AWS Access Key"
+              [ngClass]="{ 'is-invalid': isInvalid('AWS_AccessKey') }"
             />
+            <div
+              *ngIf="isInvalid('AWS_AccessKey')"
+              class="invalid-feedback d-block"
+            >
+              AWS Access Key is required.
+            </div>
           </div>
 
           <div class="col-md-4 mb-3">
@@ -120,7 +178,14 @@
               formControlName="AWS_SecretKey"
               type="password"
               placeholder="Enter AWS Secret Key"
+              [ngClass]="{ 'is-invalid': isInvalid('AWS_SecretKey') }"
             />
+            <div
+              *ngIf="isInvalid('AWS_SecretKey')"
+              class="invalid-feedback d-block"
+            >
+              AWS Secret Key is required.
+            </div>
           </div>
 
           <div class="col-md-4 mb-3">
@@ -131,7 +196,14 @@
               formControlName="AWS_BucketName"
               type="text"
               placeholder="Enter AWS Bucket Name"
+              [ngClass]="{ 'is-invalid': isInvalid('AWS_BucketName') }"
             />
+            <div
+              *ngIf="isInvalid('AWS_BucketName')"
+              class="invalid-feedback d-block"
+            >
+              AWS Bucket Name is required.
+            </div>
           </div>
 
           <div class="col-md-4 mb-3">
@@ -142,7 +214,14 @@
               formControlName="AWS_Region"
               type="text"
               placeholder="Enter AWS Region"
+              [ngClass]="{ 'is-invalid': isInvalid('AWS_Region') }"
             />
+            <div
+              *ngIf="isInvalid('AWS_Region')"
+              class="invalid-feedback d-block"
+            >
+              AWS Region is required.
+            </div>
           </div>
 
           <div class="col-md-4 mb-3">
@@ -153,9 +232,17 @@
               formControlName="AWS_backUpPath"
               type="text"
               placeholder="Enter Backup Path"
+              [ngClass]="{ 'is-invalid': isInvalid('AWS_backUpPath') }"
             />
+            <div
+              *ngIf="isInvalid('AWS_backUpPath')"
+              class="invalid-feedback d-block"
+            >
+              Backup Path is required.
+            </div>
           </div>
         </ng-container>
+
         <ng-container *ngIf="isAzure">
           <div class="col-md-4 mb-3">
             <label for="azAccountName">AZ Account Name</label>
@@ -165,7 +252,14 @@
               formControlName="AZ_AccountName"
               type="text"
               placeholder="Enter Account Name"
+              [ngClass]="{ 'is-invalid': isInvalid('AZ_AccountName') }"
             />
+            <div
+              *ngIf="isInvalid('AZ_AccountName')"
+              class="invalid-feedback d-block"
+            >
+              AZ Account Name is required.
+            </div>
           </div>
 
           <div class="col-md-4 mb-3">
@@ -176,16 +270,24 @@
               formControlName="AZ_AccountKey"
               type="text"
               placeholder="Enter Key"
+              [ngClass]="{ 'is-invalid': isInvalid('AZ_AccountKey') }"
             />
+            <div
+              *ngIf="isInvalid('AZ_AccountKey')"
+              class="invalid-feedback d-block"
+            >
+              AZ Account Key is required.
+            </div>
           </div>
         </ng-container>
       </div>
     </form>
+
     <ng-template pTemplate="footer">
       <div class="row">
         <div class="col-md-6 mb-3"></div>
         <div class="col-md-3 mb-3">
-          <button class="btn btn-success" type="submit" (click)="saveStorage()">
+          <button class="btn btn-success" type="button" (click)="saveStorage()">
             Save
           </button>
         </div>
