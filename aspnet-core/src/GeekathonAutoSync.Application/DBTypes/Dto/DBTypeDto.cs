@@ -4,9 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GeekathonAutoSync.BackUpStorageConfiguations
+namespace GeekathonAutoSync.DBTypes.Dto
 {
-    internal class BackUpStorageConfiguations
+    public class DBTypeDto
     {
+        public string Name { get; set; }
     }
 }
