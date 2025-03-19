@@ -1,18 +1,18 @@
-import { NgModule } from '@angular/core';
-import { RouterModule, Routes } from '@angular/router';
+import { NgModule } from "@angular/core";
+import { RouterModule, Routes } from "@angular/router";
+import { ManageStorageComponent } from "./manage-storage.component";
 
 const routes: Routes = [
   {
-    path: '',
-    loadComponent: () =>
-      import('./manage-storage.component').then(
-        (m) => m.ManageStorageComponent
-      ),
+    path: "",
+    component: ManageStorageComponent,
   },
+  { path: '', redirectTo: '/manage-storage', pathMatch: 'full' },
+
 ];
 
 @NgModule({
   imports: [RouterModule.forChild(routes)],
-  exports: [RouterModule]
+  exports: [RouterModule],
 })
-export class ManageStorageRoutingModule { }
+export class ManageStorageRoutingModule {}

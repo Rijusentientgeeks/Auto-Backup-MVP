@@ -1,47 +1,44 @@
-import { Component, OnInit } from "@angular/core";
-import { CommonModule } from "@angular/common";
-import { CardModule } from "primeng/card";
-import { DropdownModule } from "primeng/dropdown";
-import { InputTextModule } from "primeng/inputtext";
-import { ButtonModule } from "primeng/button";
-import { PasswordModule } from "primeng/password";
+import { Component, Injector, OnInit } from "@angular/core";
 import {
   FormBuilder,
   FormGroup,
-  ReactiveFormsModule,
   Validators,
 } from "@node_modules/@angular/forms";
-import { DialogModule } from "primeng/dialog";
+import { AppComponentBase } from "@shared/app-component-base";
+import {
+  BackUpStorageConfiguationCreateDto,
+  BackUpStorageConfiguationServiceProxy,
+  CloudStorageDto,
+  CloudStorageServiceProxy,
+  StorageMasterTypeDto,
+  StorageMasterTypeServiceProxy,
+} from "@shared/service-proxies/service-proxies";
+import Swal from "sweetalert2";
 
 @Component({
   selector: "app-manage-storage",
-  standalone: true,
-  imports: [
-    CommonModule,
-    CardModule,
-    ReactiveFormsModule,
-    DropdownModule,
-    InputTextModule,
-    ButtonModule,
-    PasswordModule,
-    DialogModule,
-  ],
   templateUrl: "./manage-storage.component.html",
   styleUrl: "./manage-storage.component.css",
 })
-export class ManageStorageComponent {
+export class ManageStorageComponent extends AppComponentBase implements OnInit {
+  constructor(
+    private fb: FormBuilder,
+    injector: Injector,
+    private storageMasterTypeService: StorageMasterTypeServiceProxy,
+    private CloudStorageService: CloudStorageServiceProxy,
+    private BackUpStorageConfiguationService: BackUpStorageConfiguationServiceProxy
+  ) {
+    super(injector);
+    this.initForm();
+  }
   storages = [
-    {
-      name: "Local Storage",
-      icon: "pi pi-hdd",
-      color: "#FF5722",
-      description: "Store backups on your local machine or server.",
-    },
+ 
     {
       name: "Network Storage",
       icon: "pi pi-globe",
       color: "#9C27B0",
       description: "Save data over the network with high availability.",
+      type: "Network File System",
     },
     {
       name: "Cloud Storage",
@@ -49,33 +46,38 @@ export class ManageStorageComponent {
       color: "#03A9F4",
       description:
         "Utilize cloud platforms for remote storage and accessibility.",
+      type: "Public Cloud",
     },
-    {
-      name: "External Drive",
-      icon: "pi pi-usb",
-      color: "#4CAF50",
-      description: "Back up data to USB, HDD, or SSD external drives.",
-    },
+  
     {
       name: "Database Backup",
       icon: "pi pi-database",
       color: "#FFC107",
       description: "Ensure your database is safely stored and recoverable.",
+      type: "DATABASE",
     },
-    {
-      name: "Remote Server",
-      icon: "pi pi-server",
-      color: "#607D8B",
-      description:
-        "Backup your application data on a remote server for security.",
-    },
+
   ];
 
   storageForm!: FormGroup;
   displayModal = false;
   isCloudStorage = false;
+  isNFSStorage = false;
   isAWS = false;
   isAzure = false;
+  storageTypes = [];
+  cloudStorages = [];
+  selectedStorage: string | null = null;
+  showDetail: boolean = false;
+  isSaving: boolean = false; 
+  storageEntries = [];
+  selectStorage(storageName: string) {
+    this.selectedStorage = storageName;
+    this.showDetail = true;
+  }
+  goBack() {
+    this.showDetail = false;
+  }
   openDialog() {
     this.displayModal = true;
     this.storageForm.reset();
@@ -83,27 +85,21 @@ export class ManageStorageComponent {
   closeDialog() {
     this.displayModal = false;
     this.storageForm.reset();
-
     this.resetConditionalValidators();
     this.isCloudStorage = false;
+    this.isNFSStorage = false;
     this.isAWS = false;
     this.isAzure = false;
     this.storageForm.get("StorageTypeId")?.setValidators(Validators.required);
     this.storageForm.get("CloudStorageId")?.setValidators(Validators.required);
     this.updateValidationState();
   }
-  storageTypes = [
-    { name: "NFS", value: "NFS" },
-    { name: "Cloud Storage", value: "CLOUD" },
-  ];
 
-  cloudStorages = [
-    { name: "AWS", value: "AWS" },
-    { name: "Azure", value: "AZURE" },
-  ];
-
-  constructor(private fb: FormBuilder) {
-    this.initForm();
+  ngOnInit(): void {
+    this.loadStorageTypes();
+    this.loadCloudStorageTypes();
+    this.selectedStorage = "";
+    this.loadDestinationConfiguration();
   }
 
   initForm() {
@@ -123,35 +119,86 @@ export class ManageStorageComponent {
       AZ_AccountKey: [null],
     });
   }
-
-  saveStorage() {
-    debugger;
-    if (this.storageForm.valid) {
-      console.log("Form Submitted", this.storageForm.value);
-      this.closeDialog();
-    } else {
-      this.storageForm.markAllAsTouched();
-    }
+  loadDestinationConfiguration(): void {
+    this.BackUpStorageConfiguationService.getAll(
+      undefined,
+      undefined,
+      1000,
+      0
+    ).subscribe({
+      next: (result) => {
+        debugger;
+        if (result && result.items) {
+          this.storageEntries = result.items;
+        }
+      },
+      error: (err) => {
+        console.error("Error fetching storage destination:", err);
+      },
+    });
   }
+
+  loadStorageTypes(): void {
+    this.storageMasterTypeService.getAll().subscribe({
+      next: (result) => {
+        if (result && result.items) {
+          this.storageTypes = result.items.map(
+            (item: StorageMasterTypeDto) => ({
+              name: item.name,
+              value: item.id,
+            })
+          );
+        }
+      },
+      error: (err) => {
+        console.error("Error fetching storage types:", err);
+      },
+    });
+  }
+  loadCloudStorageTypes(): void {
+    this.CloudStorageService.getAll().subscribe({
+      next: (result) => {
+        if (result && result.items) {
+          this.cloudStorages = result.items.map((item: CloudStorageDto) => ({
+            name: item.name,
+            value: item.id,
+          }));
+        }
+      },
+      error: (err) => {
+        console.error("Error fetching storage types:", err);
+      },
+    });
+  }
+
   onStorageTypeChange(event: any) {
-    const selectedType = event.value;
+    debugger;
+    const selectedType = event.value?.name;
     this.resetConditionalValidators();
 
-    if (selectedType === "CLOUD") {
+    if (selectedType === "Public Cloud") {
       this.isCloudStorage = true;
-    } else {
+      this.isNFSStorage = false;
+    } else if (selectedType === "Network File System") {
+      this.isNFSStorage = true;
       this.isCloudStorage = false;
       this.setNfsValidators();
+      this.storageForm.get("CloudStorageId")?.clearValidators();
+      this.storageForm.get("CloudStorageId")?.updateValueAndValidity();
+    } else {
+      this.isCloudStorage = false;
+      this.isNFSStorage = false;
     }
   }
 
   onCloudStorageChange(event: any) {
-    const selectedCloud = event.value;
+    debugger;
+    const selectedCloud = event.value?.name;
     this.resetConditionalValidators();
-    if (selectedCloud === "AWS") {
+    if (selectedCloud === "Amazon S3") {
       this.isAWS = true;
       this.setAwsValidators();
-    } else if (selectedCloud === "AZURE") {
+    } else if (selectedCloud === "Microsoft Azure") {
       this.isAzure = true;
       this.setAzureValidators();
     }
@@ -185,9 +232,13 @@ export class ManageStorageComponent {
 
   setNfsValidators() {
     this.storageForm.get("NFS_IP")?.setValidators(Validators.required);
-    this.storageForm.get("NFS_AccessUserID")?.setValidators(Validators.required);
+    this.storageForm
+      .get("NFS_AccessUserID")
+      ?.setValidators(Validators.required);
     this.storageForm.get("NFS_Password")?.setValidators(Validators.required);
-    this.storageForm.get("NFS_LocationPath")?.setValidators(Validators.required);
+    this.storageForm
+      .get("NFS_LocationPath")
+      ?.setValidators(Validators.required);
 
     this.updateValidationState();
   }
@@ -213,5 +264,78 @@ export class ManageStorageComponent {
     Object.keys(this.storageForm.controls).forEach((field) => {
       this.storageForm.get(field)?.updateValueAndValidity();
     });
+  }
+
+  mapFormToDto(): BackUpStorageConfiguationCreateDto {
+    const formValues = this.storageForm.value;
+
+    const dto = new BackUpStorageConfiguationCreateDto();
+    dto.storageMasterTypeId = formValues.StorageTypeId.value;
+    dto.cloudStorageId = this.isCloudStorage
+      ? formValues.CloudStorageId.value
+      : undefined;
+    dto.nfS_IP = !this.isCloudStorage ? formValues.NFS_IP : undefined;
+    dto.nfS_AccessUserID = !this.isCloudStorage
+      ? formValues.NFS_AccessUserID
+      : undefined;
+    dto.nfS_Password = !this.isCloudStorage
+      ? formValues.NFS_Password
+      : undefined;
+    dto.nfS_LocationPath = !this.isCloudStorage
+      ? formValues.NFS_LocationPath
+      : undefined;
+    dto.awS_AccessKey = this.isAWS ? formValues.AWS_AccessKey : undefined;
+    dto.awS_SecretKey = this.isAWS ? formValues.AWS_SecretKey : undefined;
+    dto.awS_BucketName = this.isAWS ? formValues.AWS_BucketName : undefined;
+    dto.awS_Region = this.isAWS ? formValues.AWS_Region : undefined;
+    dto.awS_backUpPath = this.isAWS ? formValues.AWS_backUpPath : undefined;
+    dto.aZ_AccountName = this.isAzure ? formValues.AZ_AccountName : undefined;
+    dto.aZ_AccountKey = this.isAzure ? formValues.AZ_AccountKey : undefined;
+
+    return dto;
+  }
+
+  saveStorageDestination() {
+    debugger;
+    if (this.storageForm.valid) {
+      this.isSaving = true;
+
+      const backupDto = this.mapFormToDto();
+      this.BackUpStorageConfiguationService.create(backupDto).subscribe({
+        next: (result) => {
+          console.log("Backup Configuration Saved Successfully:", result);
+          this.closeDialog();
+          this.isSaving = false; // Stop loader
+
+          // Swal.fire({
+          //   title: "Success!",
+          //   text: "Backup Configuration has been saved successfully.",
+          //   icon: "success",
+          //   confirmButtonText: "OK",
+          // }).then(() => {
+          //   this.closeDialog(); // Close the dialog after confirmation
+          // });
+        },
+        error: (err) => {
+          console.error("Error saving backup configuration:", err);
+          // Swal.fire({
+          //   title: "Error!",
+          //   text: "Failed to save backup configuration. Please try again.",
+          //   icon: "error",
+          //   confirmButtonText: "OK",
+          // });
+        },
+      });
+    } else {
+      console.log("Form is invalid. Please fill all required fields.");
+      // Swal.fire({
+      //   title: "Warning!",
+      //   text: "Form is invalid. Please fill all required fields.",
+      //   icon: "warning",
+      //   confirmButtonText: "OK",
+
+      // });
+      this.storageForm.markAllAsTouched();
+    }
   }
 }

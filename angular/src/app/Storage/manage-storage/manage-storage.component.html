@@ -1,13 +1,13 @@
-<div class="storage-container">
+<div class="storage-container" *ngIf="!showDetail">
   <div class="row">
     <div class="col-md-4">
-      <h2 class="page-title">Backup Storage Options</h2>
+      <h2 class="page-title">{{ l('BackupStorageOptions') }}</h2>
     </div>
     <div class="col-md-4"></div>
     <div class="col-md-4">
       <button
         pButton
-        label="Add Backup Destination"
+        [label]="l('AddBackupDestination')"
         icon="pi pi-plus"
         style="width: 72%"
         (click)="openDialog()"
@@ -20,6 +20,7 @@
       class="storage-box"
       *ngFor="let storage of storages"
       [ngStyle]="{ backgroundColor: storage.color }"
+      (click)="selectStorage(storage.type)"
     >
       <div class="icon-container">
         <i [class]="storage.icon" class="storage-icon"></i>
@@ -29,23 +30,24 @@
     </div>
   </div>
   <p-dialog
-    header="Backup Destination Configuration"
+    header="{{l('BackupStorageConfiguration')}}"
     [(visible)]="displayModal"
     [modal]="true"
     [style]="{ width: '90%', height: '80vh' }"
     (onHide)="closeDialog()"
+    [dismissableMask]="false"
+    [closable]="false"
   >
-    <form [formGroup]="storageForm">
+    <form [formGroup]="storageForm" style="text-align: left">
       <div class="row">
         <div class="col-md-2 mb-3">
-          <label for="storageType">Storage Type</label> <br />
+          <label for="storageType">{{l('StorageType')}}</label> <br />
           <p-dropdown
             id="storageType"
             formControlName="StorageTypeId"
             [options]="storageTypes"
             optionLabel="name"
-            optionValue="value"
-            placeholder="Select Storage Type"
+            placeholder="{{l('SelectStorageType')}}"
             [ngClass]="{ 'is-invalid': isInvalid('StorageTypeId') }"
             (onChange)="onStorageTypeChange($event)"
           ></p-dropdown>
@@ -53,7 +55,7 @@
             *ngIf="isInvalid('StorageTypeId')"
             class="invalid-feedback d-block"
           >
-            Storage Type is required.
+           {{l('StorageTypeisrequired')}}
           </div>
         </div>
 
@@ -64,7 +66,6 @@
             formControlName="CloudStorageId"
             [options]="cloudStorages"
             optionLabel="name"
-            optionValue="value"
             placeholder="Select Cloud Storage"
             [ngClass]="{ 'is-invalid': isInvalid('CloudStorageId') }"
             (onChange)="onCloudStorageChange($event)"
@@ -80,7 +81,7 @@
       </div>
 
       <div class="row">
-        <ng-container *ngIf="!isCloudStorage">
+        <ng-container *ngIf="isNFSStorage">
           <div class="col-md-4 mb-3">
             <label for="nfsIp">NFS IP</label>
             <input
@@ -287,7 +288,11 @@
       <div class="row">
         <div class="col-md-6 mb-3"></div>
         <div class="col-md-3 mb-3">
-          <button class="btn btn-success" type="button" (click)="saveStorage()">
+          <button
+            class="btn btn-success"
+            type="button"
+            (click)="saveStorageDestination()"
+          >
             Save
           </button>
         </div>
@@ -300,3 +305,13 @@
     </ng-template>
   </p-dialog>
 </div>
+<div *ngIf="isSaving" class="loading-overlay">
+  <i class="pi pi-spin pi-spinner loader-icon"></i>
+  <p class="loading-text text-white">Saving data, please wait...</p>
+</div>
+<app-storage-detail
+  *ngIf="showDetail"
+  [entries]="storageEntries"
+  [selectedStorage]="selectedStorage"
+  (back)="goBack()"
+></app-storage-detail>

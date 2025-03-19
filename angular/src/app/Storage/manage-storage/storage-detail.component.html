@@ -1,0 +1,51 @@
+<div class="storage-container">
+  <div class="row align-items-center mb-3">
+    <div class="col-md-10">
+      <h3 class="title-text">
+        <i class="pi pi-database" style="color: #3f51b5"></i>
+        Storage Destination Details
+      </h3>
+    </div>
+    <div class="col-md-2 text-end">
+      <button (click)="goBack()" class="btn btn-danger btn-md">
+        <i class="pi pi-arrow-left"></i>&nbsp; Back
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="filteredEntries.length > 0; else noData">
+    <div class="detail-grid">
+      <div
+        class="storage-box shadow-sm"
+        *ngFor="let entry of filteredEntries"
+        [ngStyle]="{ backgroundColor: '#F1F8E9' }"
+      >
+        <div class="header-row">
+          <i
+            class="storage-icon"
+          ></i>
+          <h4 class="storage-title text-primary"*ngIf="entry.cloudStorage">
+            {{ entry.cloudStorage?.name || 'N/A' }} - {{ entry.storageMasterType?.name }}
+          </h4>
+          <h4 class="storage-title text-primary"*ngIf="!entry.cloudStorage">
+       {{ entry.storageMasterType?.name }}
+          </h4>
+        </div>
+
+        <div class="entry-details">
+          <div class="detail-row" *ngFor="let key of getFilteredKeys(entry)">
+           <p> {{ getLabel(key) }}:
+            <strong> {{ entry[key] || 'N/A' }}</strong></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noData>
+    <div class="no-data-container">
+      <i class="pi pi-info-circle no-data-icon"></i>
+      <p class="no-data-text">No data found for the selected storage type.</p>
+    </div>
+  </ng-template>
+</div>
