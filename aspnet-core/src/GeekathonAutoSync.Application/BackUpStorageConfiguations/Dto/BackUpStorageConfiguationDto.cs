@@ -1,6 +1,7 @@
 ﻿using Abp.Domain.Entities.Auditing;
 using GeekathonAutoSync.CloudStorages.Dto;
 using GeekathonAutoSync.SourceConfiguations;
+using GeekathonAutoSync.SourceConfiguations.Dto;
 using GeekathonAutoSync.StorageMasterTypes.Dto;
 using System;
 using System.Collections.Generic;
