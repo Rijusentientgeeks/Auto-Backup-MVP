@@ -42,25 +42,63 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
     getMenuItems(): MenuItem[] {
         return [
             // new MenuItem(this.l('About'), '/app/about', 'fas fa-info-circle'),
+            // new MenuItem(this.l('About'), '/app/about', 'fas fa-info-circle'),
             new MenuItem(this.l('HomePage'), '/app/home', 'fas fa-home'),
             new MenuItem(
-                this.l('Roles'),
-                '/app/roles',
-                'fas fa-theater-masks',
-                'Pages.Roles'
-            ),
-            new MenuItem(
-                this.l('Tenants'),
-                '/app/tenants',
-                'fas fa-building',
-                'Pages.Tenants'
-            ),
-            new MenuItem(
-                this.l('Users'),
-                '/app/users',
-                'fas fa-users',
-                'Pages.Users'
-            ),
+                this.l('Administration'),
+                '',
+                'fas fa-cogs',
+                '', 
+                [
+                    new MenuItem(
+                        this.l('Roles'),
+                        '/app/roles',
+                        'fas fa-theater-masks',
+                        'Pages.Roles'
+                    ),
+                    new MenuItem(
+                        this.l('Tenants'),
+                        '/app/tenants',
+                        'fas fa-building',
+                        'Pages.Tenants'
+                    ),
+                    new MenuItem(
+                        this.l('Users'),
+                        '/app/users',
+                        'fas fa-users',
+                        'Pages.Users'
+                    ),
+                ]),
+                new MenuItem(
+                    this.l('StorageService'),
+                    '',
+                    'fas fa-hdd',
+                    '', 
+                    [
+                        new MenuItem(
+                            this.l('ManageStorage'),
+                            '/app/manage-storage',
+                            'fas fa-database',
+                            'Pages.Users'
+                        ),
+                    ]
+                ),
+                new MenuItem(
+                    this.l('BackupLogs'),
+                    '',
+                    'fas fa-file-archive', // Updated icon for backup logs
+                    '',
+                    [
+                      new MenuItem(
+                        this.l('BackupLogs'),
+                        '/app/backup-logs',
+                        'fas fa-history', // Icon for individual log entries
+                        'Pages.Users'
+                      ),
+                    ]
+                  )
+            
+                
             // new MenuItem(this.l('MultiLevelMenu'), '', 'fas fa-circle', '', [
             //     new MenuItem('ASP.NET Boilerplate', '', 'fas fa-dot-circle', '', [
             //         new MenuItem(
