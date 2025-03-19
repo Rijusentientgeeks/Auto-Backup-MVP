@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GeekathonAutoSync.DBTypes.Dto
+namespace GeekathonAutoSync.BackUpFrequencys.Dto
 {
-    public class DBTypeDto : FullAuditedEntity<Guid>
+    public class BackUpFrequencyDto : FullAuditedEntity<Guid>
     {
         public string Name { get; set; }
     }

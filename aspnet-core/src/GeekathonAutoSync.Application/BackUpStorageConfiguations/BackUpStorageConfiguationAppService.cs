@@ -142,7 +142,7 @@ namespace GeekathonAutoSync.BackUpStorageConfiguations
                     throw new UserFriendlyException("Please enter valid storage type.");
                 }
             }
-            if (cloudStorageId != Guid.Empty)
+            if (cloudStorageId != Guid.Empty && cloudStorageId != null)
             {
                 var getCloudStorage = await _cloudStorageRepository.FirstOrDefaultAsync(i => i.Id == cloudStorageId);
                 if (getCloudStorage == null)
