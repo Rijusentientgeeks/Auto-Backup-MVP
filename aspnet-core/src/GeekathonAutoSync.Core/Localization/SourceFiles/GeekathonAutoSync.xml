@@ -121,6 +121,8 @@
     <text name="403PageDescription">You don't have permission to access this resource. Please contact your administrator.</text>
     <text name="403PageButton">Go back to Dashboard</text>
     <text name="BackupStorageConfiguration">Backup Storage Configuration</text>
+
+    <text name="SourceConfiguation">Source Configuration</text>
     <text name="StorageService">Storage Service</text>
     <text name="ManageStorage">Manage Storage</text>
     <text name="BackupStorageOptions">Backup Storage Options</text>
