@@ -17,13 +17,13 @@
 }
 
 .storage-box {
-  flex: 1 1 calc(33.33% - 1.5rem); 
+  flex: 1 1 calc(33.33% - 1.5rem);
   max-width: 300px;
-  padding: 2rem;
-  border-radius: 10px;
+  padding: 1rem;
+  border-radius: 7px;
   text-align: center;
   color: white;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0px 7px 13px rgba(0, 0, 0, 0.1);
   transition: transform 0.3s, box-shadow 0.3s;
   cursor: pointer;
 
@@ -102,4 +102,35 @@ input, p-dropdown {
 
 button {
   width: 100%;
+}
+.loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.5); 
+  z-index: 9999; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .loader-container {
+    text-align: center;
+    background-color: #fff;
+    padding: 20px 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+
+  .loader-icon {
+    font-size: 2.5rem;
+    color: #007bff; 
+  }
+
+  .loading-text {
+    margin-top: 10px;
+    font-size: 1.2rem;
+    color: #333;
+  }
 }
