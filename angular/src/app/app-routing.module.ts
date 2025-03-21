@@ -49,6 +49,11 @@ import { AppComponent } from './app.component';
                         canActivate: [AppRouteGuard]
                     },
                     {
+                        path: 'Source-configuration',
+                        loadChildren: () => import('./source-configuration/source-configuration.module').then((m) => m.SourceConfigurationModule),
+                        canActivate: [AppRouteGuard]
+                    },
+                    {
                         path: 'backup-logs',
                         loadChildren: () => import('./backup-logs/backup-logs.module').then((m) => m.BackupLogsModule),
                         canActivate: [AppRouteGuard]

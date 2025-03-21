@@ -1,0 +1,257 @@
+<div class="card p-4 shadow-lg source-page-container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="text-primary">
+      <i class="pi pi-server"></i> Source Configuration
+    </h4>
+    <button class="btn btn-success" (click)="openAddSourceDialog()">
+      <i class="pi pi-plus"></i> Add Source Configuration
+    </button>
+  </div>
+
+  <div *ngIf="sourceConfigs?.length > 0; else noData">
+    <div class="row">
+      <div class="col-md-4 mb-4" *ngFor="let config of sourceConfigs">
+        <div class="card shadow-sm p-3 bg-white rounded config-card">
+          <div class="d-flex justify-content-between mb-2">
+            <h5 class="text-info mb-0">
+              <i class="pi pi-database"></i>
+              {{ config.backUPType.name }}
+            </h5>
+            <div class="actions">
+              <button
+                class="btn btn-warning btn-sm me-2"
+                (click)="editConfig(config)"
+              >
+                <i class="pi pi-pencil"></i>
+              </button>
+              &nbsp;
+              <button
+                class="btn btn-danger btn-sm"
+                (click)="deleteConfig(config.id)"
+              >
+                <i class="pi pi-trash"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="config-details">
+            <p>
+              <i class="pi pi-globe"></i>
+              <strong>Server IP:</strong> {{ config.serverIP || "N/A" }}
+            </p>
+            <p>
+              <i class="pi pi-folder"></i>
+              <strong>DB Initial Catalog:</strong> {{ config.dbInitialCatalog }}
+            </p>
+            <p>
+              <i class="pi pi-user"></i>
+              <strong>User ID:</strong> {{ config.userID }}
+            </p>
+            <p>
+              <i class="pi pi-desktop"></i>
+              <strong>OS:</strong> {{ config.os || "N/A" }}
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <ng-template #noData>
+    <div class="text-center p-5">
+      <i
+        class="pi pi-exclamation-circle text-warning"
+        style="font-size: 2rem"
+      ></i>
+      <p class="mt-3 text-secondary">No Source Configurations Found.</p>
+    </div>
+  </ng-template>
+</div>
+<p-dialog
+  [(visible)]="displayDialog"
+  [modal]="true"
+  [header]="isEdit ? 'Edit Source Configuration' : 'Add Source Configuration'"
+  [style]="{ width: '80vw' }"
+  [closable]="true"
+>
+<form [formGroup]="sourceForm" (ngSubmit)="saveSourceConfig()">
+  <div class="row">
+    <div class="col-md-4 mb-3">
+      <label for="backUPTypeId">Backup Type <span class="text-danger">*</span></label><br />
+      <p-dropdown
+        id="backUPTypeId"
+        [options]="BackupTypes"
+        formControlName="backUPType"
+        optionLabel="name"
+       
+        placeholder="Select a Backup Type"
+        (onChange)="onBackupTypeChange($event)"
+      ></p-dropdown>
+      <small
+        *ngIf="
+          sourceForm.controls['backUPType'].invalid &&
+          sourceForm.controls['backUPType'].touched
+        "
+        class="text-danger"
+      >
+        Backup Type is required
+      </small>
+    </div>
+
+    <ng-container *ngIf="showDatabaseFields">
+      <div class="col-md-4 mb-3">
+        <label for="dbTypeId">Database Type <span class="text-danger">*</span></label><br />
+        <p-dropdown
+          id="dbTypeId"
+          [options]="DbTypes"
+          formControlName="dbType"
+          optionLabel="name"
+          optionValue="value"
+          placeholder="Select a Database Type"
+        ></p-dropdown>
+        <small
+          *ngIf="
+            sourceForm.controls['dbType'].invalid &&
+            sourceForm.controls['dbType'].touched
+          "
+          class="text-danger"
+        >
+          Database Type is required
+        </small>
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <label for="serverIP">Server IP <span class="text-danger">*</span></label>
+        <input
+          id="serverIP"
+          type="text"
+          class="form-control"
+          formControlName="serverIP"
+          placeholder="Enter Server IP"
+        />
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <label for="dbInitialCatalog">Database Name <span class="text-danger">*</span></label>
+        <input
+          id="dbInitialCatalog"
+          type="text"
+          class="form-control"
+          formControlName="dbInitialCatalog"
+          placeholder="Enter Database Name"
+        />
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <label for="port">Port</label>
+        <input
+          id="port"
+          type="text"
+          class="form-control"
+          formControlName="port"
+          placeholder="Enter Port for PostgreSQL"
+        />
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <label for="userID">User ID <span class="text-danger">*</span></label>
+        <input
+          id="userID"
+          type="text"
+          class="form-control"
+          formControlName="userID"
+          placeholder="Enter User ID"
+        />
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <label for="password">Password <span class="text-danger">*</span></label>
+        <input
+          id="password"
+          type="password"
+          class="form-control"
+          formControlName="password"
+          placeholder="Enter Password"
+        />
+      </div>
+    </ng-container>
+
+    <ng-container *ngIf="!showDatabaseFields">
+      <div class="col-md-4 mb-3">
+        <label for="os">Operating System <span class="text-danger">*</span></label>
+        <input
+          id="os"
+          type="text"
+          class="form-control"
+          formControlName="os"
+          placeholder="Enter OS"
+        />
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <label for="privateKeyPath">Private Key File Path</label><br />
+        <p-fileUpload
+          id="privateKeyPath"
+          name="privateKeyPath"
+          mode="basic"
+          chooseLabel="Upload Private Key File"
+          accept=".pem,.key"
+          [customUpload]="true"
+          (uploadHandler)="onFileSelect($event, 'privateKeyPath')"
+          class="small-upload"
+        ></p-fileUpload>
+      </div>
+
+      <div class="col-md-4 mb-3">
+        <label for="sourcePath">Source Path <span class="text-danger">*</span></label>
+        <input
+          id="sourcePath"
+          type="text"
+          class="form-control"
+          formControlName="sourcePath"
+          placeholder="Enter Source Path"
+        />
+      </div>
+    </ng-container>
+
+    <div class="col-md-4 mb-3">
+      <label for="backUpInitiatedPath">Temporarily Backup Initiated Path</label>
+      <input
+        id="backUpInitiatedPath"
+        type="text"
+        class="form-control"
+        formControlName="backUpInitiatedPath"
+        placeholder="Enter Backup Initiated Path"
+      />
+    </div>
+
+    <div class="col-md-4 mb-3">
+      <label for="backUpStorageConfiguationId">Backup Storage Configuration</label><br />
+      <p-dropdown
+        id="backUpStorageConfiguationId"
+        [options]="BackupStorageConfigs"
+        formControlName="backUpStorageConfiguationId"
+        optionLabel="name"
+        optionValue="value"
+        placeholder="Select a Backup Storage Configuration"
+      ></p-dropdown>
+    </div>
+  </div>
+
+  <div class="text-right">
+    <div class="row">
+      <div class="col-md-8"></div>
+      <div class="col-md-4">
+        <button type="submit" class="btn btn-primary">
+          <i class="pi pi-save"></i> Save
+        </button>
+        &nbsp;
+        <button type="button" class="btn btn-danger me-2" (click)="closeDialog()">
+          <i class="pi pi-times"></i> Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</form>
+
+</p-dialog>
