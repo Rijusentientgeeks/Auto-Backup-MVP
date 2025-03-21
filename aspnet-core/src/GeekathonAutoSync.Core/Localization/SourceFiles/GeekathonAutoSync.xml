@@ -130,5 +130,10 @@
     <text name="StorageType">Storage Type</text>
     <text name="SelectStorageType">Select Storage Type</text>
     <text name="StorageTypeisrequired"> Storage Type is Required.</text>
+    <text name="BackupService">Backup Service</text>
+    <text name="ConfigureSource">Configure Source</text>
+    <text name="ScheduleBackup">Schedule Backup</text>
+    <text name="QuickBackup">Quick Backup</text>
+    <text name="BackupLogs">Backup Logs</text>
   </texts>
 </localizationDictionary>

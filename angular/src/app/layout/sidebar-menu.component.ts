@@ -42,7 +42,6 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
     getMenuItems(): MenuItem[] {
         return [
             // new MenuItem(this.l('About'), '/app/about', 'fas fa-info-circle'),
-            // new MenuItem(this.l('About'), '/app/about', 'fas fa-info-circle'),
             new MenuItem(this.l('HomePage'), '/app/home', 'fas fa-home'),
             new MenuItem(
                 this.l('Administration'),
@@ -84,19 +83,38 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
                     ]
                 ),
                 new MenuItem(
-                    this.l('BackupLogs'),
+                    this.l('BackupService'),
                     '',
-                    'fas fa-file-archive', // Updated icon for backup logs
-                    '',
+                    'fas fa-cloud-upload-alt',
+                    '', 
                     [
-                      new MenuItem(
-                        this.l('BackupLogs'),
-                        '/app/backup-logs',
-                        'fas fa-history', // Icon for individual log entries
-                        'Pages.Users'
-                      ),
+                        new MenuItem(
+                            this.l('ConfigureSource'),
+                            '/app/Source-configuration',
+                            'fas fa-cogs',
+                            'Pages.Users'
+                        ),
+                        new MenuItem(
+                            this.l('ScheduleBackup'),
+                            '/app/schedule-backup',
+                            'fas fa-calendar-alt',
+                            'Pages.Users'
+                        ),
+                        new MenuItem(
+                            this.l('QuickBackup'),
+                            '/app/quick-backup',
+                            'fas fa-play-circle',
+                            'Pages.Users'
+                        ),
+                        new MenuItem(
+                            this.l('BackupLogs'),
+                            '/app/backup-logs',
+                            'fas fa-history', 
+                            'Pages.Users'
+                          ),
                     ]
-                  )
+                ),
+       
             
                 
             // new MenuItem(this.l('MultiLevelMenu'), '', 'fas fa-circle', '', [
