@@ -18,6 +18,7 @@ export class SourceConfigurationComponent implements OnInit {
   DbTypes= [];
   BackupStorageConfigs=[];
   showDatabaseFields: boolean = false;
+  base64String: string = null;
 
   constructor(
     private fb: FormBuilder,
@@ -55,16 +56,33 @@ export class SourceConfigurationComponent implements OnInit {
     });
     
   }
-  onFileSelect(event: any, controlName: string): void {
+  onFileSelect(event: any): void {
+    debugger
     const file = event.files[0];
     if (file) {
-      this.uploadFile(file, controlName);
+      this.convertToBase64(file);
     }
   }
-  
-  uploadFile(file: any, controlName: string): void {
-    const fileName = file.name;
-    this.sourceForm.controls[controlName].setValue(fileName);
+
+  // Convert PEM file to Base64 string
+  convertToBase64(file: File): void {
+    debugger
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const base64String = reader.result as string;
+      
+      // Extract the Base64 part without the data URL prefix
+      const base64Data = base64String.split(',')[1];
+      this.sourceForm.controls['privateKeyPath'].setValue(base64Data);
+    };
+
+    reader.onerror = (error) => {
+      console.error('Error reading file:', error);
+    };
+
+    // Read the file as a data URL (Base64)
+    reader.readAsDataURL(file);
   }
   
   loadSourceConfigs(): void {
@@ -139,7 +157,6 @@ export class SourceConfigurationComponent implements OnInit {
     });
   }
   onBackupTypeChange(event:any) {
-    debugger
     this.showDatabaseFields = event.value?.name === 'DataBase';
   
     if (this.showDatabaseFields) {
@@ -183,7 +200,6 @@ export class SourceConfigurationComponent implements OnInit {
   }
 
   saveSourceConfig(): void {
-    debugger
     if (this.sourceForm.valid) {
       const formData = this.prepareFormData();
   
@@ -200,6 +216,7 @@ export class SourceConfigurationComponent implements OnInit {
             }
           );
       } else {
+        debugger
         this.sourceConfigService
           .create(formData as SourceConfiguationCreateDto)
           .subscribe(
@@ -225,6 +242,12 @@ export class SourceConfigurationComponent implements OnInit {
           id: this.selectedConfigId,
           backUPTypeId: formData.backUPType.value || '',
           dbTypeId: formData.dbType || undefined,
+          databaseName: formData.databaseName || undefined,
+          dbUsername: formData.dbUsername || undefined,
+          dbPassword: formData.dbPassword || undefined,
+          port: formData.port || undefined,
+          sshUserName: formData.sshUserName || undefined,
+          sshPassword: formData.sshPassword || undefined,
           serverIP: formData.serverIP || undefined,
           dbInitialCatalog: formData.dbInitialCatalog || undefined,
           userID: formData.userID || undefined,
@@ -239,6 +262,12 @@ export class SourceConfigurationComponent implements OnInit {
         return new SourceConfiguationCreateDto({
           backUPTypeId: formData.backUPType.value || '',
           dbTypeId: formData.dbType || undefined,
+          databaseName: formData.databaseName || undefined,
+          dbUsername: formData.dbUsername || undefined,
+          dbPassword: formData.dbPassword || undefined,
+          port: formData.port || undefined,
+          sshUserName: formData.sshUserName || undefined,
+          sshPassword: formData.sshPassword || undefined,
           serverIP: formData.serverIP || undefined,
           dbInitialCatalog: formData.dbInitialCatalog || undefined,
           userID: formData.userID || undefined,

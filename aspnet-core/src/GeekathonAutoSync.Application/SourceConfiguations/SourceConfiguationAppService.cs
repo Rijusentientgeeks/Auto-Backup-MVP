@@ -7,6 +7,9 @@ using GeekathonAutoSync.BackUpStorageConfiguations;
 using GeekathonAutoSync.BackUPTypes;
 using GeekathonAutoSync.DBTypes;
 using GeekathonAutoSync.SourceConfiguations.Dto;
+using GeekathonAutoSync.Utilities;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -79,16 +82,25 @@ namespace GeekathonAutoSync.SourceConfiguations
         {
             Guid sourceConfiguationID = Guid.Empty;
             await CheckValidation(input.BackUPTypeId, input.DBTypeId, input.BackUpStorageConfiguationId);
+            
+            Base64ToPemConverter converter = new Base64ToPemConverter();
+            var filePath = await converter.ConvertBase64ToPemFile(input.PrivateKeyPath, (int)AbpSession.TenantId);
             SourceConfiguation sourceConfiguation = new SourceConfiguation
             {
                 TenantId = (int)AbpSession.TenantId,
                 BackUPTypeId = input.BackUPTypeId,
                 DBTypeId = input.DBTypeId,
+                DatabaseName = input.DatabaseName,
+                DbUsername = input.DbUsername,
+                DbPassword = input.DbPassword,
+                Port = input.Port,
+                SshUserName = input.SshUserName,
+                SshPassword = input.SshPassword,
                 ServerIP = input.ServerIP,
                 DBInitialCatalog = input.DBInitialCatalog,
                 UserID = input.UserID,
                 Password = input.Password,
-                PrivateKeyPath = input.PrivateKeyPath,
+                PrivateKeyPath = filePath,
                 BackUpInitiatedPath = input.BackUpInitiatedPath,
                 Sourcepath = input.Sourcepath,
                 OS = input.OS,
@@ -114,10 +126,16 @@ namespace GeekathonAutoSync.SourceConfiguations
             getSourceConfiguation.BackUPTypeId = input.BackUPTypeId;
             getSourceConfiguation.DBTypeId = input.DBTypeId;
             getSourceConfiguation.ServerIP = input.ServerIP;
+            getSourceConfiguation.DatabaseName = input.DatabaseName;
+            getSourceConfiguation.DbUsername = input.DbUsername;
+            getSourceConfiguation.DbPassword = input.DbPassword;
+            getSourceConfiguation.Port = input.Port;
+            getSourceConfiguation.SshUserName = input.SshUserName;
+            getSourceConfiguation.SshPassword = input.SshPassword;
             getSourceConfiguation.DBInitialCatalog = input.DBInitialCatalog;
             getSourceConfiguation.UserID = input.UserID;
             getSourceConfiguation.Password = input.Password;
-            getSourceConfiguation.PrivateKeyPath = input.PrivateKeyPath;
+            //getSourceConfiguation.PrivateKeyPath = input.PrivateKeyPath;
             getSourceConfiguation.BackUpInitiatedPath = input.BackUpInitiatedPath;
             getSourceConfiguation.Sourcepath = input.Sourcepath;
             getSourceConfiguation.OS = input.OS;
@@ -144,7 +162,7 @@ namespace GeekathonAutoSync.SourceConfiguations
                     throw new UserFriendlyException("Please enter valid backup type.");
                 }
             }
-            if (dBTypeId != Guid.Empty)
+            if (dBTypeId != Guid.Empty && dBTypeId != null)
             {
                 var getDBTypeId = await _dBTypeRepository.FirstOrDefaultAsync(i => i.Id == dBTypeId);
                 if (getDBTypeId == null)
