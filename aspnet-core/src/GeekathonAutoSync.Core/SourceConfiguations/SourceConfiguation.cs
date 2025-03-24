@@ -23,6 +23,9 @@ namespace GeekathonAutoSync.SourceConfiguations
         public Guid? DBTypeId { get; set; }
         [ForeignKey("DBTypeId")]
         public virtual DBType DBType { get; set; }
+        public string DatabaseName { get; set; }
+        public string DbUsername { get; set; }
+        public string DbPassword { get; set; }
         public string ServerIP { get; set; }
         public string DBInitialCatalog { get; set; }
         public string UserID { get; set; }
@@ -34,6 +37,9 @@ namespace GeekathonAutoSync.SourceConfiguations
         public Guid? BackUpStorageConfiguationId { get; set; }
         [ForeignKey("BackUpStorageConfiguationId")]
         public virtual BackUpStorageConfiguation BackUpStorageConfiguation { get; set; }
+        public string Port { get; set; }
+        public string SshUserName { get; set; }
+        public string SshPassword { get; set; }
         public ICollection<BackUpSchedule> BackUpSchedules { get; set; } = new List<BackUpSchedule>();
         public ICollection<BackUpLog> BackUpLogs { get; set; } = new List<BackUpLog>();
     }

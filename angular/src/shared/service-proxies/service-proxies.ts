@@ -5377,6 +5377,12 @@ export interface IRoleListDtoListResultDto {
 export class SourceConfiguationCreateDto implements ISourceConfiguationCreateDto {
     backUPTypeId: string;
     dbTypeId: string | undefined;
+    databaseName: string | undefined;
+    dbUsername: string | undefined;
+    dbPassword: string | undefined;
+    port: string | undefined;
+    sshUserName: string | undefined;
+    sshPassword: string | undefined;
     serverIP: string | undefined;
     dbInitialCatalog: string | undefined;
     userID: string | undefined;
@@ -5400,6 +5406,12 @@ export class SourceConfiguationCreateDto implements ISourceConfiguationCreateDto
         if (_data) {
             this.backUPTypeId = _data["backUPTypeId"];
             this.dbTypeId = _data["dbTypeId"];
+            this.databaseName = _data["databaseName"];
+            this.dbUsername = _data["dbUsername"];
+            this.dbPassword = _data["dbPassword"];
+            this.port = _data["port"];
+            this.sshUserName = _data["sshUserName"];
+            this.sshPassword = _data["sshPassword"];
             this.serverIP = _data["serverIP"];
             this.dbInitialCatalog = _data["dbInitialCatalog"];
             this.userID = _data["userID"];
@@ -5423,6 +5435,12 @@ export class SourceConfiguationCreateDto implements ISourceConfiguationCreateDto
         data = typeof data === 'object' ? data : {};
         data["backUPTypeId"] = this.backUPTypeId;
         data["dbTypeId"] = this.dbTypeId;
+        data["databaseName"] = this.databaseName;
+        data["dbUsername"] = this.dbUsername;
+        data["dbPassword"] = this.dbPassword;
+        data["port"] = this.port;
+        data["sshUserName"] = this.sshUserName;
+        data["sshPassword"] = this.sshPassword;
         data["serverIP"] = this.serverIP;
         data["dbInitialCatalog"] = this.dbInitialCatalog;
         data["userID"] = this.userID;
@@ -5446,6 +5464,12 @@ export class SourceConfiguationCreateDto implements ISourceConfiguationCreateDto
 export interface ISourceConfiguationCreateDto {
     backUPTypeId: string;
     dbTypeId: string | undefined;
+    databaseName: string | undefined;
+    dbUsername: string | undefined;
+    dbPassword: string | undefined;
+    port: string | undefined;
+    sshUserName: string | undefined;
+    sshPassword: string | undefined;
     serverIP: string | undefined;
     dbInitialCatalog: string | undefined;
     userID: string | undefined;
@@ -5469,6 +5493,12 @@ export class SourceConfiguationDto implements ISourceConfiguationDto {
     tenantId: number;
     backUPTypeId: string;
     dbTypeId: string | undefined;
+    databaseName: string | undefined;
+    dbUsername: string | undefined;
+    dbPassword: string | undefined;
+    port: string | undefined;
+    sshUserName: string | undefined;
+    sshPassword: string | undefined;
     serverIP: string | undefined;
     dbInitialCatalog: string | undefined;
     userID: string | undefined;
@@ -5504,6 +5534,12 @@ export class SourceConfiguationDto implements ISourceConfiguationDto {
             this.tenantId = _data["tenantId"];
             this.backUPTypeId = _data["backUPTypeId"];
             this.dbTypeId = _data["dbTypeId"];
+            this.databaseName = _data["databaseName"];
+            this.dbUsername = _data["dbUsername"];
+            this.dbPassword = _data["dbPassword"];
+            this.port = _data["port"];
+            this.sshUserName = _data["sshUserName"];
+            this.sshPassword = _data["sshPassword"];
             this.serverIP = _data["serverIP"];
             this.dbInitialCatalog = _data["dbInitialCatalog"];
             this.userID = _data["userID"];
@@ -5539,6 +5575,12 @@ export class SourceConfiguationDto implements ISourceConfiguationDto {
         data["tenantId"] = this.tenantId;
         data["backUPTypeId"] = this.backUPTypeId;
         data["dbTypeId"] = this.dbTypeId;
+        data["databaseName"] = this.databaseName;
+        data["dbUsername"] = this.dbUsername;
+        data["dbPassword"] = this.dbPassword;
+        data["port"] = this.port;
+        data["sshUserName"] = this.sshUserName;
+        data["sshPassword"] = this.sshPassword;
         data["serverIP"] = this.serverIP;
         data["dbInitialCatalog"] = this.dbInitialCatalog;
         data["userID"] = this.userID;
@@ -5574,6 +5616,12 @@ export interface ISourceConfiguationDto {
     tenantId: number;
     backUPTypeId: string;
     dbTypeId: string | undefined;
+    databaseName: string | undefined;
+    dbUsername: string | undefined;
+    dbPassword: string | undefined;
+    port: string | undefined;
+    sshUserName: string | undefined;
+    sshPassword: string | undefined;
     serverIP: string | undefined;
     dbInitialCatalog: string | undefined;
     userID: string | undefined;
@@ -5646,6 +5694,12 @@ export interface ISourceConfiguationDtoPagedResultDto {
 export class SourceConfiguationUpdateDto implements ISourceConfiguationUpdateDto {
     backUPTypeId: string;
     dbTypeId: string | undefined;
+    databaseName: string | undefined;
+    dbUsername: string | undefined;
+    dbPassword: string | undefined;
+    port: string | undefined;
+    sshUserName: string | undefined;
+    sshPassword: string | undefined;
     serverIP: string | undefined;
     dbInitialCatalog: string | undefined;
     userID: string | undefined;
@@ -5670,6 +5724,12 @@ export class SourceConfiguationUpdateDto implements ISourceConfiguationUpdateDto
         if (_data) {
             this.backUPTypeId = _data["backUPTypeId"];
             this.dbTypeId = _data["dbTypeId"];
+            this.databaseName = _data["databaseName"];
+            this.dbUsername = _data["dbUsername"];
+            this.dbPassword = _data["dbPassword"];
+            this.port = _data["port"];
+            this.sshUserName = _data["sshUserName"];
+            this.sshPassword = _data["sshPassword"];
             this.serverIP = _data["serverIP"];
             this.dbInitialCatalog = _data["dbInitialCatalog"];
             this.userID = _data["userID"];
@@ -5694,6 +5754,12 @@ export class SourceConfiguationUpdateDto implements ISourceConfiguationUpdateDto
         data = typeof data === 'object' ? data : {};
         data["backUPTypeId"] = this.backUPTypeId;
         data["dbTypeId"] = this.dbTypeId;
+        data["databaseName"] = this.databaseName;
+        data["dbUsername"] = this.dbUsername;
+        data["dbPassword"] = this.dbPassword;
+        data["port"] = this.port;
+        data["sshUserName"] = this.sshUserName;
+        data["sshPassword"] = this.sshPassword;
         data["serverIP"] = this.serverIP;
         data["dbInitialCatalog"] = this.dbInitialCatalog;
         data["userID"] = this.userID;
@@ -5718,6 +5784,12 @@ export class SourceConfiguationUpdateDto implements ISourceConfiguationUpdateDto
 export interface ISourceConfiguationUpdateDto {
     backUPTypeId: string;
     dbTypeId: string | undefined;
+    databaseName: string | undefined;
+    dbUsername: string | undefined;
+    dbPassword: string | undefined;
+    port: string | undefined;
+    sshUserName: string | undefined;
+    sshPassword: string | undefined;
     serverIP: string | undefined;
     dbInitialCatalog: string | undefined;
     userID: string | undefined;

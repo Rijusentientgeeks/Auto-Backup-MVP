@@ -12,6 +12,12 @@ namespace GeekathonAutoSync.SourceConfiguations.Dto
         public int TenantId { get; set; }
         public Guid BackUPTypeId { get; set; }
         public Guid? DBTypeId { get; set; }
+        public string DatabaseName { get; set; }
+        public string DbUsername { get; set; }
+        public string DbPassword { get; set; }
+        public string Port { get; set; }
+        public string SshUserName { get; set; }
+        public string SshPassword { get; set; }
         public string ServerIP { get; set; }
         public string DBInitialCatalog { get; set; }
         public string UserID { get; set; }

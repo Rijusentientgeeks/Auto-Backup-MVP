@@ -197,7 +197,7 @@
           chooseLabel="Upload Private Key File"
           accept=".pem,.key"
           [customUpload]="true"
-          (uploadHandler)="onFileSelect($event, 'privateKeyPath')"
+          (onSelect)="onFileSelect($event)"
           class="small-upload"
         ></p-fileUpload>
       </div>
