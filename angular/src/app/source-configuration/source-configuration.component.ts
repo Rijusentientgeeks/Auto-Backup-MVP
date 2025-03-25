@@ -19,7 +19,8 @@ export class SourceConfigurationComponent implements OnInit {
   BackupStorageConfigs=[];
   showDatabaseFields: boolean = false;
   base64String: string = null;
-
+  noData:false;
+  isSaving: boolean=false;
   constructor(
     private fb: FormBuilder,
     private BackUPTypeService: BackUPTypeServiceProxy,
@@ -63,7 +64,14 @@ export class SourceConfigurationComponent implements OnInit {
       this.convertToBase64(file);
     }
   }
+  triggerOnDemandBackup(){
 
+  }
+  isInvalid(controlName: string): boolean {
+    const control = this.sourceForm.get(controlName);
+    return control?.invalid && (control?.dirty || control?.touched);
+  }
+  
   // Convert PEM file to Base64 string
   convertToBase64(file: File): void {
     debugger
@@ -193,6 +201,7 @@ export class SourceConfigurationComponent implements OnInit {
   }
 
   editConfig(config: any): void {
+    debugger
     this.isEdit = true;
     this.selectedConfigId = config.id;
     this.sourceForm.patchValue(config);
@@ -200,7 +209,9 @@ export class SourceConfigurationComponent implements OnInit {
   }
 
   saveSourceConfig(): void {
+    debugger
     if (this.sourceForm.valid) {
+      this.isSaving = true;
       const formData = this.prepareFormData();
   
       if (this.isEdit && this.selectedConfigId) {
@@ -209,9 +220,11 @@ export class SourceConfigurationComponent implements OnInit {
           .subscribe(
             () => {
               this.closeDialog();
+              this.isSaving = false;
               this.loadSourceConfigs();
             },
             (error) => {
+              this.isSaving = false;
               console.error('Error updating config:', error);
             }
           );
@@ -222,9 +235,13 @@ export class SourceConfigurationComponent implements OnInit {
           .subscribe(
             () => {
               this.closeDialog();
+              this.isSaving = false;
+
               this.loadSourceConfigs();
             },
             (error) => {
+              this.isSaving = false;
+
               console.error('Error creating config:', error);
             }
           );

@@ -84,7 +84,7 @@ namespace GeekathonAutoSync.SourceConfiguations
             await CheckValidation(input.BackUPTypeId, input.DBTypeId, input.BackUpStorageConfiguationId);
             
             Base64ToPemConverter converter = new Base64ToPemConverter();
-            var filePath = await converter.ConvertBase64ToPemFile(input.PrivateKeyPath, (int)AbpSession.TenantId);
+            var filePath =input.PrivateKeyPath==null?null: await converter.ConvertBase64ToPemFile(input.PrivateKeyPath, (int)AbpSession.TenantId);
             SourceConfiguation sourceConfiguation = new SourceConfiguation
             {
                 TenantId = (int)AbpSession.TenantId,
