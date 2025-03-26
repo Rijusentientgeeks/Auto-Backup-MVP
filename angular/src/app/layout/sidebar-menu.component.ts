@@ -101,8 +101,8 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
                             'Pages.Users'
                         ),
                         new MenuItem(
-                            this.l('ConfigureSource'),
-                            '/app/quick-backup',
+                            this.l('QuickBackup'),
+                            '/app/Source-configuration',
                             'fas fa-play-circle',
                             'Pages.Users'
                         ),

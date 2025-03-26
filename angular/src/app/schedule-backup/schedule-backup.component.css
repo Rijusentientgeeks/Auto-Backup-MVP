@@ -1,0 +1,13 @@
+.container {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .alert-info {
+    margin-top: 20px;
+  }
+  
+  button {
+    margin-top: 10px;
+  }
+  

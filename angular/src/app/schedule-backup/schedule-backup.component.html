@@ -1,1 +1,89 @@
-<p>schedule-backup works!</p>
+<div class="card p-4 shadow-lg source-page-container">
+  <div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="text-primary"><i class="pi pi-calendar"></i> Schedule Backup</h4>
+  </div>
+
+  <div class="card shadow-lg p-4 bg-white rounded">
+    <form [formGroup]="scheduleForm" (ngSubmit)="onSubmit()">
+      <div class="row mb-3">
+        <div class="col-md-3">
+          <label for="backUpStorageConfiguationId" class="form-label fw-bold">
+            <i class="pi pi-database"></i> Backup Configuration </label
+          ><br />
+          <p-dropdown
+            id="backUpStorageConfiguationId"
+            [options]="backupConfigs"
+            formControlName="backUpStorageConfiguationId"
+            optionLabel="backUPType"
+            optionValue="backUpStorageConfiguationId"
+            placeholder="Select Configuration"
+            class="w-100"
+          ></p-dropdown>
+        </div>
+
+        <div class="col-md-3">
+          <label for="frequency" class="form-label fw-bold">
+            <i class="pi pi-clock"></i> Frequency </label
+          ><br />
+          <p-dropdown
+            id="frequency"
+            [options]="frequencies"
+            formControlName="frequency"
+            optionLabel="label"
+            placeholder="Select Frequency"
+            class="w-100"
+            (onChange)="onFrequencyChange($event)"
+          ></p-dropdown>
+        </div>
+
+        <div class="col-md-3" *ngIf="showDayOfMonth">
+          <label for="dayOfMonth" class="form-label fw-bold">
+            <i class="pi pi-calendar-plus"></i> Day of the Month
+          </label><br>
+          <p-dropdown
+            id="dayOfMonth"
+            [options]="daysOfMonth"
+            formControlName="dayOfMonth"
+            optionLabel="label"
+            placeholder="Select Day"
+            class="w-100"
+          ></p-dropdown>
+        </div>
+
+        <div class="col-md-3" *ngIf="showDayOfWeek">
+          <label for="dayOfWeek" class="form-label fw-bold">
+            <i class="pi pi-calendar"></i> Day of the Week
+          </label><br>
+          <p-dropdown
+            id="dayOfWeek"
+            [options]="daysOfWeek"
+            formControlName="dayOfWeek"
+            optionLabel="label"
+            placeholder="Select Day"
+            class="w-100"
+          ></p-dropdown>
+        </div>
+      </div>
+      <div class="row mb-3">
+        <div class="col-md-6">
+          <label for="time" class="form-label fw-bold">
+            <i class="pi pi-clock"></i> Time
+          </label>
+          <input
+            type="time"
+            id="time"
+            formControlName="time"
+            class="form-control"
+            required
+          />
+        </div>
+      </div>
+
+      <div class="text-end mt-4">
+        <button type="submit" class="btn btn-primary px-4">
+          <i class="pi pi-check-circle"></i> Schedule Task
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
