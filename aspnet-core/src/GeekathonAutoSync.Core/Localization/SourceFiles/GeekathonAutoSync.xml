@@ -120,5 +120,20 @@
     <text name="403PageHeader">Forbidden</text>
     <text name="403PageDescription">You don't have permission to access this resource. Please contact your administrator.</text>
     <text name="403PageButton">Go back to Dashboard</text>
+    <text name="BackupStorageConfiguration">Backup Storage Configuration</text>
+
+    <text name="SourceConfiguation">Source Configuration</text>
+    <text name="StorageService">Storage Service</text>
+    <text name="ManageStorage">Manage Storage</text>
+    <text name="BackupStorageOptions">Backup Storage Options</text>
+    <text name="AddBackupDestination">Add Backup Destination</text>
+    <text name="StorageType">Storage Type</text>
+    <text name="SelectStorageType">Select Storage Type</text>
+    <text name="StorageTypeisrequired"> Storage Type is Required.</text>
+    <text name="BackupService">Backup Service</text>
+    <text name="ConfigureSource">Configure Source</text>
+    <text name="ScheduleBackup">Schedule Backup</text>
+    <text name="QuickBackup">Quick Backup</text>
+    <text name="BackupLogs">Backup Logs</text>
   </texts>
 </localizationDictionary>

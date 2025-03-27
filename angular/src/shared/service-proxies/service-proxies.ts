@@ -142,6 +142,697 @@ export class AccountServiceProxy {
 }
 
 @Injectable()
+export class BackUpFrequencyServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @return OK
+     */
+    getAll(): Observable<BackUpFrequencyDtoPagedResultDto> {
+        let url_ = this.baseUrl + "/api/services/app/BackUpFrequency/GetAll";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAll(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAll(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<BackUpFrequencyDtoPagedResultDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<BackUpFrequencyDtoPagedResultDto>;
+        }));
+    }
+
+    protected processGetAll(response: HttpResponseBase): Observable<BackUpFrequencyDtoPagedResultDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BackUpFrequencyDtoPagedResultDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
+export class BackUpScheduleServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param filterText (optional) 
+     * @param sorting (optional) 
+     * @param maxResultCount (optional) 
+     * @param skipCount (optional) 
+     * @return OK
+     */
+    getAll(filterText: string | undefined, sorting: string | undefined, maxResultCount: number | undefined, skipCount: number | undefined): Observable<BackUpScheduleDtoPagedResultDto> {
+        let url_ = this.baseUrl + "/api/services/app/BackUpSchedule/GetAll?";
+        if (filterText === null)
+            throw new Error("The parameter 'filterText' cannot be null.");
+        else if (filterText !== undefined)
+            url_ += "FilterText=" + encodeURIComponent("" + filterText) + "&";
+        if (sorting === null)
+            throw new Error("The parameter 'sorting' cannot be null.");
+        else if (sorting !== undefined)
+            url_ += "Sorting=" + encodeURIComponent("" + sorting) + "&";
+        if (maxResultCount === null)
+            throw new Error("The parameter 'maxResultCount' cannot be null.");
+        else if (maxResultCount !== undefined)
+            url_ += "MaxResultCount=" + encodeURIComponent("" + maxResultCount) + "&";
+        if (skipCount === null)
+            throw new Error("The parameter 'skipCount' cannot be null.");
+        else if (skipCount !== undefined)
+            url_ += "SkipCount=" + encodeURIComponent("" + skipCount) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAll(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAll(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<BackUpScheduleDtoPagedResultDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<BackUpScheduleDtoPagedResultDto>;
+        }));
+    }
+
+    protected processGetAll(response: HttpResponseBase): Observable<BackUpScheduleDtoPagedResultDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BackUpScheduleDtoPagedResultDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    create(body: BackUpScheduleCreateDto | undefined): Observable<BackUpScheduleDto> {
+        let url_ = this.baseUrl + "/api/services/app/BackUpSchedule/Create";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreate(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreate(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<BackUpScheduleDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<BackUpScheduleDto>;
+        }));
+    }
+
+    protected processCreate(response: HttpResponseBase): Observable<BackUpScheduleDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BackUpScheduleDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    update(body: BackUpScheduleUpdateDto | undefined): Observable<BackUpScheduleDto> {
+        let url_ = this.baseUrl + "/api/services/app/BackUpSchedule/Update";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processUpdate(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processUpdate(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<BackUpScheduleDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<BackUpScheduleDto>;
+        }));
+    }
+
+    protected processUpdate(response: HttpResponseBase): Observable<BackUpScheduleDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BackUpScheduleDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    get(id: string | undefined): Observable<BackUpScheduleDto> {
+        let url_ = this.baseUrl + "/api/services/app/BackUpSchedule/Get?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGet(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGet(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<BackUpScheduleDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<BackUpScheduleDto>;
+        }));
+    }
+
+    protected processGet(response: HttpResponseBase): Observable<BackUpScheduleDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BackUpScheduleDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
+export class BackUpStorageConfiguationServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param filterText (optional) 
+     * @param sorting (optional) 
+     * @param maxResultCount (optional) 
+     * @param skipCount (optional) 
+     * @return OK
+     */
+    getAll(filterText: string | undefined, sorting: string | undefined, maxResultCount: number | undefined, skipCount: number | undefined): Observable<BackUpStorageConfiguationDtoPagedResultDto> {
+        let url_ = this.baseUrl + "/api/services/app/BackUpStorageConfiguation/GetAll?";
+        if (filterText === null)
+            throw new Error("The parameter 'filterText' cannot be null.");
+        else if (filterText !== undefined)
+            url_ += "FilterText=" + encodeURIComponent("" + filterText) + "&";
+        if (sorting === null)
+            throw new Error("The parameter 'sorting' cannot be null.");
+        else if (sorting !== undefined)
+            url_ += "Sorting=" + encodeURIComponent("" + sorting) + "&";
+        if (maxResultCount === null)
+            throw new Error("The parameter 'maxResultCount' cannot be null.");
+        else if (maxResultCount !== undefined)
+            url_ += "MaxResultCount=" + encodeURIComponent("" + maxResultCount) + "&";
+        if (skipCount === null)
+            throw new Error("The parameter 'skipCount' cannot be null.");
+        else if (skipCount !== undefined)
+            url_ += "SkipCount=" + encodeURIComponent("" + skipCount) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAll(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAll(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<BackUpStorageConfiguationDtoPagedResultDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<BackUpStorageConfiguationDtoPagedResultDto>;
+        }));
+    }
+
+    protected processGetAll(response: HttpResponseBase): Observable<BackUpStorageConfiguationDtoPagedResultDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BackUpStorageConfiguationDtoPagedResultDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    create(body: BackUpStorageConfiguationCreateDto | undefined): Observable<BackUpStorageConfiguationDto> {
+        let url_ = this.baseUrl + "/api/services/app/BackUpStorageConfiguation/Create";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreate(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreate(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<BackUpStorageConfiguationDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<BackUpStorageConfiguationDto>;
+        }));
+    }
+
+    protected processCreate(response: HttpResponseBase): Observable<BackUpStorageConfiguationDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BackUpStorageConfiguationDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    update(body: BackUpStorageConfiguationUpdateDto | undefined): Observable<BackUpStorageConfiguationDto> {
+        let url_ = this.baseUrl + "/api/services/app/BackUpStorageConfiguation/Update";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processUpdate(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processUpdate(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<BackUpStorageConfiguationDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<BackUpStorageConfiguationDto>;
+        }));
+    }
+
+    protected processUpdate(response: HttpResponseBase): Observable<BackUpStorageConfiguationDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BackUpStorageConfiguationDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    get(id: string | undefined): Observable<BackUpStorageConfiguationDto> {
+        let url_ = this.baseUrl + "/api/services/app/BackUpStorageConfiguation/Get?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGet(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGet(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<BackUpStorageConfiguationDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<BackUpStorageConfiguationDto>;
+        }));
+    }
+
+    protected processGet(response: HttpResponseBase): Observable<BackUpStorageConfiguationDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BackUpStorageConfiguationDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
+export class BackUPTypeServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @return OK
+     */
+    getAll(): Observable<BackUPTypeDtoPagedResultDto> {
+        let url_ = this.baseUrl + "/api/services/app/BackUPType/GetAll";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAll(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAll(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<BackUPTypeDtoPagedResultDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<BackUPTypeDtoPagedResultDto>;
+        }));
+    }
+
+    protected processGetAll(response: HttpResponseBase): Observable<BackUPTypeDtoPagedResultDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BackUPTypeDtoPagedResultDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
+export class CloudStorageServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @return OK
+     */
+    getAll(): Observable<CloudStorageDtoPagedResultDto> {
+        let url_ = this.baseUrl + "/api/services/app/CloudStorage/GetAll";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAll(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAll(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<CloudStorageDtoPagedResultDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<CloudStorageDtoPagedResultDto>;
+        }));
+    }
+
+    protected processGetAll(response: HttpResponseBase): Observable<CloudStorageDtoPagedResultDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = CloudStorageDtoPagedResultDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
 export class ConfigurationServiceProxy {
     private http: HttpClient;
     private baseUrl: string;
@@ -195,6 +886,69 @@ export class ConfigurationServiceProxy {
         if (status === 200) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
             return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
+export class DBTypeServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @return OK
+     */
+    getAll(): Observable<DBTypeDtoPagedResultDto> {
+        let url_ = this.baseUrl + "/api/services/app/DBType/GetAll";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAll(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAll(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<DBTypeDtoPagedResultDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<DBTypeDtoPagedResultDto>;
+        }));
+    }
+
+    protected processGetAll(response: HttpResponseBase): Observable<DBTypeDtoPagedResultDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = DBTypeDtoPagedResultDto.fromJS(resultData200);
+            return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -718,6 +1472,320 @@ export class SessionServiceProxy {
             let result200: any = null;
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result200 = GetCurrentLoginInformationsOutput.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
+export class SourceConfiguationServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param filterText (optional) 
+     * @param sorting (optional) 
+     * @param maxResultCount (optional) 
+     * @param skipCount (optional) 
+     * @return OK
+     */
+    getAll(filterText: string | undefined, sorting: string | undefined, maxResultCount: number | undefined, skipCount: number | undefined): Observable<SourceConfiguationDtoPagedResultDto> {
+        let url_ = this.baseUrl + "/api/services/app/SourceConfiguation/GetAll?";
+        if (filterText === null)
+            throw new Error("The parameter 'filterText' cannot be null.");
+        else if (filterText !== undefined)
+            url_ += "FilterText=" + encodeURIComponent("" + filterText) + "&";
+        if (sorting === null)
+            throw new Error("The parameter 'sorting' cannot be null.");
+        else if (sorting !== undefined)
+            url_ += "Sorting=" + encodeURIComponent("" + sorting) + "&";
+        if (maxResultCount === null)
+            throw new Error("The parameter 'maxResultCount' cannot be null.");
+        else if (maxResultCount !== undefined)
+            url_ += "MaxResultCount=" + encodeURIComponent("" + maxResultCount) + "&";
+        if (skipCount === null)
+            throw new Error("The parameter 'skipCount' cannot be null.");
+        else if (skipCount !== undefined)
+            url_ += "SkipCount=" + encodeURIComponent("" + skipCount) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAll(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAll(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<SourceConfiguationDtoPagedResultDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<SourceConfiguationDtoPagedResultDto>;
+        }));
+    }
+
+    protected processGetAll(response: HttpResponseBase): Observable<SourceConfiguationDtoPagedResultDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = SourceConfiguationDtoPagedResultDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    get(id: string | undefined): Observable<SourceConfiguationDto> {
+        let url_ = this.baseUrl + "/api/services/app/SourceConfiguation/Get?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGet(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGet(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<SourceConfiguationDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<SourceConfiguationDto>;
+        }));
+    }
+
+    protected processGet(response: HttpResponseBase): Observable<SourceConfiguationDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = SourceConfiguationDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    create(body: SourceConfiguationCreateDto | undefined): Observable<SourceConfiguationDto> {
+        let url_ = this.baseUrl + "/api/services/app/SourceConfiguation/Create";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreate(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreate(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<SourceConfiguationDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<SourceConfiguationDto>;
+        }));
+    }
+
+    protected processCreate(response: HttpResponseBase): Observable<SourceConfiguationDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = SourceConfiguationDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    update(body: SourceConfiguationUpdateDto | undefined): Observable<SourceConfiguationDto> {
+        let url_ = this.baseUrl + "/api/services/app/SourceConfiguation/Update";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("put", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processUpdate(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processUpdate(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<SourceConfiguationDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<SourceConfiguationDto>;
+        }));
+    }
+
+    protected processUpdate(response: HttpResponseBase): Observable<SourceConfiguationDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = SourceConfiguationDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
+export class StorageMasterTypeServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @return OK
+     */
+    getAll(): Observable<StorageMasterTypeDtoPagedResultDto> {
+        let url_ = this.baseUrl + "/api/services/app/StorageMasterType/GetAll";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAll(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAll(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<StorageMasterTypeDtoPagedResultDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<StorageMasterTypeDtoPagedResultDto>;
+        }));
+    }
+
+    protected processGetAll(response: HttpResponseBase): Observable<StorageMasterTypeDtoPagedResultDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = StorageMasterTypeDtoPagedResultDto.fromJS(resultData200);
             return _observableOf(result200);
             }));
         } else if (status !== 200 && status !== 204) {
@@ -1893,6 +2961,910 @@ export interface IAuthenticateResultModel {
     userId: number;
 }
 
+export class BackUPTypeDto implements IBackUPTypeDto {
+    id: string;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    name: string | undefined;
+
+    constructor(data?: IBackUPTypeDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.isDeleted = _data["isDeleted"];
+            this.deleterUserId = _data["deleterUserId"];
+            this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): BackUPTypeDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BackUPTypeDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["isDeleted"] = this.isDeleted;
+        data["deleterUserId"] = this.deleterUserId;
+        data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
+        data["name"] = this.name;
+        return data;
+    }
+
+    clone(): BackUPTypeDto {
+        const json = this.toJSON();
+        let result = new BackUPTypeDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IBackUPTypeDto {
+    id: string;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    name: string | undefined;
+}
+
+export class BackUPTypeDtoPagedResultDto implements IBackUPTypeDtoPagedResultDto {
+    items: BackUPTypeDto[] | undefined;
+    totalCount: number;
+
+    constructor(data?: IBackUPTypeDtoPagedResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items.push(BackUPTypeDto.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+        }
+    }
+
+    static fromJS(data: any): BackUPTypeDtoPagedResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BackUPTypeDtoPagedResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["totalCount"] = this.totalCount;
+        return data;
+    }
+
+    clone(): BackUPTypeDtoPagedResultDto {
+        const json = this.toJSON();
+        let result = new BackUPTypeDtoPagedResultDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IBackUPTypeDtoPagedResultDto {
+    items: BackUPTypeDto[] | undefined;
+    totalCount: number;
+}
+
+export class BackUpFrequencyDto implements IBackUpFrequencyDto {
+    id: string;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    name: string | undefined;
+
+    constructor(data?: IBackUpFrequencyDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.isDeleted = _data["isDeleted"];
+            this.deleterUserId = _data["deleterUserId"];
+            this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): BackUpFrequencyDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BackUpFrequencyDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["isDeleted"] = this.isDeleted;
+        data["deleterUserId"] = this.deleterUserId;
+        data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
+        data["name"] = this.name;
+        return data;
+    }
+
+    clone(): BackUpFrequencyDto {
+        const json = this.toJSON();
+        let result = new BackUpFrequencyDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IBackUpFrequencyDto {
+    id: string;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    name: string | undefined;
+}
+
+export class BackUpFrequencyDtoPagedResultDto implements IBackUpFrequencyDtoPagedResultDto {
+    items: BackUpFrequencyDto[] | undefined;
+    totalCount: number;
+
+    constructor(data?: IBackUpFrequencyDtoPagedResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items.push(BackUpFrequencyDto.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+        }
+    }
+
+    static fromJS(data: any): BackUpFrequencyDtoPagedResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BackUpFrequencyDtoPagedResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["totalCount"] = this.totalCount;
+        return data;
+    }
+
+    clone(): BackUpFrequencyDtoPagedResultDto {
+        const json = this.toJSON();
+        let result = new BackUpFrequencyDtoPagedResultDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IBackUpFrequencyDtoPagedResultDto {
+    items: BackUpFrequencyDto[] | undefined;
+    totalCount: number;
+}
+
+export class BackUpScheduleCreateDto implements IBackUpScheduleCreateDto {
+    sourceConfiguationId: string | undefined;
+    backupDate: moment.Moment | undefined;
+    backupTime: string | undefined;
+    backUpFrequencyId: string | undefined;
+
+    constructor(data?: IBackUpScheduleCreateDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.sourceConfiguationId = _data["sourceConfiguationId"];
+            this.backupDate = _data["backupDate"] ? moment(_data["backupDate"].toString()) : <any>undefined;
+            this.backupTime = _data["backupTime"];
+            this.backUpFrequencyId = _data["backUpFrequencyId"];
+        }
+    }
+
+    static fromJS(data: any): BackUpScheduleCreateDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BackUpScheduleCreateDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["sourceConfiguationId"] = this.sourceConfiguationId;
+        data["backupDate"] = this.backupDate ? this.backupDate.toISOString() : <any>undefined;
+        data["backupTime"] = this.backupTime;
+        data["backUpFrequencyId"] = this.backUpFrequencyId;
+        return data;
+    }
+
+    clone(): BackUpScheduleCreateDto {
+        const json = this.toJSON();
+        let result = new BackUpScheduleCreateDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IBackUpScheduleCreateDto {
+    sourceConfiguationId: string | undefined;
+    backupDate: moment.Moment | undefined;
+    backupTime: string | undefined;
+    backUpFrequencyId: string | undefined;
+}
+
+export class BackUpScheduleDto implements IBackUpScheduleDto {
+    id: string;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number;
+    sourceConfiguationId: string | undefined;
+    backupDate: moment.Moment | undefined;
+    backupTime: string | undefined;
+    backUpFrequencyId: string | undefined;
+    sourceConfiguation: SourceConfiguationDto;
+    backUpFrequency: BackUpFrequencyDto;
+
+    constructor(data?: IBackUpScheduleDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.isDeleted = _data["isDeleted"];
+            this.deleterUserId = _data["deleterUserId"];
+            this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
+            this.tenantId = _data["tenantId"];
+            this.sourceConfiguationId = _data["sourceConfiguationId"];
+            this.backupDate = _data["backupDate"] ? moment(_data["backupDate"].toString()) : <any>undefined;
+            this.backupTime = _data["backupTime"];
+            this.backUpFrequencyId = _data["backUpFrequencyId"];
+            this.sourceConfiguation = _data["sourceConfiguation"] ? SourceConfiguationDto.fromJS(_data["sourceConfiguation"]) : <any>undefined;
+            this.backUpFrequency = _data["backUpFrequency"] ? BackUpFrequencyDto.fromJS(_data["backUpFrequency"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): BackUpScheduleDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BackUpScheduleDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["isDeleted"] = this.isDeleted;
+        data["deleterUserId"] = this.deleterUserId;
+        data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
+        data["tenantId"] = this.tenantId;
+        data["sourceConfiguationId"] = this.sourceConfiguationId;
+        data["backupDate"] = this.backupDate ? this.backupDate.toISOString() : <any>undefined;
+        data["backupTime"] = this.backupTime;
+        data["backUpFrequencyId"] = this.backUpFrequencyId;
+        data["sourceConfiguation"] = this.sourceConfiguation ? this.sourceConfiguation.toJSON() : <any>undefined;
+        data["backUpFrequency"] = this.backUpFrequency ? this.backUpFrequency.toJSON() : <any>undefined;
+        return data;
+    }
+
+    clone(): BackUpScheduleDto {
+        const json = this.toJSON();
+        let result = new BackUpScheduleDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IBackUpScheduleDto {
+    id: string;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number;
+    sourceConfiguationId: string | undefined;
+    backupDate: moment.Moment | undefined;
+    backupTime: string | undefined;
+    backUpFrequencyId: string | undefined;
+    sourceConfiguation: SourceConfiguationDto;
+    backUpFrequency: BackUpFrequencyDto;
+}
+
+export class BackUpScheduleDtoPagedResultDto implements IBackUpScheduleDtoPagedResultDto {
+    items: BackUpScheduleDto[] | undefined;
+    totalCount: number;
+
+    constructor(data?: IBackUpScheduleDtoPagedResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items.push(BackUpScheduleDto.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+        }
+    }
+
+    static fromJS(data: any): BackUpScheduleDtoPagedResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BackUpScheduleDtoPagedResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["totalCount"] = this.totalCount;
+        return data;
+    }
+
+    clone(): BackUpScheduleDtoPagedResultDto {
+        const json = this.toJSON();
+        let result = new BackUpScheduleDtoPagedResultDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IBackUpScheduleDtoPagedResultDto {
+    items: BackUpScheduleDto[] | undefined;
+    totalCount: number;
+}
+
+export class BackUpScheduleUpdateDto implements IBackUpScheduleUpdateDto {
+    sourceConfiguationId: string | undefined;
+    backupDate: moment.Moment | undefined;
+    backupTime: string | undefined;
+    backUpFrequencyId: string | undefined;
+    id: string;
+
+    constructor(data?: IBackUpScheduleUpdateDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.sourceConfiguationId = _data["sourceConfiguationId"];
+            this.backupDate = _data["backupDate"] ? moment(_data["backupDate"].toString()) : <any>undefined;
+            this.backupTime = _data["backupTime"];
+            this.backUpFrequencyId = _data["backUpFrequencyId"];
+            this.id = _data["id"];
+        }
+    }
+
+    static fromJS(data: any): BackUpScheduleUpdateDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BackUpScheduleUpdateDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["sourceConfiguationId"] = this.sourceConfiguationId;
+        data["backupDate"] = this.backupDate ? this.backupDate.toISOString() : <any>undefined;
+        data["backupTime"] = this.backupTime;
+        data["backUpFrequencyId"] = this.backUpFrequencyId;
+        data["id"] = this.id;
+        return data;
+    }
+
+    clone(): BackUpScheduleUpdateDto {
+        const json = this.toJSON();
+        let result = new BackUpScheduleUpdateDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IBackUpScheduleUpdateDto {
+    sourceConfiguationId: string | undefined;
+    backupDate: moment.Moment | undefined;
+    backupTime: string | undefined;
+    backUpFrequencyId: string | undefined;
+    id: string;
+}
+
+export class BackUpStorageConfiguationCreateDto implements IBackUpStorageConfiguationCreateDto {
+    storageMasterTypeId: string;
+    cloudStorageId: string | undefined;
+    nfS_IP: string | undefined;
+    nfS_AccessUserID: string | undefined;
+    nfS_Password: string | undefined;
+    nfS_LocationPath: string | undefined;
+    awS_AccessKey: string | undefined;
+    awS_SecretKey: string | undefined;
+    awS_BucketName: string | undefined;
+    awS_Region: string | undefined;
+    awS_backUpPath: string | undefined;
+    aZ_AccountName: string | undefined;
+    aZ_AccountKey: string | undefined;
+
+    constructor(data?: IBackUpStorageConfiguationCreateDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.storageMasterTypeId = _data["storageMasterTypeId"];
+            this.cloudStorageId = _data["cloudStorageId"];
+            this.nfS_IP = _data["nfS_IP"];
+            this.nfS_AccessUserID = _data["nfS_AccessUserID"];
+            this.nfS_Password = _data["nfS_Password"];
+            this.nfS_LocationPath = _data["nfS_LocationPath"];
+            this.awS_AccessKey = _data["awS_AccessKey"];
+            this.awS_SecretKey = _data["awS_SecretKey"];
+            this.awS_BucketName = _data["awS_BucketName"];
+            this.awS_Region = _data["awS_Region"];
+            this.awS_backUpPath = _data["awS_backUpPath"];
+            this.aZ_AccountName = _data["aZ_AccountName"];
+            this.aZ_AccountKey = _data["aZ_AccountKey"];
+        }
+    }
+
+    static fromJS(data: any): BackUpStorageConfiguationCreateDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BackUpStorageConfiguationCreateDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["storageMasterTypeId"] = this.storageMasterTypeId;
+        data["cloudStorageId"] = this.cloudStorageId;
+        data["nfS_IP"] = this.nfS_IP;
+        data["nfS_AccessUserID"] = this.nfS_AccessUserID;
+        data["nfS_Password"] = this.nfS_Password;
+        data["nfS_LocationPath"] = this.nfS_LocationPath;
+        data["awS_AccessKey"] = this.awS_AccessKey;
+        data["awS_SecretKey"] = this.awS_SecretKey;
+        data["awS_BucketName"] = this.awS_BucketName;
+        data["awS_Region"] = this.awS_Region;
+        data["awS_backUpPath"] = this.awS_backUpPath;
+        data["aZ_AccountName"] = this.aZ_AccountName;
+        data["aZ_AccountKey"] = this.aZ_AccountKey;
+        return data;
+    }
+
+    clone(): BackUpStorageConfiguationCreateDto {
+        const json = this.toJSON();
+        let result = new BackUpStorageConfiguationCreateDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IBackUpStorageConfiguationCreateDto {
+    storageMasterTypeId: string;
+    cloudStorageId: string | undefined;
+    nfS_IP: string | undefined;
+    nfS_AccessUserID: string | undefined;
+    nfS_Password: string | undefined;
+    nfS_LocationPath: string | undefined;
+    awS_AccessKey: string | undefined;
+    awS_SecretKey: string | undefined;
+    awS_BucketName: string | undefined;
+    awS_Region: string | undefined;
+    awS_backUpPath: string | undefined;
+    aZ_AccountName: string | undefined;
+    aZ_AccountKey: string | undefined;
+}
+
+export class BackUpStorageConfiguationDto implements IBackUpStorageConfiguationDto {
+    id: string;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number;
+    storageMasterTypeId: string;
+    cloudStorageId: string | undefined;
+    nfS_IP: string | undefined;
+    nfS_AccessUserID: string | undefined;
+    nfS_Password: string | undefined;
+    nfS_LocationPath: string | undefined;
+    awS_AccessKey: string | undefined;
+    awS_SecretKey: string | undefined;
+    awS_BucketName: string | undefined;
+    awS_Region: string | undefined;
+    awS_backUpPath: string | undefined;
+    aZ_AccountName: string | undefined;
+    aZ_AccountKey: string | undefined;
+    storageMasterType: StorageMasterTypeDto;
+    cloudStorage: CloudStorageDto;
+
+    constructor(data?: IBackUpStorageConfiguationDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.isDeleted = _data["isDeleted"];
+            this.deleterUserId = _data["deleterUserId"];
+            this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
+            this.tenantId = _data["tenantId"];
+            this.storageMasterTypeId = _data["storageMasterTypeId"];
+            this.cloudStorageId = _data["cloudStorageId"];
+            this.nfS_IP = _data["nfS_IP"];
+            this.nfS_AccessUserID = _data["nfS_AccessUserID"];
+            this.nfS_Password = _data["nfS_Password"];
+            this.nfS_LocationPath = _data["nfS_LocationPath"];
+            this.awS_AccessKey = _data["awS_AccessKey"];
+            this.awS_SecretKey = _data["awS_SecretKey"];
+            this.awS_BucketName = _data["awS_BucketName"];
+            this.awS_Region = _data["awS_Region"];
+            this.awS_backUpPath = _data["awS_backUpPath"];
+            this.aZ_AccountName = _data["aZ_AccountName"];
+            this.aZ_AccountKey = _data["aZ_AccountKey"];
+            this.storageMasterType = _data["storageMasterType"] ? StorageMasterTypeDto.fromJS(_data["storageMasterType"]) : <any>undefined;
+            this.cloudStorage = _data["cloudStorage"] ? CloudStorageDto.fromJS(_data["cloudStorage"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): BackUpStorageConfiguationDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BackUpStorageConfiguationDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["isDeleted"] = this.isDeleted;
+        data["deleterUserId"] = this.deleterUserId;
+        data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
+        data["tenantId"] = this.tenantId;
+        data["storageMasterTypeId"] = this.storageMasterTypeId;
+        data["cloudStorageId"] = this.cloudStorageId;
+        data["nfS_IP"] = this.nfS_IP;
+        data["nfS_AccessUserID"] = this.nfS_AccessUserID;
+        data["nfS_Password"] = this.nfS_Password;
+        data["nfS_LocationPath"] = this.nfS_LocationPath;
+        data["awS_AccessKey"] = this.awS_AccessKey;
+        data["awS_SecretKey"] = this.awS_SecretKey;
+        data["awS_BucketName"] = this.awS_BucketName;
+        data["awS_Region"] = this.awS_Region;
+        data["awS_backUpPath"] = this.awS_backUpPath;
+        data["aZ_AccountName"] = this.aZ_AccountName;
+        data["aZ_AccountKey"] = this.aZ_AccountKey;
+        data["storageMasterType"] = this.storageMasterType ? this.storageMasterType.toJSON() : <any>undefined;
+        data["cloudStorage"] = this.cloudStorage ? this.cloudStorage.toJSON() : <any>undefined;
+        return data;
+    }
+
+    clone(): BackUpStorageConfiguationDto {
+        const json = this.toJSON();
+        let result = new BackUpStorageConfiguationDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IBackUpStorageConfiguationDto {
+    id: string;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number;
+    storageMasterTypeId: string;
+    cloudStorageId: string | undefined;
+    nfS_IP: string | undefined;
+    nfS_AccessUserID: string | undefined;
+    nfS_Password: string | undefined;
+    nfS_LocationPath: string | undefined;
+    awS_AccessKey: string | undefined;
+    awS_SecretKey: string | undefined;
+    awS_BucketName: string | undefined;
+    awS_Region: string | undefined;
+    awS_backUpPath: string | undefined;
+    aZ_AccountName: string | undefined;
+    aZ_AccountKey: string | undefined;
+    storageMasterType: StorageMasterTypeDto;
+    cloudStorage: CloudStorageDto;
+}
+
+export class BackUpStorageConfiguationDtoPagedResultDto implements IBackUpStorageConfiguationDtoPagedResultDto {
+    items: BackUpStorageConfiguationDto[] | undefined;
+    totalCount: number;
+
+    constructor(data?: IBackUpStorageConfiguationDtoPagedResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items.push(BackUpStorageConfiguationDto.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+        }
+    }
+
+    static fromJS(data: any): BackUpStorageConfiguationDtoPagedResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BackUpStorageConfiguationDtoPagedResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["totalCount"] = this.totalCount;
+        return data;
+    }
+
+    clone(): BackUpStorageConfiguationDtoPagedResultDto {
+        const json = this.toJSON();
+        let result = new BackUpStorageConfiguationDtoPagedResultDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IBackUpStorageConfiguationDtoPagedResultDto {
+    items: BackUpStorageConfiguationDto[] | undefined;
+    totalCount: number;
+}
+
+export class BackUpStorageConfiguationUpdateDto implements IBackUpStorageConfiguationUpdateDto {
+    storageMasterTypeId: string;
+    cloudStorageId: string | undefined;
+    nfS_IP: string | undefined;
+    nfS_AccessUserID: string | undefined;
+    nfS_Password: string | undefined;
+    nfS_LocationPath: string | undefined;
+    awS_AccessKey: string | undefined;
+    awS_SecretKey: string | undefined;
+    awS_BucketName: string | undefined;
+    awS_Region: string | undefined;
+    awS_backUpPath: string | undefined;
+    aZ_AccountName: string | undefined;
+    aZ_AccountKey: string | undefined;
+    id: string;
+
+    constructor(data?: IBackUpStorageConfiguationUpdateDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.storageMasterTypeId = _data["storageMasterTypeId"];
+            this.cloudStorageId = _data["cloudStorageId"];
+            this.nfS_IP = _data["nfS_IP"];
+            this.nfS_AccessUserID = _data["nfS_AccessUserID"];
+            this.nfS_Password = _data["nfS_Password"];
+            this.nfS_LocationPath = _data["nfS_LocationPath"];
+            this.awS_AccessKey = _data["awS_AccessKey"];
+            this.awS_SecretKey = _data["awS_SecretKey"];
+            this.awS_BucketName = _data["awS_BucketName"];
+            this.awS_Region = _data["awS_Region"];
+            this.awS_backUpPath = _data["awS_backUpPath"];
+            this.aZ_AccountName = _data["aZ_AccountName"];
+            this.aZ_AccountKey = _data["aZ_AccountKey"];
+            this.id = _data["id"];
+        }
+    }
+
+    static fromJS(data: any): BackUpStorageConfiguationUpdateDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BackUpStorageConfiguationUpdateDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["storageMasterTypeId"] = this.storageMasterTypeId;
+        data["cloudStorageId"] = this.cloudStorageId;
+        data["nfS_IP"] = this.nfS_IP;
+        data["nfS_AccessUserID"] = this.nfS_AccessUserID;
+        data["nfS_Password"] = this.nfS_Password;
+        data["nfS_LocationPath"] = this.nfS_LocationPath;
+        data["awS_AccessKey"] = this.awS_AccessKey;
+        data["awS_SecretKey"] = this.awS_SecretKey;
+        data["awS_BucketName"] = this.awS_BucketName;
+        data["awS_Region"] = this.awS_Region;
+        data["awS_backUpPath"] = this.awS_backUpPath;
+        data["aZ_AccountName"] = this.aZ_AccountName;
+        data["aZ_AccountKey"] = this.aZ_AccountKey;
+        data["id"] = this.id;
+        return data;
+    }
+
+    clone(): BackUpStorageConfiguationUpdateDto {
+        const json = this.toJSON();
+        let result = new BackUpStorageConfiguationUpdateDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IBackUpStorageConfiguationUpdateDto {
+    storageMasterTypeId: string;
+    cloudStorageId: string | undefined;
+    nfS_IP: string | undefined;
+    nfS_AccessUserID: string | undefined;
+    nfS_Password: string | undefined;
+    nfS_LocationPath: string | undefined;
+    awS_AccessKey: string | undefined;
+    awS_SecretKey: string | undefined;
+    awS_BucketName: string | undefined;
+    awS_Region: string | undefined;
+    awS_backUpPath: string | undefined;
+    aZ_AccountName: string | undefined;
+    aZ_AccountKey: string | undefined;
+    id: string;
+}
+
 export class ChangePasswordDto implements IChangePasswordDto {
     currentPassword: string;
     newPassword: string;
@@ -2024,6 +3996,136 @@ export class ChangeUserLanguageDto implements IChangeUserLanguageDto {
 
 export interface IChangeUserLanguageDto {
     languageName: string;
+}
+
+export class CloudStorageDto implements ICloudStorageDto {
+    id: string;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    name: string | undefined;
+
+    constructor(data?: ICloudStorageDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.isDeleted = _data["isDeleted"];
+            this.deleterUserId = _data["deleterUserId"];
+            this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): CloudStorageDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CloudStorageDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["isDeleted"] = this.isDeleted;
+        data["deleterUserId"] = this.deleterUserId;
+        data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
+        data["name"] = this.name;
+        return data;
+    }
+
+    clone(): CloudStorageDto {
+        const json = this.toJSON();
+        let result = new CloudStorageDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ICloudStorageDto {
+    id: string;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    name: string | undefined;
+}
+
+export class CloudStorageDtoPagedResultDto implements ICloudStorageDtoPagedResultDto {
+    items: CloudStorageDto[] | undefined;
+    totalCount: number;
+
+    constructor(data?: ICloudStorageDtoPagedResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items.push(CloudStorageDto.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+        }
+    }
+
+    static fromJS(data: any): CloudStorageDtoPagedResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new CloudStorageDtoPagedResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["totalCount"] = this.totalCount;
+        return data;
+    }
+
+    clone(): CloudStorageDtoPagedResultDto {
+        const json = this.toJSON();
+        let result = new CloudStorageDtoPagedResultDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ICloudStorageDtoPagedResultDto {
+    items: CloudStorageDto[] | undefined;
+    totalCount: number;
 }
 
 export class CreateRoleDto implements ICreateRoleDto {
@@ -2225,6 +4327,136 @@ export interface ICreateUserDto {
     isActive: boolean;
     roleNames: string[] | undefined;
     password: string;
+}
+
+export class DBTypeDto implements IDBTypeDto {
+    id: string;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    name: string | undefined;
+
+    constructor(data?: IDBTypeDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.isDeleted = _data["isDeleted"];
+            this.deleterUserId = _data["deleterUserId"];
+            this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): DBTypeDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DBTypeDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["isDeleted"] = this.isDeleted;
+        data["deleterUserId"] = this.deleterUserId;
+        data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
+        data["name"] = this.name;
+        return data;
+    }
+
+    clone(): DBTypeDto {
+        const json = this.toJSON();
+        let result = new DBTypeDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IDBTypeDto {
+    id: string;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    name: string | undefined;
+}
+
+export class DBTypeDtoPagedResultDto implements IDBTypeDtoPagedResultDto {
+    items: DBTypeDto[] | undefined;
+    totalCount: number;
+
+    constructor(data?: IDBTypeDtoPagedResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items.push(DBTypeDto.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+        }
+    }
+
+    static fromJS(data: any): DBTypeDtoPagedResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new DBTypeDtoPagedResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["totalCount"] = this.totalCount;
+        return data;
+    }
+
+    clone(): DBTypeDtoPagedResultDto {
+        const json = this.toJSON();
+        let result = new DBTypeDtoPagedResultDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IDBTypeDtoPagedResultDto {
+    items: DBTypeDto[] | undefined;
+    totalCount: number;
 }
 
 export class FlatPermissionDto implements IFlatPermissionDto {
@@ -3140,6 +5372,564 @@ export class RoleListDtoListResultDto implements IRoleListDtoListResultDto {
 
 export interface IRoleListDtoListResultDto {
     items: RoleListDto[] | undefined;
+}
+
+export class SourceConfiguationCreateDto implements ISourceConfiguationCreateDto {
+    backUPTypeId: string;
+    dbTypeId: string | undefined;
+    databaseName: string | undefined;
+    dbUsername: string | undefined;
+    dbPassword: string | undefined;
+    port: string | undefined;
+    sshUserName: string | undefined;
+    sshPassword: string | undefined;
+    serverIP: string | undefined;
+    dbInitialCatalog: string | undefined;
+    userID: string | undefined;
+    password: string | undefined;
+    privateKeyPath: string | undefined;
+    backUpInitiatedPath: string | undefined;
+    sourcepath: string | undefined;
+    os: string | undefined;
+    backUpStorageConfiguationId: string | undefined;
+
+    constructor(data?: ISourceConfiguationCreateDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.backUPTypeId = _data["backUPTypeId"];
+            this.dbTypeId = _data["dbTypeId"];
+            this.databaseName = _data["databaseName"];
+            this.dbUsername = _data["dbUsername"];
+            this.dbPassword = _data["dbPassword"];
+            this.port = _data["port"];
+            this.sshUserName = _data["sshUserName"];
+            this.sshPassword = _data["sshPassword"];
+            this.serverIP = _data["serverIP"];
+            this.dbInitialCatalog = _data["dbInitialCatalog"];
+            this.userID = _data["userID"];
+            this.password = _data["password"];
+            this.privateKeyPath = _data["privateKeyPath"];
+            this.backUpInitiatedPath = _data["backUpInitiatedPath"];
+            this.sourcepath = _data["sourcepath"];
+            this.os = _data["os"];
+            this.backUpStorageConfiguationId = _data["backUpStorageConfiguationId"];
+        }
+    }
+
+    static fromJS(data: any): SourceConfiguationCreateDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new SourceConfiguationCreateDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["backUPTypeId"] = this.backUPTypeId;
+        data["dbTypeId"] = this.dbTypeId;
+        data["databaseName"] = this.databaseName;
+        data["dbUsername"] = this.dbUsername;
+        data["dbPassword"] = this.dbPassword;
+        data["port"] = this.port;
+        data["sshUserName"] = this.sshUserName;
+        data["sshPassword"] = this.sshPassword;
+        data["serverIP"] = this.serverIP;
+        data["dbInitialCatalog"] = this.dbInitialCatalog;
+        data["userID"] = this.userID;
+        data["password"] = this.password;
+        data["privateKeyPath"] = this.privateKeyPath;
+        data["backUpInitiatedPath"] = this.backUpInitiatedPath;
+        data["sourcepath"] = this.sourcepath;
+        data["os"] = this.os;
+        data["backUpStorageConfiguationId"] = this.backUpStorageConfiguationId;
+        return data;
+    }
+
+    clone(): SourceConfiguationCreateDto {
+        const json = this.toJSON();
+        let result = new SourceConfiguationCreateDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ISourceConfiguationCreateDto {
+    backUPTypeId: string;
+    dbTypeId: string | undefined;
+    databaseName: string | undefined;
+    dbUsername: string | undefined;
+    dbPassword: string | undefined;
+    port: string | undefined;
+    sshUserName: string | undefined;
+    sshPassword: string | undefined;
+    serverIP: string | undefined;
+    dbInitialCatalog: string | undefined;
+    userID: string | undefined;
+    password: string | undefined;
+    privateKeyPath: string | undefined;
+    backUpInitiatedPath: string | undefined;
+    sourcepath: string | undefined;
+    os: string | undefined;
+    backUpStorageConfiguationId: string | undefined;
+}
+
+export class SourceConfiguationDto implements ISourceConfiguationDto {
+    id: string;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number;
+    backUPTypeId: string;
+    dbTypeId: string | undefined;
+    databaseName: string | undefined;
+    dbUsername: string | undefined;
+    dbPassword: string | undefined;
+    port: string | undefined;
+    sshUserName: string | undefined;
+    sshPassword: string | undefined;
+    serverIP: string | undefined;
+    dbInitialCatalog: string | undefined;
+    userID: string | undefined;
+    password: string | undefined;
+    privateKeyPath: string | undefined;
+    backUpInitiatedPath: string | undefined;
+    sourcepath: string | undefined;
+    os: string | undefined;
+    backUpStorageConfiguationId: string | undefined;
+    backUPType: BackUPTypeDto;
+    dbType: DBTypeDto;
+    backUpStorageConfiguation: BackUpStorageConfiguationDto;
+
+    constructor(data?: ISourceConfiguationDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.isDeleted = _data["isDeleted"];
+            this.deleterUserId = _data["deleterUserId"];
+            this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
+            this.tenantId = _data["tenantId"];
+            this.backUPTypeId = _data["backUPTypeId"];
+            this.dbTypeId = _data["dbTypeId"];
+            this.databaseName = _data["databaseName"];
+            this.dbUsername = _data["dbUsername"];
+            this.dbPassword = _data["dbPassword"];
+            this.port = _data["port"];
+            this.sshUserName = _data["sshUserName"];
+            this.sshPassword = _data["sshPassword"];
+            this.serverIP = _data["serverIP"];
+            this.dbInitialCatalog = _data["dbInitialCatalog"];
+            this.userID = _data["userID"];
+            this.password = _data["password"];
+            this.privateKeyPath = _data["privateKeyPath"];
+            this.backUpInitiatedPath = _data["backUpInitiatedPath"];
+            this.sourcepath = _data["sourcepath"];
+            this.os = _data["os"];
+            this.backUpStorageConfiguationId = _data["backUpStorageConfiguationId"];
+            this.backUPType = _data["backUPType"] ? BackUPTypeDto.fromJS(_data["backUPType"]) : <any>undefined;
+            this.dbType = _data["dbType"] ? DBTypeDto.fromJS(_data["dbType"]) : <any>undefined;
+            this.backUpStorageConfiguation = _data["backUpStorageConfiguation"] ? BackUpStorageConfiguationDto.fromJS(_data["backUpStorageConfiguation"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): SourceConfiguationDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new SourceConfiguationDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["isDeleted"] = this.isDeleted;
+        data["deleterUserId"] = this.deleterUserId;
+        data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
+        data["tenantId"] = this.tenantId;
+        data["backUPTypeId"] = this.backUPTypeId;
+        data["dbTypeId"] = this.dbTypeId;
+        data["databaseName"] = this.databaseName;
+        data["dbUsername"] = this.dbUsername;
+        data["dbPassword"] = this.dbPassword;
+        data["port"] = this.port;
+        data["sshUserName"] = this.sshUserName;
+        data["sshPassword"] = this.sshPassword;
+        data["serverIP"] = this.serverIP;
+        data["dbInitialCatalog"] = this.dbInitialCatalog;
+        data["userID"] = this.userID;
+        data["password"] = this.password;
+        data["privateKeyPath"] = this.privateKeyPath;
+        data["backUpInitiatedPath"] = this.backUpInitiatedPath;
+        data["sourcepath"] = this.sourcepath;
+        data["os"] = this.os;
+        data["backUpStorageConfiguationId"] = this.backUpStorageConfiguationId;
+        data["backUPType"] = this.backUPType ? this.backUPType.toJSON() : <any>undefined;
+        data["dbType"] = this.dbType ? this.dbType.toJSON() : <any>undefined;
+        data["backUpStorageConfiguation"] = this.backUpStorageConfiguation ? this.backUpStorageConfiguation.toJSON() : <any>undefined;
+        return data;
+    }
+
+    clone(): SourceConfiguationDto {
+        const json = this.toJSON();
+        let result = new SourceConfiguationDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ISourceConfiguationDto {
+    id: string;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenantId: number;
+    backUPTypeId: string;
+    dbTypeId: string | undefined;
+    databaseName: string | undefined;
+    dbUsername: string | undefined;
+    dbPassword: string | undefined;
+    port: string | undefined;
+    sshUserName: string | undefined;
+    sshPassword: string | undefined;
+    serverIP: string | undefined;
+    dbInitialCatalog: string | undefined;
+    userID: string | undefined;
+    password: string | undefined;
+    privateKeyPath: string | undefined;
+    backUpInitiatedPath: string | undefined;
+    sourcepath: string | undefined;
+    os: string | undefined;
+    backUpStorageConfiguationId: string | undefined;
+    backUPType: BackUPTypeDto;
+    dbType: DBTypeDto;
+    backUpStorageConfiguation: BackUpStorageConfiguationDto;
+}
+
+export class SourceConfiguationDtoPagedResultDto implements ISourceConfiguationDtoPagedResultDto {
+    items: SourceConfiguationDto[] | undefined;
+    totalCount: number;
+
+    constructor(data?: ISourceConfiguationDtoPagedResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items.push(SourceConfiguationDto.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+        }
+    }
+
+    static fromJS(data: any): SourceConfiguationDtoPagedResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new SourceConfiguationDtoPagedResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["totalCount"] = this.totalCount;
+        return data;
+    }
+
+    clone(): SourceConfiguationDtoPagedResultDto {
+        const json = this.toJSON();
+        let result = new SourceConfiguationDtoPagedResultDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ISourceConfiguationDtoPagedResultDto {
+    items: SourceConfiguationDto[] | undefined;
+    totalCount: number;
+}
+
+export class SourceConfiguationUpdateDto implements ISourceConfiguationUpdateDto {
+    backUPTypeId: string;
+    dbTypeId: string | undefined;
+    databaseName: string | undefined;
+    dbUsername: string | undefined;
+    dbPassword: string | undefined;
+    port: string | undefined;
+    sshUserName: string | undefined;
+    sshPassword: string | undefined;
+    serverIP: string | undefined;
+    dbInitialCatalog: string | undefined;
+    userID: string | undefined;
+    password: string | undefined;
+    privateKeyPath: string | undefined;
+    backUpInitiatedPath: string | undefined;
+    sourcepath: string | undefined;
+    os: string | undefined;
+    backUpStorageConfiguationId: string | undefined;
+    id: string;
+
+    constructor(data?: ISourceConfiguationUpdateDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.backUPTypeId = _data["backUPTypeId"];
+            this.dbTypeId = _data["dbTypeId"];
+            this.databaseName = _data["databaseName"];
+            this.dbUsername = _data["dbUsername"];
+            this.dbPassword = _data["dbPassword"];
+            this.port = _data["port"];
+            this.sshUserName = _data["sshUserName"];
+            this.sshPassword = _data["sshPassword"];
+            this.serverIP = _data["serverIP"];
+            this.dbInitialCatalog = _data["dbInitialCatalog"];
+            this.userID = _data["userID"];
+            this.password = _data["password"];
+            this.privateKeyPath = _data["privateKeyPath"];
+            this.backUpInitiatedPath = _data["backUpInitiatedPath"];
+            this.sourcepath = _data["sourcepath"];
+            this.os = _data["os"];
+            this.backUpStorageConfiguationId = _data["backUpStorageConfiguationId"];
+            this.id = _data["id"];
+        }
+    }
+
+    static fromJS(data: any): SourceConfiguationUpdateDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new SourceConfiguationUpdateDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["backUPTypeId"] = this.backUPTypeId;
+        data["dbTypeId"] = this.dbTypeId;
+        data["databaseName"] = this.databaseName;
+        data["dbUsername"] = this.dbUsername;
+        data["dbPassword"] = this.dbPassword;
+        data["port"] = this.port;
+        data["sshUserName"] = this.sshUserName;
+        data["sshPassword"] = this.sshPassword;
+        data["serverIP"] = this.serverIP;
+        data["dbInitialCatalog"] = this.dbInitialCatalog;
+        data["userID"] = this.userID;
+        data["password"] = this.password;
+        data["privateKeyPath"] = this.privateKeyPath;
+        data["backUpInitiatedPath"] = this.backUpInitiatedPath;
+        data["sourcepath"] = this.sourcepath;
+        data["os"] = this.os;
+        data["backUpStorageConfiguationId"] = this.backUpStorageConfiguationId;
+        data["id"] = this.id;
+        return data;
+    }
+
+    clone(): SourceConfiguationUpdateDto {
+        const json = this.toJSON();
+        let result = new SourceConfiguationUpdateDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ISourceConfiguationUpdateDto {
+    backUPTypeId: string;
+    dbTypeId: string | undefined;
+    databaseName: string | undefined;
+    dbUsername: string | undefined;
+    dbPassword: string | undefined;
+    port: string | undefined;
+    sshUserName: string | undefined;
+    sshPassword: string | undefined;
+    serverIP: string | undefined;
+    dbInitialCatalog: string | undefined;
+    userID: string | undefined;
+    password: string | undefined;
+    privateKeyPath: string | undefined;
+    backUpInitiatedPath: string | undefined;
+    sourcepath: string | undefined;
+    os: string | undefined;
+    backUpStorageConfiguationId: string | undefined;
+    id: string;
+}
+
+export class StorageMasterTypeDto implements IStorageMasterTypeDto {
+    id: string;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    name: string | undefined;
+
+    constructor(data?: IStorageMasterTypeDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.isDeleted = _data["isDeleted"];
+            this.deleterUserId = _data["deleterUserId"];
+            this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
+            this.name = _data["name"];
+        }
+    }
+
+    static fromJS(data: any): StorageMasterTypeDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new StorageMasterTypeDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["isDeleted"] = this.isDeleted;
+        data["deleterUserId"] = this.deleterUserId;
+        data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
+        data["name"] = this.name;
+        return data;
+    }
+
+    clone(): StorageMasterTypeDto {
+        const json = this.toJSON();
+        let result = new StorageMasterTypeDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IStorageMasterTypeDto {
+    id: string;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    name: string | undefined;
+}
+
+export class StorageMasterTypeDtoPagedResultDto implements IStorageMasterTypeDtoPagedResultDto {
+    items: StorageMasterTypeDto[] | undefined;
+    totalCount: number;
+
+    constructor(data?: IStorageMasterTypeDtoPagedResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items.push(StorageMasterTypeDto.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+        }
+    }
+
+    static fromJS(data: any): StorageMasterTypeDtoPagedResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new StorageMasterTypeDtoPagedResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["totalCount"] = this.totalCount;
+        return data;
+    }
+
+    clone(): StorageMasterTypeDtoPagedResultDto {
+        const json = this.toJSON();
+        let result = new StorageMasterTypeDtoPagedResultDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IStorageMasterTypeDtoPagedResultDto {
+    items: StorageMasterTypeDto[] | undefined;
+    totalCount: number;
 }
 
 export enum TenantAvailabilityState {

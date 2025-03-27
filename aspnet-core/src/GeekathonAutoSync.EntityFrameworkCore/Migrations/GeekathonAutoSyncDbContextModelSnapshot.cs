@@ -17,7 +17,7 @@ namespace GeekathonAutoSync.Migrations
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.4")
+                .HasAnnotation("ProductVersion", "8.0.8")
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
@@ -102,7 +102,7 @@ namespace GeekathonAutoSync.Migrations
 
                     b.ToTable("AbpFeatures");
 
-                    b.HasDiscriminator<string>("Discriminator").HasValue("FeatureSetting");
+                    b.HasDiscriminator().HasValue("FeatureSetting");
 
                     b.UseTphMappingStrategy();
                 });
@@ -219,7 +219,7 @@ namespace GeekathonAutoSync.Migrations
 
                     b.ToTable("AbpPermissions");
 
-                    b.HasDiscriminator<string>("Discriminator").HasValue("PermissionSetting");
+                    b.HasDiscriminator().HasValue("PermissionSetting");
 
                     b.UseTphMappingStrategy();
                 });
@@ -1583,6 +1583,230 @@ namespace GeekathonAutoSync.Migrations
                     b.ToTable("AbpUsers");
                 });
 
+            modelBuilder.Entity("GeekathonAutoSync.BackUPTypes.BackUPType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BackUPTypes");
+                });
+
+            modelBuilder.Entity("GeekathonAutoSync.BackUpFrequencys.BackUpFrequency", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("BackupFrequencies");
+                });
+
+            modelBuilder.Entity("GeekathonAutoSync.BackUpLogs.BackUpLog", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("BackUpStorageConfiguationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int?>("BackupLogStatus")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CompletedTimeStamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("SourceConfiguationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("StartedTimeStamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BackUpStorageConfiguationId");
+
+                    b.HasIndex("SourceConfiguationId");
+
+                    b.HasIndex("TenantId");
+
+                    b.ToTable("BackUpLogs");
+                });
+
+            modelBuilder.Entity("GeekathonAutoSync.BackUpSchedules.BackUpSchedule", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("BackUpFrequencyId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("BackupDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<TimeSpan?>("BackupTime")
+                        .HasColumnType("time");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<Guid?>("SourceConfiguationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BackUpFrequencyId");
+
+                    b.HasIndex("SourceConfiguationId");
+
+                    b.HasIndex("TenantId");
+
+                    b.ToTable("BackUpSchedules");
+                });
+
+            modelBuilder.Entity("GeekathonAutoSync.BackUpStorageConfiguations.BackUpStorageConfiguation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("AWS_AccessKey")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AWS_BucketName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AWS_Region")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AWS_SecretKey")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AWS_backUpPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AZ_AccountKey")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("AZ_AccountName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("CloudStorageId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("NFS_AccessUserID")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NFS_IP")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NFS_LocationPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("NFS_Password")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("StorageMasterTypeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CloudStorageId");
+
+                    b.HasIndex("StorageMasterTypeId");
+
+                    b.HasIndex("TenantId");
+
+                    b.ToTable("BackUpStorageConfiguations");
+                });
+
+            modelBuilder.Entity("GeekathonAutoSync.CloudStorages.CloudStorage", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CloudStorages");
+                });
+
+            modelBuilder.Entity("GeekathonAutoSync.DBTypes.DBType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DBTypes");
+                });
+
             modelBuilder.Entity("GeekathonAutoSync.MultiTenancy.Tenant", b =>
                 {
                     b.Property<int>("Id")
@@ -1645,6 +1869,114 @@ namespace GeekathonAutoSync.Migrations
                     b.HasIndex("TenancyName");
 
                     b.ToTable("AbpTenants");
+                });
+
+            modelBuilder.Entity("GeekathonAutoSync.SourceConfiguations.SourceConfiguation", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BackUPTypeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BackUpInitiatedPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("BackUpStorageConfiguationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("CreatorUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("DBInitialCatalog")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("DBTypeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("DatabaseName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DbPassword")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DbUsername")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<long?>("DeleterUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<DateTime?>("DeletionTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastModificationTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<long?>("LastModifierUserId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("OS")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Password")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Port")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("PrivateKeyPath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ServerIP")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Sourcepath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SshPassword")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SshUserName")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("TenantId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserID")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BackUPTypeId");
+
+                    b.HasIndex("BackUpStorageConfiguationId");
+
+                    b.HasIndex("DBTypeId");
+
+                    b.HasIndex("TenantId");
+
+                    b.ToTable("SourceConfiguations");
+                });
+
+            modelBuilder.Entity("GeekathonAutoSync.StorageMasterTypes.StorageMasterType", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("StorageMasterTypes");
                 });
 
             modelBuilder.Entity("Abp.Application.Features.EditionFeatureSetting", b =>
@@ -1865,6 +2197,77 @@ namespace GeekathonAutoSync.Migrations
                     b.Navigation("LastModifierUser");
                 });
 
+            modelBuilder.Entity("GeekathonAutoSync.BackUpLogs.BackUpLog", b =>
+                {
+                    b.HasOne("GeekathonAutoSync.BackUpStorageConfiguations.BackUpStorageConfiguation", "BackUpStorageConfiguation")
+                        .WithMany("BackUpLogs")
+                        .HasForeignKey("BackUpStorageConfiguationId");
+
+                    b.HasOne("GeekathonAutoSync.SourceConfiguations.SourceConfiguation", "SourceConfiguation")
+                        .WithMany("BackUpLogs")
+                        .HasForeignKey("SourceConfiguationId");
+
+                    b.HasOne("GeekathonAutoSync.MultiTenancy.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BackUpStorageConfiguation");
+
+                    b.Navigation("SourceConfiguation");
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("GeekathonAutoSync.BackUpSchedules.BackUpSchedule", b =>
+                {
+                    b.HasOne("GeekathonAutoSync.BackUpFrequencys.BackUpFrequency", "BackUpFrequency")
+                        .WithMany()
+                        .HasForeignKey("BackUpFrequencyId");
+
+                    b.HasOne("GeekathonAutoSync.SourceConfiguations.SourceConfiguation", "SourceConfiguation")
+                        .WithMany("BackUpSchedules")
+                        .HasForeignKey("SourceConfiguationId");
+
+                    b.HasOne("GeekathonAutoSync.MultiTenancy.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BackUpFrequency");
+
+                    b.Navigation("SourceConfiguation");
+
+                    b.Navigation("Tenant");
+                });
+
+            modelBuilder.Entity("GeekathonAutoSync.BackUpStorageConfiguations.BackUpStorageConfiguation", b =>
+                {
+                    b.HasOne("GeekathonAutoSync.CloudStorages.CloudStorage", "CloudStorage")
+                        .WithMany()
+                        .HasForeignKey("CloudStorageId");
+
+                    b.HasOne("GeekathonAutoSync.StorageMasterTypes.StorageMasterType", "StorageMasterType")
+                        .WithMany()
+                        .HasForeignKey("StorageMasterTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GeekathonAutoSync.MultiTenancy.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CloudStorage");
+
+                    b.Navigation("StorageMasterType");
+
+                    b.Navigation("Tenant");
+                });
+
             modelBuilder.Entity("GeekathonAutoSync.MultiTenancy.Tenant", b =>
                 {
                     b.HasOne("GeekathonAutoSync.Authorization.Users.User", "CreatorUser")
@@ -1890,6 +2293,37 @@ namespace GeekathonAutoSync.Migrations
                     b.Navigation("Edition");
 
                     b.Navigation("LastModifierUser");
+                });
+
+            modelBuilder.Entity("GeekathonAutoSync.SourceConfiguations.SourceConfiguation", b =>
+                {
+                    b.HasOne("GeekathonAutoSync.BackUPTypes.BackUPType", "BackUPType")
+                        .WithMany()
+                        .HasForeignKey("BackUPTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GeekathonAutoSync.BackUpStorageConfiguations.BackUpStorageConfiguation", "BackUpStorageConfiguation")
+                        .WithMany("SourceConfiguations")
+                        .HasForeignKey("BackUpStorageConfiguationId");
+
+                    b.HasOne("GeekathonAutoSync.DBTypes.DBType", "DBType")
+                        .WithMany()
+                        .HasForeignKey("DBTypeId");
+
+                    b.HasOne("GeekathonAutoSync.MultiTenancy.Tenant", "Tenant")
+                        .WithMany()
+                        .HasForeignKey("TenantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BackUPType");
+
+                    b.Navigation("BackUpStorageConfiguation");
+
+                    b.Navigation("DBType");
+
+                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("Abp.Application.Features.EditionFeatureSetting", b =>
@@ -1961,6 +2395,20 @@ namespace GeekathonAutoSync.Migrations
                     b.Navigation("Settings");
 
                     b.Navigation("Tokens");
+                });
+
+            modelBuilder.Entity("GeekathonAutoSync.BackUpStorageConfiguations.BackUpStorageConfiguation", b =>
+                {
+                    b.Navigation("BackUpLogs");
+
+                    b.Navigation("SourceConfiguations");
+                });
+
+            modelBuilder.Entity("GeekathonAutoSync.SourceConfiguations.SourceConfiguation", b =>
+                {
+                    b.Navigation("BackUpLogs");
+
+                    b.Navigation("BackUpSchedules");
                 });
 #pragma warning restore 612, 618
         }

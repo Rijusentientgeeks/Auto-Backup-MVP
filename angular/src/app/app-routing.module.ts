@@ -43,6 +43,21 @@ import { AppComponent } from './app.component';
                         loadChildren: () => import('./users/users.module').then((m) => m.UsersModule),
                         canActivate: [AppRouteGuard]
                     },
+                    {
+                        path: 'manage-storage',
+                        loadChildren: () => import('./Storage/manage-storage/manage-storage.module').then((m) => m.ManageStorageModule),
+                        canActivate: [AppRouteGuard]
+                    },
+                    {
+                        path: 'Source-configuration',
+                        loadChildren: () => import('./source-configuration/source-configuration.module').then((m) => m.SourceConfigurationModule),
+                        canActivate: [AppRouteGuard]
+                    },
+                    {
+                        path: 'backup-logs',
+                        loadChildren: () => import('./backup-logs/backup-logs.module').then((m) => m.BackupLogsModule),
+                        canActivate: [AppRouteGuard]
+                    }
                 ]
             }
         ])

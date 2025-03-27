@@ -41,7 +41,7 @@ export class RolesComponent extends PagedListingComponentBase<RoleDto> {
     finishedCallback: Function
   ): void {
     request.keyword = this.keyword;
-
+debugger
     this._rolesService
       .getAll(request.keyword, request.skipCount, request.maxResultCount)
       .pipe(
