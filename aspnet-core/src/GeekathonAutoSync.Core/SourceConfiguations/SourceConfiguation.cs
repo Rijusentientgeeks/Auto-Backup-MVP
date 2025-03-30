@@ -40,6 +40,7 @@ namespace GeekathonAutoSync.SourceConfiguations
         public string Port { get; set; }
         public string SshUserName { get; set; }
         public string SshPassword { get; set; }
+        public string BackupName { get; set; }
         public ICollection<BackUpSchedule> BackUpSchedules { get; set; } = new List<BackUpSchedule>();
         public ICollection<BackUpLog> BackUpLogs { get; set; } = new List<BackUpLog>();
     }

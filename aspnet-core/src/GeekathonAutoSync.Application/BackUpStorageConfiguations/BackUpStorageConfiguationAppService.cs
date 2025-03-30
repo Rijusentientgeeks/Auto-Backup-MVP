@@ -63,6 +63,7 @@ namespace GeekathonAutoSync.BackUpStorageConfiguations
         public async Task<BackUpStorageConfiguationDto> CreateAsync(BackUpStorageConfiguationCreateDto input)  
         {
             Guid backUpStorageID = Guid.Empty;
+            try { 
             await CheckValidation(input.StorageMasterTypeId, input.CloudStorageId);
             BackUpStorageConfiguation backUpStorageConfiguation = new BackUpStorageConfiguation
             {
@@ -80,12 +81,16 @@ namespace GeekathonAutoSync.BackUpStorageConfiguations
                 AWS_backUpPath = input.AWS_backUpPath,
                 AZ_AccountName = input.AZ_AccountName,
                 AZ_AccountKey = input.AZ_AccountKey,
+                BackupName = input.BackupName,
             };
             using (CurrentUnitOfWork.SetTenantId(backUpStorageConfiguation.TenantId))
             {
                 backUpStorageID = await _backUpStorageConfiguationRepository.InsertAndGetIdAsync(backUpStorageConfiguation);
                 await CurrentUnitOfWork.SaveChangesAsync();
             }
+            }
+            catch (Exception ex) { }
+
             var getBackupStorageConfiguration = await GetAsync(backUpStorageID);
             return getBackupStorageConfiguration;
         }
@@ -111,6 +116,7 @@ namespace GeekathonAutoSync.BackUpStorageConfiguations
             getBackupStorageConfiguration.AWS_backUpPath = input.AWS_backUpPath;
             getBackupStorageConfiguration.AZ_AccountName = input.AZ_AccountName;
             getBackupStorageConfiguration.AZ_AccountKey = input.AZ_AccountKey;
+            getBackupStorageConfiguration.BackupName = input.BackupName;
             using (CurrentUnitOfWork.SetTenantId(getBackupStorageConfiguration.TenantId))
             {
                 backUpStorageID = await _backUpStorageConfiguationRepository.InsertOrUpdateAndGetIdAsync(getBackupStorageConfiguration);

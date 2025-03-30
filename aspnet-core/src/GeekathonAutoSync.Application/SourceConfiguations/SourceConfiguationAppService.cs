@@ -105,6 +105,7 @@ namespace GeekathonAutoSync.SourceConfiguations
                 Sourcepath = input.Sourcepath,
                 OS = input.OS,
                 BackUpStorageConfiguationId = input.BackUpStorageConfiguationId,
+                BackupName = input.BackupName
             };
             using (CurrentUnitOfWork.SetTenantId(sourceConfiguation.TenantId))
             {
@@ -140,6 +141,7 @@ namespace GeekathonAutoSync.SourceConfiguations
             getSourceConfiguation.Sourcepath = input.Sourcepath;
             getSourceConfiguation.OS = input.OS;
             getSourceConfiguation.BackUpStorageConfiguationId = input.BackUpStorageConfiguationId;
+            getSourceConfiguation.BackupName = input.BackupName;
             using (CurrentUnitOfWork.SetTenantId(getSourceConfiguation.TenantId))
             {
                 sourceConfiguationID = await _sourceConfiguationRepository.InsertOrUpdateAndGetIdAsync(getSourceConfiguation);

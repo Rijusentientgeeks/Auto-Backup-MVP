@@ -26,5 +26,6 @@ namespace GeekathonAutoSync.SourceConfiguations.Dto
         public string Sourcepath { get; set; }
         public string OS { get; set; }
         public Guid? BackUpStorageConfiguationId { get; set; }
+        public string BackupName { get; set; }
     }
 }

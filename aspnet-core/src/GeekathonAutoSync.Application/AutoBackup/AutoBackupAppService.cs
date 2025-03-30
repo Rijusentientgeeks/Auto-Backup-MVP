@@ -1,75 +1,164 @@
-﻿using Abp.UI;
+﻿using Abp.Domain.Repositories;
+using Abp.UI;
+using Amazon;
+using Amazon.S3;
+using Amazon.S3.Transfer;
+using GeekathonAutoSync.Authorization.Users;
+using GeekathonAutoSync.BackUpStorageConfiguations;
+using GeekathonAutoSync.CloudStorages;
+using GeekathonAutoSync.SourceConfiguations;
 using GeekathonAutoSync.SourceConfiguations.Dto;
+using GeekathonAutoSync.StorageMasterTypes;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore;
 using Renci.SshNet;
 using Renci.SshNet.Common;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace GeekathonAutoSync.AutoBackup
 {
     public class AutoBackupAppService : GeekathonAutoSyncAppServiceBase, IAutoBackupAppService
     {
+        private readonly IRepository<BackUpStorageConfiguation, Guid> _backUpStorageConfiguationRepository;
+        private readonly IRepository<StorageMasterType, Guid> _storageMasterTypeRepository;
+        private readonly IRepository<CloudStorage, Guid> _cloudStorageRepository;
+        private readonly IRepository<SourceConfiguation, Guid> _sourceConfiguationRepository;
+        private readonly IWebHostEnvironment _env;
 
-        public AutoBackupAppService()
+        private string defaultInitialLocalPath = "LocalBackupFiles";
+
+        public AutoBackupAppService(IRepository<BackUpStorageConfiguation, Guid> backUpStorageConfiguationRepository,
+            IRepository<StorageMasterType, Guid> storageMasterTypeRepository,
+            IRepository<CloudStorage, Guid> cloudStorageRepository, IRepository<SourceConfiguation, Guid> sourceConfiguationRepository, IWebHostEnvironment env)
         {
-            
+            _backUpStorageConfiguationRepository = backUpStorageConfiguationRepository;
+            _storageMasterTypeRepository = storageMasterTypeRepository;
+            _cloudStorageRepository = cloudStorageRepository;
+            _sourceConfiguationRepository = sourceConfiguationRepository;
+            _env = env;
         }
-        public async Task<string> Backup(SourceConfiguationCreateDto input, string backupTypeName, string dbTypeName)
+        public async Task<string> CreateBackup(string sConfigurationId)
         {
-            var res = "";
-            switch (backupTypeName)
+
+            var backupFileName = "";
+            string downLoadedFileName = "";
+            bool fileDownloadflag = false;
+            string resFromUpload="";
+
+            string serverPath = Path.Combine(_env.ContentRootPath, defaultInitialLocalPath);
+
+            var BackUPConfig = await _sourceConfiguationRepository.GetAll()
+                .Include(i => i.BackUPType)
+                .Include(i => i.DBType)
+                .Include(i => i.BackUpStorageConfiguation).ThenInclude(e => e.StorageMasterType)
+                .Include(i => i.BackUpStorageConfiguation).ThenInclude(e => e.CloudStorage)
+                .FirstOrDefaultAsync(i => i.Id.ToString().ToLower() == sConfigurationId.ToLower());
+
+
+
+            (bool,string) resp = (false, "");
+            switch (BackUPConfig.BackUPType.Name)
             {
                 case "DataBase":
-                    switch (dbTypeName)
+                    switch (BackUPConfig.DBType.Name)
                     {
                         case "PostgreSQL":
-                            res = await PostGresDBBackUp(input);
+                            resp = await PostGresDBBackUp(BackUPConfig.BackUpInitiatedPath, BackUPConfig.SshUserName, BackUPConfig.SshPassword, BackUPConfig.ServerIP, BackUPConfig.DbPassword, BackUPConfig.DbUsername, BackUPConfig.DatabaseName);
                             break;
                         case "Microsoft SQL Server":
-                            res = await MSSQLBackUp(input);
+                            resp = await MSSQLBackUp(BackUPConfig.ServerIP, BackUPConfig.DBInitialCatalog, BackUPConfig.DbUsername, BackUPConfig.DbPassword, BackUPConfig.BackUpInitiatedPath, BackUPConfig.DatabaseName);
                             break;
                         case "Oracle Database":
-                            res = "Work Inprogress.";
+                            resp = (false, "Work Inprogress.");
                             break;
                         case "MySQL":
-                            res = "Work Inprogress.";
+                            resp = (false, "Work Inprogress.");
                             break;
                         case "MongoDB":
-                            res = "Work Inprogress.";
+                            resp = (false,"Work Inprogress.");
                             break;
                         default:
-                            res = dbTypeName + " database type is not valid.";
+                            resp = (false,BackUPConfig.DBType.Name + " database type is not valid.");
                             break;
+                    //backupFileName = res;
                     }
+                    backupFileName = resp.Item2;
+                    string nameWithoutExtension = Path.GetFileNameWithoutExtension(backupFileName);
+                    string backupZipFileWithPath = Path.Combine(BackUPConfig.BackUpInitiatedPath ,$"{nameWithoutExtension}.zip");
+
+                    var response = await ZipAndDownloadBackupSSHToLocal(BackUPConfig.ServerIP, BackUPConfig.SshUserName, BackUPConfig.SshPassword, BackUPConfig.BackUpInitiatedPath, backupZipFileWithPath, serverPath, backupFileName, BackUPConfig.PrivateKeyPath);
+                    fileDownloadflag = resp.Item1;
+                    downLoadedFileName = $"{nameWithoutExtension}.zip";
                     break;
+
                 case "Application Files":
-                    res = await ApplicationBackup(input);
+
+                    resp = await ApplicationBackup(BackUPConfig.Sourcepath, BackUPConfig.BackUpInitiatedPath, BackUPConfig.PrivateKeyPath, BackUPConfig.DbPassword, BackUPConfig.ServerIP, BackUPConfig.SshPassword, serverPath);
+                    downLoadedFileName = resp.Item2;
+                    fileDownloadflag = resp.Item1;
                     break;
+                    
                 case "Specific File":
                     break;
                 default:
                     break;
             }
-            return res;
+
+
+            
+        if (fileDownloadflag == true)
+        {
+                string storageType = BackUPConfig.BackUpStorageConfiguation.StorageMasterType.Name.ToString();
+                string cloudStorageType = BackUPConfig.BackUpStorageConfiguation?.CloudStorage.Name.ToString();
+                switch (storageType)
+                {
+                    case "Public Cloud":
+                        switch (cloudStorageType)
+                        {
+                            case "Amazon S3":
+                                string downloadedFileWithPath = Path.Combine(serverPath, downLoadedFileName);
+                                resFromUpload= await UploadFileToS3(BackUPConfig.BackUpStorageConfiguation.AWS_AccessKey, BackUPConfig.BackUpStorageConfiguation.AWS_SecretKey, BackUPConfig.BackUpStorageConfiguation.AWS_BucketName, $"/{downLoadedFileName}", $"{downloadedFileWithPath}");
+                                break;
+                            case "Microsoft Azure":
+                                break ;
+                            case "Google Cloud":
+                                break ;
+                            case "Alibaba Cloud":
+                                break;
+                            default:
+                                break;
+                        }
+
+                        break ;
+                    case "Network File System":
+                        break;
+                    case "GeekSync Infrastructure Cluster":
+                        break ;
+                    default:
+                        break;
+
+                }
+
+
+        }
+
+            return resFromUpload;
         }
 
         #region DB Backup
-        public async Task<string> MSSQLBackUp(SourceConfiguationCreateDto input)
+
+        private async Task<(bool, string)> MSSQLBackUp(string ServerIP, string DBInitialCatalog, string DbUsername, string DbPassword, string BackUpInitiatedPath, string DatabaseName)
         {
             var res = "";
-            //string connectionString = "Server=34.240.155.123;Initial Catalog=PolymerConnectDB;Persist Security Info=False;User ID=sa;Password=Geeks$456;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;";
-            string connectionString = $"Server={input.ServerIP};Initial Catalog={input.DBInitialCatalog};Persist Security Info=False;User ID={input.DbUsername};Password={input.DbPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;";
-            //string backupFilePath = @"C:/Backup/TestBackUp.bak";
+            string connectionString = $"Server={ServerIP};Initial Catalog={DBInitialCatalog};Persist Security Info=False;User ID={DbUsername};Password={DbPassword};MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;";
             string timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
-            //string backupFilePath = @"/var/opt/mssql/data/TestBackUp.bak";
-            string backupFilePath = $@"/{input.BackUpInitiatedPath}/BackupFiles_{timestamp}.bak";
-            //string backupFilePath = @"/home/ubuntu/TestBackUpMsSQL.bak";
-            //string databaseName = "PolymerConnectDB";
-            //string databaseName = database_Name;
-
-            string backupQuery = $"BACKUP DATABASE [{input.DatabaseName}] TO DISK = '{backupFilePath}' WITH FORMAT, MEDIANAME = 'SQLServerBackups', NAME = 'Full Backup of {input.DatabaseName}';";
+            string backupFilePath = $@"/{BackUpInitiatedPath}/BackupFiles_{timestamp}.bak";
+            string backupQuery = $"BACKUP DATABASE [{DatabaseName}] TO DISK = '{backupFilePath}' WITH FORMAT, MEDIANAME = 'SQLServerBackups', NAME = 'Full Backup of {DatabaseName}';";
             try
             {
                 using (SqlConnection connection = new SqlConnection(connectionString))
@@ -87,30 +176,20 @@ namespace GeekathonAutoSync.AutoBackup
                 throw new UserFriendlyException("Error: " + ex.Message);
             }
 
-            return res;
+            return (true, $@"BackupFiles_{timestamp}.bak");
         }
 
-        public async Task<string> PostGresDBBackUp(SourceConfiguationCreateDto input)
+        private async Task<(bool, string)> PostGresDBBackUp(string BackUpInitiatedPath, string SshUserName, string SshPassword, string ServerIP, string DbPassword, string DbUsername, string DatabaseName)
         {
-            //string remoteServerIp = "184.174.33.208";//source
-            //string username = "asim"; // SSH username//source
-            //string sshPassword = "asim"; // SSH password//source
-            //string databaseName = "NGCOrderingSystem";//source
-            //string dbUsername = "postgres";//source
-            //string dbPassword = "sgeeks@2024";//source
-            //string backupFileName = $"PostgresBackup.backup";//add timespan
-            //string remoteBackupPath = $"/var/www/html/NGCOrderingSystem/dbbackup/{backupFileName}";//source
-            //string localBackupPath = $@"D:\DOT NET\AutoSync-SG\backup\{backupFileName}";
-            
             string timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
             string backupFileName = $"PostgresBackup_{timestamp}.backup";
-            string remoteBackupPath = $"/{input.BackUpInitiatedPath}/{backupFileName}";
+            string remoteBackupPath = $"/{BackUpInitiatedPath}/{backupFileName}";
             string localBackupPath = $@"D:\DOT NET\AutoSync-SG\backup\{backupFileName}";
 
             try
             {
-                var authMethod = new PasswordAuthenticationMethod(input.SshUserName, input.SshPassword);
-                var connectionInfo = new Renci.SshNet.ConnectionInfo(input.ServerIP, 22, input.SshUserName, authMethod)
+                var authMethod = new PasswordAuthenticationMethod(SshUserName, SshPassword);
+                var connectionInfo = new Renci.SshNet.ConnectionInfo(ServerIP, 22, SshUserName, authMethod)
                 {
                     Timeout = TimeSpan.FromSeconds(30)
                 };
@@ -126,7 +205,7 @@ namespace GeekathonAutoSync.AutoBackup
                     }
 
                     // 🏆 Run pg_dump command on the remote server
-                    string command = $"PGPASSWORD='{input.DbPassword}' pg_dump -U {input.DbUsername} -h localhost -p 5432 -F c -b -v -f \"{remoteBackupPath}\" {input.DatabaseName}";
+                    string command = $"PGPASSWORD='{DbPassword}' pg_dump -U {DbUsername} -h localhost -p 5432 -F c -b -v -f \"{remoteBackupPath}\" {DatabaseName}";
                     var cmd = client.CreateCommand(command);
                     var result = cmd.Execute();
 
@@ -150,7 +229,7 @@ namespace GeekathonAutoSync.AutoBackup
                 }
 
                 //Console.WriteLine($"Backup file downloaded successfully to {localBackupPath}");
-                return $"Backup file downloaded successfully to {localBackupPath}";
+                return (true,backupFileName);
             }
             catch (Exception ex)
             {
@@ -161,28 +240,29 @@ namespace GeekathonAutoSync.AutoBackup
         #endregion
 
         #region Application Backup
-        public async Task<string> ApplicationBackup(SourceConfiguationCreateDto input)
+        private async Task<(bool res, string bName)> ApplicationBackup(string Sourcepath, string BackUpInitiatedPath, string PrivateKeyPath, string SshUserName, string ServerIP, string SshPassword, string localPath)
         {
             string timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
-            string remoteFolderPath = $@"/{input.Sourcepath}/";
-            string remoteZipPath = $"/{input.BackUpInitiatedPath}/BackupFile_{timestamp}.zip";
-            //string localFilePath = "";
+            string remoteFolderPath = $@"/{Sourcepath}/";
+            string remoteZipPath = $"/{BackUpInitiatedPath}/BackupFile_{timestamp}.zip";
+           string fileName = $"BackupAppFile_{timestamp}.zip";
+            string localFilePath = Path.Combine(localPath, fileName);
 
-            if(input.PrivateKeyPath != null)
+            if (PrivateKeyPath != null)
             {
-                string localFilePath = $@"D:\DOT NET\AutoSync-SG\backup\BackupFiles_{timestamp}.zip";
+                //string localFilePath = $@"D:\DOT NET\AutoSync-SG\backup\BackupFiles_{timestamp}.zip";
                 try
                 {
-                    if (!File.Exists(input.PrivateKeyPath))
+                    if (!File.Exists(PrivateKeyPath))
                     {
-                        throw new FileNotFoundException($"Private key file not found at: {input.PrivateKeyPath}");
+                        throw new FileNotFoundException($"Private key file not found at: {PrivateKeyPath}");
                     }
-                    using (var keyStream = new FileStream(input.PrivateKeyPath, FileMode.Open, FileAccess.Read))
+                    using (var keyStream = new FileStream(PrivateKeyPath, FileMode.Open, FileAccess.Read))
                     {
                         var privateKey = new PrivateKeyFile(keyStream);
-                        var authMethod = new PrivateKeyAuthenticationMethod(input.SshUserName, privateKey);
+                        var authMethod = new PrivateKeyAuthenticationMethod(SshUserName, privateKey);
 
-                        var connectionInfo = new Renci.SshNet.ConnectionInfo(input.ServerIP, input.SshUserName, authMethod)
+                        var connectionInfo = new Renci.SshNet.ConnectionInfo(ServerIP, SshUserName, authMethod)
                         {
                             Timeout = TimeSpan.FromSeconds(30)
                         };
@@ -236,7 +316,7 @@ namespace GeekathonAutoSync.AutoBackup
                             client.Disconnect();
                         }
                     }
-                    return "Backup files zipped and downloaded successfully.";
+                    return(true, fileName);
                 }
                 catch (FileNotFoundException fnfEx)
                 {
@@ -266,13 +346,13 @@ namespace GeekathonAutoSync.AutoBackup
             }
             else
             {
-                string localFilePath = $@"D:\DOT NET\AutoSync-SG\backup\QuantamoApplicationBackup_{timestamp}.zip";
+                //string localFilePath = $@"D:\DOT NET\AutoSync-SG\backup\QuantamoApplicationBackup_{timestamp}.zip";
                 try
                 {
                     // Create authentication method using username and password
-                    var authMethod = new PasswordAuthenticationMethod(input.SshUserName, input.SshPassword);
+                    var authMethod = new PasswordAuthenticationMethod(SshUserName, SshPassword);
 
-                    var connectionInfo = new Renci.SshNet.ConnectionInfo(input.ServerIP, 22, input.SshUserName, authMethod)
+                    var connectionInfo = new Renci.SshNet.ConnectionInfo(ServerIP, 22, SshUserName, authMethod)
                     {
                         Timeout = TimeSpan.FromSeconds(30)
                     };
@@ -312,7 +392,7 @@ namespace GeekathonAutoSync.AutoBackup
                         client.Disconnect();
                     }
 
-                    return "Backup files zipped and downloaded successfully.";
+                    return (true, fileName);
                 }
                 catch (FileNotFoundException fnfEx)
                 {
@@ -341,228 +421,162 @@ namespace GeekathonAutoSync.AutoBackup
                 }
             }
         }
-        //public async Task<string> ZipAndDownloadRemoteFolder(string serverIP, string sshUserName, 
-        //    string privateKeyPath, string sourcePath, string backupInitiatedPath)
-        //{
-        //    //string remoteServerIp = "34.240.155.123";//source
-        //    //string username = "ubuntu";//SSH user name source
-        //    //string privateKeyPath = @"D:\SecretKey\secretKey.pem";//source
-        //    ////string remoteFolderPath = @"/var/opt/mssql/data";
-        //    //string timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
-        //    //string remoteFolderPath = @"/var/www/html/polymer/polymer-connect-backend/PolymerConnectWebAPI/api/";//source path
-        //    //string remoteZipPath = $"/home/ubuntu/BackupFiles_{timestamp}.zip";//source store backup int
-        //    //string localFilePath = $@"D:\DOT NET\AutoSync-SG\backup\BackupFiles_{timestamp}.zip";//destination
-        //    ////string localFilePath = $"D:\\DOT NET\\AutoSync-SG\\backup\\BackupFiles_{timestamp}.zip";
-
-        //    string timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
-        //    string remoteFolderPath = $@"/{sourcePath}/";
-        //    string remoteZipPath = $"/{backupInitiatedPath}/BackupFile_{timestamp}.zip";
-        //    string localFilePath = $@"D:\DOT NET\AutoSync-SG\backup\BackupFiles_{timestamp}.zip";
-
-        //    try
-        //    {
-        //        if (!System.IO.File.Exists(privateKeyPath))
-        //        {
-        //            throw new FileNotFoundException($"Private key file not found at: {privateKeyPath}");
-        //        }
-
-        //        using (var keyStream = new FileStream(privateKeyPath, FileMode.Open, FileAccess.Read))
-        //        {
-        //            var privateKey = new PrivateKeyFile(keyStream);
-        //            var authMethod = new PrivateKeyAuthenticationMethod(sshUserName, privateKey);
-
-        //            var connectionInfo = new Renci.SshNet.ConnectionInfo(serverIP, sshUserName, authMethod)
-        //            {
-        //                Timeout = TimeSpan.FromSeconds(30)
-        //            };
-
-        //            using (var client = new SshClient(connectionInfo))
-        //            using (var sftp = new SftpClient(connectionInfo))
-        //            {
-        //                client.Connect();
-
-        //                if (!client.IsConnected)
-        //                {
-        //                    throw new Exception("SSH connection failed.");
-        //                }
-
-        //                // Create zip file on remote server (Include the entire path in the Zip)
-        //                //var command = $"zip -r {remoteZipPath} {remoteFolderPath}";
-        //                //var cmd = client.CreateCommand(command);
+        
+        #endregion
 
 
-        //                // Include from the last directory of the remoteFolderPath
-        //                remoteFolderPath = remoteFolderPath.TrimEnd('/');
-        //                string parentFolder = remoteFolderPath.Substring(0, remoteFolderPath.LastIndexOf('/'));
-        //                string targetFolder = remoteFolderPath.Substring(remoteFolderPath.LastIndexOf('/') + 1);
-        //                if (string.IsNullOrEmpty(parentFolder) || string.IsNullOrEmpty(targetFolder))
-        //                {
-        //                    throw new Exception("Invalid remote folder path");
-        //                }
-        //                var command = $"cd {parentFolder} && zip -r {remoteZipPath} {targetFolder}";
-        //                var cmd = client.CreateCommand(command);
+        #region Handle created Backup files
+            public async Task<bool> ZipAndDownloadBackupSSHToLocal(string remoteServerIp, string sshUsername, string sshPassword, string remoteFolderPath, string remoteZipFileWithPath, string localFilePath, string fileName, string PrivateKeyPath)
+            {
+                string remoteFile = Path.Combine(remoteFolderPath, fileName);
 
-        //                var result = cmd.Execute();
+            try
+            {
+                if(!string.IsNullOrEmpty(PrivateKeyPath))
+                {
+                    // Create authentication method using username and PrivateKeyFile.
+                    var keyFile = new PrivateKeyFile(PrivateKeyPath);
+                    var authMethod = new PrivateKeyAuthenticationMethod(sshUsername, keyFile);
 
-        //                // Capture error if any
-        //                if (!string.IsNullOrEmpty(cmd.Error))
-        //                {
-        //                    throw new Exception($"Error creating zip file: {cmd.Error}");
-        //                }
+                    var connectionInfo = new ConnectionInfo(remoteServerIp, 22, sshUsername, authMethod)
+                    {
+                        Timeout = TimeSpan.FromSeconds(30)
+                    };
 
-        //                sftp.Connect();
+                    using (var client = new SshClient(connectionInfo))
+                    using (var sftp = new SftpClient(connectionInfo))
+                    {
+                        // Connect SSH client
+                        client.Connect();
+                        if (!client.IsConnected)
+                        {
+                            throw new Exception("SSH connection failed.");
+                        }
 
-        //                if (!sftp.Exists(remoteZipPath))
-        //                {
-        //                    throw new FileNotFoundException($"Zip file not found on remote server: {remoteZipPath}");
-        //                }
+                        var command = $"zip -r {remoteZipFileWithPath} {remoteFile}";
+                        var cmd = client.CreateCommand(command);
+                        var result = cmd.Execute();
 
-        //                // Download zip file to local machine
-        //                using (var fileStream = new FileStream(localFilePath, FileMode.Create, FileAccess.Write))
-        //                {
-        //                    sftp.DownloadFile(remoteZipPath, fileStream);
-        //                }
+                        // Connect SFTP client
+                        sftp.Connect();
 
-        //                // Delete zip file from remote server after download
-        //                sftp.DeleteFile(remoteZipPath);
+                        if (!sftp.Exists(remoteZipFileWithPath))
+                        {
+                            throw new FileNotFoundException($"Zip file not found on remote server: {remoteZipFileWithPath}");
+                        }
 
-        //                sftp.Disconnect();
-        //                client.Disconnect();
-        //            }
-        //        }
+                        // Download zip file to local machine
+                        using (var fileStream = new FileStream(localFilePath, FileMode.Create, FileAccess.Write))
+                        {
+                            sftp.DownloadFile(remoteZipFileWithPath, fileStream);
+                        }
 
-        //        return "Backup files zipped and downloaded successfully.";
-        //    }
-        //    catch (FileNotFoundException fnfEx)
-        //    {
-        //        Console.WriteLine($"File Not Found Error: {fnfEx.Message}");
-        //        throw new UserFriendlyException($"File not found: {fnfEx.Message}");
-        //    }
-        //    catch (SshAuthenticationException authEx)
-        //    {
-        //        Console.WriteLine($"SSH Authentication Error: {authEx.Message}");
-        //        throw new UserFriendlyException($"SSH Authentication failed: {authEx.Message}");
-        //    }
-        //    catch (SshConnectionException connEx)
-        //    {
-        //        Console.WriteLine($"SSH Connection Error: {connEx.Message}");
-        //        throw new UserFriendlyException($"SSH Connection failed: {connEx.Message}");
-        //    }
-        //    catch (IOException ioEx)
-        //    {
-        //        Console.WriteLine($"I/O Error: {ioEx.Message}");
-        //        throw new UserFriendlyException($"I/O error occurred: {ioEx.Message}");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"General Error: {ex.Message}");
-        //        throw new UserFriendlyException($"An unexpected error occurred: {ex.Message}");
-        //    }
-        //}
+                        // Delete zip file from remote server after download
+                        sftp.DeleteFile(remoteZipFileWithPath);
 
-        //public async Task<string> DownloadAndZipRemoteFolderQuantamoServer(string serverIP, string sshUserName,
-        //    string sshPassword, string sourcePath, string backupInitiatedPath)
-        //{
-        //    //string remoteServerIp = "184.174.33.208"; // Update to your server IP
-        //    //string username = "asim"; // Your SSH username
-        //    //string password = "asim"; // Your SSH password
-        //    //string timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
-        //    //string remoteFolderPath = @"/var/www/html/NGCOrderingSystem/aspnet-core/src/NGCOrderingSystem.Web.Host/";
-        //    //string remoteZipPath = $"/var/www/html/NGCOrderingSystem/applicationBackup/QuantamoApplicationBackup_{timestamp}.zip";
-        //    //string localFilePath = $@"D:\DOT NET\AutoSync-SG\backup\QuantamoApplicationBackup_{timestamp}.zip";
+                        // Close connections
+                        sftp.Disconnect();
+                        client.Disconnect();
+                    }
+                }
+                else
+                {
+                    // Create authentication method using username and password
+                    var authMethod = new PasswordAuthenticationMethod(sshUsername, sshPassword);
+                    var connectionInfo = new ConnectionInfo(remoteServerIp, 22, sshUsername, authMethod)
+                    {
+                        Timeout = TimeSpan.FromSeconds(30)
+                    };
 
-        //    string timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
-        //    string remoteFolderPath = $@"/{sourcePath}/";
-        //    string remoteZipPath = $"/{backupInitiatedPath}/BackupFile_{timestamp}.zip"; ;
-        //    string localFilePath = $@"D:\DOT NET\AutoSync-SG\backup\QuantamoApplicationBackup_{timestamp}.zip";
+                    using (var client = new SshClient(connectionInfo))
+                    using (var sftp = new SftpClient(connectionInfo))
+                    {
+                        // Connect SSH client
+                        client.Connect();
+                        if (!client.IsConnected)
+                        {
+                            throw new Exception("SSH connection failed.");
+                        }
 
-        //    try
-        //    {
-        //        // Create authentication method using username and password
-        //        var authMethod = new PasswordAuthenticationMethod(sshUserName, sshPassword);
+                        var command = $"zip -r {remoteZipFileWithPath} {remoteFile}";
+                        var cmd = client.CreateCommand(command);
+                        var result = cmd.Execute();
 
-        //        var connectionInfo = new Renci.SshNet.ConnectionInfo(serverIP, 22, sshUserName, authMethod)
-        //        {
-        //            Timeout = TimeSpan.FromSeconds(30)
-        //        };
+                        // Connect SFTP client
+                        sftp.Connect();
 
-        //        using (var client = new SshClient(connectionInfo))
-        //        using (var sftp = new SftpClient(connectionInfo))
-        //        {
-        //            // Connect SSH client
-        //            client.Connect();
-        //            if (!client.IsConnected)
-        //            {
-        //                throw new Exception("SSH connection failed.");
-        //            }
+                        if (!sftp.Exists(remoteZipFileWithPath))
+                        {
+                            throw new FileNotFoundException($"Zip file not found on remote server: {remoteZipFileWithPath}");
+                        }
 
-        //            // Prepare folder path for zip command
-        //            //remoteFolderPath = remoteFolderPath.TrimEnd('/');
-        //            //string parentFolder = remoteFolderPath.Substring(0, remoteFolderPath.LastIndexOf('/'));
-        //            //string targetFolder = remoteFolderPath.Substring(remoteFolderPath.LastIndexOf('/') + 1);
-        //            //if (string.IsNullOrEmpty(parentFolder) || string.IsNullOrEmpty(targetFolder))
-        //            //{
-        //            //    throw new Exception("Invalid remote folder path");
-        //            //}
+                        // Download zip file to local machine
+                        using (var fileStream = new FileStream(localFilePath, FileMode.Create, FileAccess.Write))
+                        {
+                            sftp.DownloadFile(remoteZipFileWithPath, fileStream);
+                        }
 
-        //            //// Zip folder command (include full path)
-        //            //var command = $"cd {parentFolder} && zip -r {remoteZipPath} {targetFolder}";
-        //            //var cmd = client.CreateCommand(command);
-        //            //var result = cmd.Execute();
-        //            var command = $"zip -r {remoteZipPath} {remoteFolderPath}";
-        //            var cmd = client.CreateCommand(command);
-        //            var result = cmd.Execute();
+                        // Delete zip file from remote server after download
+                        sftp.DeleteFile(remoteZipFileWithPath);
 
-        //            // Connect SFTP client
-        //            sftp.Connect();
+                        // Close connections
+                        sftp.Disconnect();
+                        client.Disconnect();
+                    }
+                }
+                
 
-        //            if (!sftp.Exists(remoteZipPath))
-        //            {
-        //                throw new FileNotFoundException($"Zip file not found on remote server: {remoteZipPath}");
-        //            }
+                return true ;
+            }
+            catch (FileNotFoundException fnfEx)
+            {
+                Console.WriteLine($"File Not Found Error: {fnfEx.Message}");
+                throw new Exception($"File not found: {fnfEx.Message}");
+            }
+            catch (SshAuthenticationException authEx)
+            {
+                Console.WriteLine($"SSH Authentication Error: {authEx.Message}");
+                throw new Exception($"SSH Authentication failed: {authEx.Message}");
+            }
+            catch (SshConnectionException connEx)
+            {
+                Console.WriteLine($"SSH Connection Error: {connEx.Message}");
+                throw new Exception($"SSH Connection failed: {connEx.Message}");
+            }
+            catch (IOException ioEx)
+            {
+                Console.WriteLine($"I/O Error: {ioEx.Message}");
+                throw new Exception($"I/O error occurred: {ioEx.Message}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"General Error: {ex.Message}");
+                throw new Exception($"An unexpected error occurred: {ex.Message}");
+            }
+        }
 
-        //            // Download zip file to local machine
-        //            using (var fileStream = new FileStream(localFilePath, FileMode.Create, FileAccess.Write))
-        //            {
-        //                sftp.DownloadFile(remoteZipPath, fileStream);
-        //            }
 
-        //            // Delete zip file from remote server after download
-        //            sftp.DeleteFile(remoteZipPath);
+        public async Task<string> UploadFileToS3(string awsAccessKey, string awsSecretKey, string s3BucketName, string s3Key, string systemLocalPath)
+        {
+            try
+            {
+                using (var s3Client = new AmazonS3Client(awsAccessKey, awsSecretKey, RegionEndpoint.APSouth1))
+                {
+                    var fileTransferUtility = new TransferUtility(s3Client);
 
-        //            // Close connections
-        //            sftp.Disconnect();
-        //            client.Disconnect();
-        //        }
+                    // Upload file
+                    await fileTransferUtility.UploadAsync(systemLocalPath, s3BucketName, s3Key);
+                }
 
-        //        return "Backup files zipped and downloaded successfully.";
-        //    }
-        //    catch (FileNotFoundException fnfEx)
-        //    {
-        //        Console.WriteLine($"File Not Found Error: {fnfEx.Message}");
-        //        throw new Exception($"File not found: {fnfEx.Message}");
-        //    }
-        //    catch (SshAuthenticationException authEx)
-        //    {
-        //        Console.WriteLine($"SSH Authentication Error: {authEx.Message}");
-        //        throw new Exception($"SSH Authentication failed: {authEx.Message}");
-        //    }
-        //    catch (SshConnectionException connEx)
-        //    {
-        //        Console.WriteLine($"SSH Connection Error: {connEx.Message}");
-        //        throw new Exception($"SSH Connection failed: {connEx.Message}");
-        //    }
-        //    catch (IOException ioEx)
-        //    {
-        //        Console.WriteLine($"I/O Error: {ioEx.Message}");
-        //        throw new Exception($"I/O error occurred: {ioEx.Message}");
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        Console.WriteLine($"General Error: {ex.Message}");
-        //        throw new Exception($"An unexpected error occurred: {ex.Message}");
-        //    }
-        //}
+                return $"File uploaded successfully to S3: s3://{s3BucketName}/{s3Key}";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error: {ex.Message}");
+                throw;
+            }
+        }
+
         #endregion
     }
 }

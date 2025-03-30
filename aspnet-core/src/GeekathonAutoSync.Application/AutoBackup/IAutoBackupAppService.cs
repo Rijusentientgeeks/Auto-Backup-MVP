@@ -10,6 +10,6 @@ namespace GeekathonAutoSync.AutoBackup
 {
     public interface IAutoBackupAppService : IApplicationService
     {
-        Task<string> Backup(SourceConfiguationCreateDto input, string backupTypeName, string dbTypeName);
+        Task<string> CreateBackup(string sConfigurationId);
     }
 }

@@ -27,6 +27,7 @@ namespace GeekathonAutoSync.BackUpStorageConfiguations.Dto
         public string AWS_backUpPath { get; set; }
         public string AZ_AccountName { get; set; }
         public string AZ_AccountKey { get; set; }
+        public string BackupName { get; set; }
         public StorageMasterTypeDto StorageMasterType { get; set; } = new StorageMasterTypeDto();
         public CloudStorageDto CloudStorage { get; set; } = new CloudStorageDto();
         //public List<SourceConfiguationDto> SourceConfiguations { get; set; } = new List<SourceConfiguationDto>();
