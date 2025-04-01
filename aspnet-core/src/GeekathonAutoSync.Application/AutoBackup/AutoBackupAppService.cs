@@ -1,10 +1,15 @@
-﻿using Abp.Domain.Repositories;
+﻿using Abp.Application.Services.Dto;
+using Abp.Collections.Extensions;
+using Abp.Domain.Repositories;
 using Abp.UI;
 using Amazon;
 using Amazon.S3;
 using Amazon.S3.Transfer;
 using GeekathonAutoSync.Authorization.Users;
+using GeekathonAutoSync.AutoBackup.Dto;
+using GeekathonAutoSync.BackUpLogs;
 using GeekathonAutoSync.BackUpStorageConfiguations;
+using GeekathonAutoSync.BackUpStorageConfiguations.Dto;
 using GeekathonAutoSync.CloudStorages;
 using GeekathonAutoSync.SourceConfiguations;
 using GeekathonAutoSync.SourceConfiguations.Dto;
@@ -16,7 +21,9 @@ using Microsoft.EntityFrameworkCore;
 using Renci.SshNet;
 using Renci.SshNet.Common;
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -28,19 +35,22 @@ namespace GeekathonAutoSync.AutoBackup
         private readonly IRepository<StorageMasterType, Guid> _storageMasterTypeRepository;
         private readonly IRepository<CloudStorage, Guid> _cloudStorageRepository;
         private readonly IRepository<SourceConfiguation, Guid> _sourceConfiguationRepository;
+        private readonly IRepository<BackUpLog, Guid> _backUpLogsRepository; 
         private readonly IWebHostEnvironment _env;
 
         private string defaultInitialLocalPath = "LocalBackupFiles";
 
         public AutoBackupAppService(IRepository<BackUpStorageConfiguation, Guid> backUpStorageConfiguationRepository,
             IRepository<StorageMasterType, Guid> storageMasterTypeRepository,
-            IRepository<CloudStorage, Guid> cloudStorageRepository, IRepository<SourceConfiguation, Guid> sourceConfiguationRepository, IWebHostEnvironment env)
+            IRepository<CloudStorage, Guid> cloudStorageRepository, IRepository<SourceConfiguation, Guid> sourceConfiguationRepository, IWebHostEnvironment env,
+            IRepository<BackUpLog, Guid> backUpLogsRepository)
         {
             _backUpStorageConfiguationRepository = backUpStorageConfiguationRepository;
             _storageMasterTypeRepository = storageMasterTypeRepository;
             _cloudStorageRepository = cloudStorageRepository;
             _sourceConfiguationRepository = sourceConfiguationRepository;
             _env = env;
+            _backUpLogsRepository = backUpLogsRepository;
         }
         public async Task<string> CreateBackup(string sConfigurationId)
         {
@@ -48,7 +58,7 @@ namespace GeekathonAutoSync.AutoBackup
             var backupFileName = "";
             string downLoadedFileName = "";
             bool fileDownloadflag = false;
-            string resFromUpload="";
+            string resFromUpload = "";
 
             string serverPath = Path.Combine(_env.ContentRootPath, defaultInitialLocalPath);
 
@@ -59,9 +69,10 @@ namespace GeekathonAutoSync.AutoBackup
                 .Include(i => i.BackUpStorageConfiguation).ThenInclude(e => e.CloudStorage)
                 .FirstOrDefaultAsync(i => i.Id.ToString().ToLower() == sConfigurationId.ToLower());
 
+            //insert to BackLog
+            await CreatebackLog(BackUPConfig.Id, DateTime.UtcNow, (Guid)BackUPConfig.BackUpStorageConfiguationId);
 
-
-            (bool,string) resp = (false, "");
+            (bool, string) resp = (false, "");
             switch (BackUPConfig.BackUPType.Name)
             {
                 case "DataBase":
@@ -80,16 +91,16 @@ namespace GeekathonAutoSync.AutoBackup
                             resp = (false, "Work Inprogress.");
                             break;
                         case "MongoDB":
-                            resp = (false,"Work Inprogress.");
+                            resp = (false, "Work Inprogress.");
                             break;
                         default:
-                            resp = (false,BackUPConfig.DBType.Name + " database type is not valid.");
+                            resp = (false, BackUPConfig.DBType.Name + " database type is not valid.");
                             break;
-                    //backupFileName = res;
+                            //backupFileName = res;
                     }
                     backupFileName = resp.Item2;
                     string nameWithoutExtension = Path.GetFileNameWithoutExtension(backupFileName);
-                    string backupZipFileWithPath = Path.Combine(BackUPConfig.BackUpInitiatedPath ,$"{nameWithoutExtension}.zip");
+                    string backupZipFileWithPath = Path.Combine(BackUPConfig.BackUpInitiatedPath, $"{nameWithoutExtension}.zip");
 
                     var response = await ZipAndDownloadBackupSSHToLocal(BackUPConfig.ServerIP, BackUPConfig.SshUserName, BackUPConfig.SshPassword, BackUPConfig.BackUpInitiatedPath, backupZipFileWithPath, serverPath, backupFileName, BackUPConfig.PrivateKeyPath);
                     fileDownloadflag = resp.Item1;
@@ -102,7 +113,7 @@ namespace GeekathonAutoSync.AutoBackup
                     downLoadedFileName = resp.Item2;
                     fileDownloadflag = resp.Item1;
                     break;
-                    
+
                 case "Specific File":
                     break;
                 default:
@@ -110,11 +121,12 @@ namespace GeekathonAutoSync.AutoBackup
             }
 
 
-            
-        if (fileDownloadflag == true)
-        {
+
+            if (fileDownloadflag == true)
+            {
                 string storageType = BackUPConfig.BackUpStorageConfiguation.StorageMasterType.Name.ToString();
                 string cloudStorageType = BackUPConfig.BackUpStorageConfiguation?.CloudStorage.Name.ToString();
+
                 switch (storageType)
                 {
                     case "Public Cloud":
@@ -122,32 +134,56 @@ namespace GeekathonAutoSync.AutoBackup
                         {
                             case "Amazon S3":
                                 string downloadedFileWithPath = Path.Combine(serverPath, downLoadedFileName);
-                                resFromUpload= await UploadFileToS3(BackUPConfig.BackUpStorageConfiguation.AWS_AccessKey, BackUPConfig.BackUpStorageConfiguation.AWS_SecretKey, BackUPConfig.BackUpStorageConfiguation.AWS_BucketName, $"/{downLoadedFileName}", $"{downloadedFileWithPath}");
+                                resFromUpload = await UploadFileToS3(BackUPConfig.BackUpStorageConfiguation.AWS_AccessKey, BackUPConfig.BackUpStorageConfiguation.AWS_SecretKey, BackUPConfig.BackUpStorageConfiguation.AWS_BucketName, $"/{downLoadedFileName}", $"{downloadedFileWithPath}");
                                 break;
                             case "Microsoft Azure":
-                                break ;
+                                break;
                             case "Google Cloud":
-                                break ;
+                                break;
                             case "Alibaba Cloud":
                                 break;
                             default:
                                 break;
                         }
 
-                        break ;
+                        break;
                     case "Network File System":
                         break;
                     case "GeekSync Infrastructure Cluster":
-                        break ;
+                        break;
                     default:
                         break;
 
                 }
-
-
+            }
+            await UpdatebackLogStatus(BackUPConfig.Id, DateTime.UtcNow, BackupLogStatus.Success, downLoadedFileName,"");
+            return resFromUpload;
         }
 
-            return resFromUpload;
+        public async Task<PagedResultDto<BackUpLogDto>> GetAllBackupLogAsync(PagedBackLogRequestDto input)
+        {
+           
+            var query =  _backUpLogsRepository.GetAll()
+                .Include(i => i.SourceConfiguation)
+                .Include(i => i.BackUpStorageConfiguation)
+                .Where(i => i.TenantId == AbpSession.TenantId);
+
+            var filteredQry = query.AsQueryable().WhereIf(!string.IsNullOrWhiteSpace(input.Keyword),
+                    u => u.BackUpFileName.ToLower().Contains(input.Keyword) ||
+                         u.SourceConfiguation.BackupName.ToLower().Contains(input.Keyword))
+                .WhereIf(!string.IsNullOrEmpty(input.SourceConfigId), u => u.SourceConfiguationId?.ToString().ToLower() == input.SourceConfigId.ToLower())
+                .WhereIf(!string.IsNullOrEmpty(input.BackupStorageid), u => u.BackUpStorageConfiguationId?.ToString().ToLower() == input.BackupStorageid.ToLower())
+                .WhereIf(!string.IsNullOrEmpty(input.BackupTypeId), u => u.BackUpStorageConfiguation?.StorageMasterTypeId.ToString().ToLower() == input.BackupTypeId.ToLower())
+                .WhereIf(!string.IsNullOrEmpty(input.CloudStorageTypeId), u => u.BackUpStorageConfiguation?.CloudStorageId?.ToString().ToLower() == input.CloudStorageTypeId.ToLower())
+                .Skip(input.SkipCount)
+                .Take(input.MaxResultCount)
+                .ToList();
+            var totalCount =  filteredQry.Count();
+            return new PagedResultDto<BackUpLogDto>
+            {
+                TotalCount = totalCount,
+                Items = ObjectMapper.Map<List<BackUpLogDto>>(filteredQry)
+            };
         }
 
         #region DB Backup
@@ -426,7 +462,7 @@ namespace GeekathonAutoSync.AutoBackup
 
 
         #region Handle created Backup files
-            public async Task<bool> ZipAndDownloadBackupSSHToLocal(string remoteServerIp, string sshUsername, string sshPassword, string remoteFolderPath, string remoteZipFileWithPath, string localFilePath, string fileName, string PrivateKeyPath)
+        private async Task<bool> ZipAndDownloadBackupSSHToLocal(string remoteServerIp, string sshUsername, string sshPassword, string remoteFolderPath, string remoteZipFileWithPath, string localFilePath, string fileName, string PrivateKeyPath)
             {
                 string remoteFile = Path.Combine(remoteFolderPath, fileName);
 
@@ -554,9 +590,7 @@ namespace GeekathonAutoSync.AutoBackup
                 throw new Exception($"An unexpected error occurred: {ex.Message}");
             }
         }
-
-
-        public async Task<string> UploadFileToS3(string awsAccessKey, string awsSecretKey, string s3BucketName, string s3Key, string systemLocalPath)
+        private async Task<string> UploadFileToS3(string awsAccessKey, string awsSecretKey, string s3BucketName, string s3Key, string systemLocalPath)
         {
             try
             {
@@ -575,6 +609,57 @@ namespace GeekathonAutoSync.AutoBackup
                 Console.WriteLine($"Error: {ex.Message}");
                 throw;
             }
+        }
+
+        #endregion
+
+
+        #region backupLogs
+        private async Task<bool> CreatebackLog(Guid sourceConfiguationId, DateTime startedTimeStamp, Guid backUpStorageConfiguationId)
+        {
+            try
+            {
+                 var backUpLog = new BackUpLog
+                 {
+                    TenantId = (int)AbpSession.TenantId,
+                     SourceConfiguationId = sourceConfiguationId,
+                     StartedTimeStamp = startedTimeStamp,
+                     BackUpStorageConfiguationId = backUpStorageConfiguationId,
+                     BackupLogStatus = BackupLogStatus.Initiated,
+                 };
+                using (CurrentUnitOfWork.SetTenantId(backUpLog.TenantId))
+                {
+                   var backUpLogId = await _backUpLogsRepository.InsertAndGetIdAsync(backUpLog);
+                    await CurrentUnitOfWork.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex) { }
+            return true;
+        }
+
+        private async Task<bool> UpdatebackLogStatus(Guid backUpLogId, DateTime completedTimeStamp, BackupLogStatus status, string bFileName, string bFilePath)
+        {
+            try
+            {
+                var getBackUpLog = await _backUpLogsRepository.FirstOrDefaultAsync(i => i.Id == backUpLogId);
+                if (getBackUpLog == null)
+                {
+                    throw new UserFriendlyException("Invalid backup log id");
+                }
+
+                getBackUpLog.CompletedTimeStamp = completedTimeStamp;
+                getBackUpLog.BackupLogStatus = (BackupLogStatus)status;
+                getBackUpLog.BackupFilPath = bFilePath;
+                getBackUpLog.BackUpFileName = bFileName;
+
+                using (CurrentUnitOfWork.SetTenantId(getBackUpLog.TenantId))
+                {
+                    await _backUpLogsRepository.InsertOrUpdateAndGetIdAsync(getBackUpLog);
+                    await CurrentUnitOfWork.SaveChangesAsync();
+                }
+            }
+            catch (Exception ex) { }
+            return true;
         }
 
         #endregion
