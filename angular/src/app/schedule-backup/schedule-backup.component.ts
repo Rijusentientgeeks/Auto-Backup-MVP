@@ -70,6 +70,7 @@ export class ScheduleBackupComponent implements OnInit {
           debugger;
           this.backupConfigs = result.items.map((config: any) => ({
             backUPType: config.backUPType.name,
+            dbType: config.dbType?.name,
             backUpStorageConfiguationId: config.backUpStorageConfiguationId,
           }));
 
