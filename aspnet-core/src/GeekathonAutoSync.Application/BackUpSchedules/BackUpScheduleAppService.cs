@@ -64,7 +64,8 @@ namespace GeekathonAutoSync.BackUpSchedules
                 SourceConfiguationId = input.SourceConfiguationId,
                 BackupDate = input.BackupDate,
                 BackupTime = input.BackupTime,
-                BackUpFrequencyId = input.BackUpFrequencyId
+                BackUpFrequencyId = input.BackUpFrequencyId,
+                CronExpression = input.CronExpression
             };
             using (CurrentUnitOfWork.SetTenantId(backUpSchedule.TenantId))
             {
@@ -87,6 +88,7 @@ namespace GeekathonAutoSync.BackUpSchedules
             getBackUpSchedule.BackUpFrequencyId = input.BackUpFrequencyId;
             getBackUpSchedule.BackupDate = input.BackupDate;
             getBackUpSchedule.BackupTime = input.BackupTime;
+            getBackUpSchedule.CronExpression = input.CronExpression;
             using (CurrentUnitOfWork.SetTenantId(getBackUpSchedule.TenantId))
             {
                 backUpScheduleID = await _backUpScheduleRepository.InsertOrUpdateAndGetIdAsync(getBackUpSchedule);

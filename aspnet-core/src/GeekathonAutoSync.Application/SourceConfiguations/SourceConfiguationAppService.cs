@@ -40,20 +40,29 @@ namespace GeekathonAutoSync.SourceConfiguations
         }
         public async Task<PagedResultDto<SourceConfiguationDto>> GetAllAsync(GetSourceConfiguationInput input)
         {
-            var query = GetDetails(input);
-            var sourceConfiguationList = ObjectMapper.Map<List<SourceConfiguationDto>>(query);
-            var pagedSourceConfiguations = sourceConfiguationList
-                    .AsQueryable()
-                    .OrderBy(input.Sorting)
-                    .Skip(input.SkipCount)
-                    .Take(input.MaxResultCount)
-                    .ToList();
-            var sourceConfiguationCount = query.Count();
-            return new PagedResultDto<SourceConfiguationDto>
+            try
             {
-                TotalCount = sourceConfiguationCount,
-                Items = pagedSourceConfiguations
-            };
+                var query = GetDetails(input);
+                var sourceConfiguationList = ObjectMapper.Map<List<SourceConfiguationDto>>(query);
+                var pagedSourceConfiguations = sourceConfiguationList
+                        .AsQueryable()
+                        .OrderBy(input.Sorting)
+                        .Skip(input.SkipCount)
+                        .Take(input.MaxResultCount)
+                        .ToList();
+                var sourceConfiguationCount = query.Count();
+                return new PagedResultDto<SourceConfiguationDto>
+                {
+                    TotalCount = sourceConfiguationCount,
+                    Items = pagedSourceConfiguations
+                };
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
+            
+            
         }
         private IQueryable<SourceConfiguation> GetDetails(IGetSourceConfiguationInput input)
         {

@@ -121,7 +121,6 @@ namespace GeekathonAutoSync.AutoBackup
             }
 
 
-
             if (fileDownloadflag == true)
             {
                 string storageType = BackUPConfig.BackUpStorageConfiguation.StorageMasterType.Name.ToString();

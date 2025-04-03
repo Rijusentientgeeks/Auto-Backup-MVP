@@ -3,6 +3,7 @@ import {
   EventEmitter,
   Input,
   OnChanges,
+  OnInit,
   Output,
 } from "@angular/core";
 
@@ -12,16 +13,21 @@ import {
   templateUrl: "./storage-detail.component.html",
   styleUrl: "./storage-detail.component.css",
 })
-export class StorageDetailComponent implements OnChanges {
+export class StorageDetailComponent implements OnChanges, OnInit {
   @Input() entries: any[] = [];
   @Input() selectedStorage: string = "";
   @Output() back = new EventEmitter<void>();
   filteredEntries: any[] = [];
 
+  ngOnInit(): void {
+    debugger;
+    var res = this.entries;
+  }
   ngOnChanges(): void {
     this.filterData();
   }
   filterData(): void {
+    debugger;
     this.filteredEntries = this.entries.filter(
       (entry) =>
         entry.storageMasterType?.name.toLowerCase() ===

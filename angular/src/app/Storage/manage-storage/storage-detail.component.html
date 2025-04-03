@@ -15,27 +15,27 @@
 
   <div *ngIf="filteredEntries.length > 0; else noData">
     <div class="detail-grid">
-      <div
-        class="storage-box shadow-sm"
-        *ngFor="let entry of filteredEntries"
-        [ngStyle]="{ backgroundColor: '#F1F8E9' }"
-      >
+      <div class="storage-box shadow-sm" *ngFor="let entry of filteredEntries"
+        [ngStyle]="{ backgroundColor: '#F1F8E9' }">
         <div class="header-row">
-          <i
-            class="storage-icon"
-          ></i>
-          <h4 class="storage-title text-primary"*ngIf="entry.cloudStorage">
+          <i class="storage-icon"></i>
+          <h3 class="storage-title text-primary" *ngIf="entry.cloudStorage">
+            {{ entry?.backupName || entry.cloudStorage?.name || entry.storageMasterType?.name }}
+          </h3>
+        </div>
+        <!-- <div class="header-row">
+          <h4 class="storage-title text-primary" *ngIf="entry.cloudStorage">
             {{ entry.cloudStorage?.name || 'N/A' }} - {{ entry.storageMasterType?.name }}
           </h4>
-          <h4 class="storage-title text-primary"*ngIf="!entry.cloudStorage">
-       {{ entry.storageMasterType?.name }}
+          <h4 class="storage-title text-primary" *ngIf="!entry.cloudStorage">
+            {{ entry.storageMasterType?.name }}
           </h4>
-        </div>
-
+        </div> -->
         <div class="entry-details">
           <div class="detail-row" *ngFor="let key of getFilteredKeys(entry)">
-           <p> {{ getLabel(key) }}:
-            <strong> {{ entry[key] || 'N/A' }}</strong></p>
+            <p> {{ getLabel(key) }}:
+              <strong> {{ entry[key] || 'N/A' }}</strong>
+            </p>
           </div>
         </div>
       </div>
