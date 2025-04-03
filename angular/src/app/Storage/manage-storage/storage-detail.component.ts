@@ -82,4 +82,13 @@ export class StorageDetailComponent implements OnChanges, OnInit {
   goBack() {
     this.back.emit();
   }
+
+  editEntry(entry: any) {
+    console.log('Edit clicked for:', entry);
+  }
+  
+  deleteEntry(entry: any) {
+    console.log('Delete clicked for:', entry);
+  }
+  
 }
