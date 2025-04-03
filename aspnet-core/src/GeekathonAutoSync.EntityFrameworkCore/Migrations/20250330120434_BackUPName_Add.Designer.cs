@@ -4,6 +4,7 @@ using GeekathonAutoSync.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GeekathonAutoSync.Migrations
 {
     [DbContext(typeof(GeekathonAutoSyncDbContext))]
-    partial class GeekathonAutoSyncDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250330120434_BackUPName_Add")]
+    partial class BackUPName_Add
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1617,14 +1620,8 @@ namespace GeekathonAutoSync.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("BackUpFileName")
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<Guid?>("BackUpStorageConfiguationId")
                         .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("BackupFilPath")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("BackupLogStatus")
                         .HasColumnType("int");
@@ -1672,9 +1669,6 @@ namespace GeekathonAutoSync.Migrations
 
                     b.Property<long?>("CreatorUserId")
                         .HasColumnType("bigint");
-
-                    b.Property<string>("CronExpression")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<long?>("DeleterUserId")
                         .HasColumnType("bigint");

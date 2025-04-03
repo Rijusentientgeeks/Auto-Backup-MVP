@@ -1,13 +1,11 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
+import { BackupLogsComponent } from './backup-logs.component';
 
 const routes: Routes = [
   {
     path: '',
-    loadComponent: () =>
-      import('./backup-logs.component').then(
-        (m) => m.BackupLogsComponent
-      ),
+    component: BackupLogsComponent,
   },
 ];
 

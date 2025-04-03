@@ -1,1 +1,125 @@
-<p>backup-logs works!</p>
+<div class="card shadow-lg p-4 bg-white rounded">
+    <div class="row mb-4">
+      <div class="col">
+        <h2 class="h4 fw-bold mb-0">Backup Logs</h2>
+      </div>
+    </div>
+  
+    <div class="row gy-3">
+         
+      <div class="col-md-3">
+        <label for="backupType" class="form-label fw-bold">Backup Type</label>
+        <p-dropdown inputId="backupType"
+                    [(ngModel)]="selectedBackupType"
+                    (onChange)="onFilterChange()"
+                    [options]="backupTypes"
+                    optionLabel="name"
+                    optionValue="value"
+                    placeholder="Select Storage Type"
+                    class="w-100">
+        </p-dropdown>
+        </div>
+      
+      <div class="col-md-3">
+        <label for="storageType" class="form-label fw-bold">Storage Type</label>
+        <p-dropdown inputId="storageType"
+                    [(ngModel)]="selectedStorageType"
+                    (onChange)="onFilterChange()"
+                    [options]="storageTypes"
+                    optionLabel="name"
+                    optionValue="value"
+                    placeholder="Select Storage Type"
+                    class="w-100">
+        </p-dropdown>
+      </div>
+      
+      <div class="col-md-3">
+        <label for="cloudStorage" class="form-label fw-bold">Cloud Storage</label>
+        <p-dropdown inputId="cloudStorage"
+                    [(ngModel)]="selectedCloudStorage"
+                    (onChange)="onFilterChange()"
+                    [options]="cloudStorages"
+                    optionLabel="name"
+                    optionValue="value"
+                    placeholder="Select Cloud Storage"
+                    class="w-100">
+        </p-dropdown>
+      </div>
+  
+      <div class="col-md-3">
+        <label for="sourceConfig" class="form-label fw-bold">Source Config</label>
+        <p-dropdown inputId="sourceConfig"
+                    [(ngModel)]="selectedSourceConfig"
+                    (onChange)="onFilterChange()"
+                    [options]="backupConfigs"
+                    optionLabel="backupName"
+                    optionValue="backUpStorageConfiguationId"
+                    placeholder="Select Configuration"
+                    class="w-100">
+        </p-dropdown>
+      </div>
+
+      <div class="col-md-3">
+        <label for="keyword" class="form-label fw-bold">Keyword</label>
+        <input type="text" id="keyword"
+               class="form-control"
+               [(ngModel)]="keyword"
+               (input)="onFilterChange()"
+               placeholder="Search...">
+      </div>
+
+    </div>
+  
+    <div class="mt-4">
+      <p-table [value]="backupLogs" 
+               [lazy]="true"
+               [paginator]="true" 
+               [rows]="10"  
+               [loading]="loading"
+               (onLazyLoad)="loadBackupLogsLazy($event)"
+               [rowsPerPageOptions]="[10,25,50]"
+               [showCurrentPageReport]="true"
+               currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+               responsiveLayout="scroll"
+               styleClass="p-datatable-striped p-datatable-gridlines">
+        
+        <ng-template pTemplate="header">
+          <tr>
+            <th pSortableColumn="tenantId">Tenant ID <p-sortIcon field="tenantId"></p-sortIcon></th>
+            <th pSortableColumn="sourceConfiguation.name">Source <p-sortIcon field="sourceConfiguation.name"></p-sortIcon></th>
+            <th pSortableColumn="startedTimeStamp">Started <p-sortIcon field="startedTimeStamp"></p-sortIcon></th>
+            <th pSortableColumn="completedTimeStamp">Completed <p-sortIcon field="completedTimeStamp"></p-sortIcon></th>
+            <th>Status</th>
+            <th>File Name</th>
+            <th>File Path</th>
+          </tr>
+        </ng-template>
+  
+        <ng-template pTemplate="body" let-log>
+          <tr>
+            <td>{{ log.tenantId }}</td>
+            <td>{{ log.sourceConfiguation?.name || 'N/A' }}</td>
+            <td>{{ log.startedTimeStamp | date: 'yyyy-MM-dd HH:mm' }}</td>
+            <td>{{ log.completedTimeStamp | date: 'yyyy-MM-dd HH:mm' }}</td>
+            <td>
+              <p-tag [value]="log.backupLogStatus === 1 ? 'Success' : log.backupLogStatus === 2 ? 'Failed' : 'Pending'"
+                    [severity]="log.backupLogStatus === 1 ? 'success' : log.backupLogStatus === 2 ? 'danger' : 'warning'">
+              </p-tag>
+            </td>
+            <td>{{ log.backUpFileName }}</td>
+            <td class="text-truncate" style="max-width: 200px;">{{ log.backupFilPath }}</td>
+          </tr>
+        </ng-template>
+  
+        <ng-template pTemplate="emptymessage">
+          <tr>
+            <td colspan="7" class="text-center py-4 text-muted">
+              <i class="pi pi-info-circle me-2"></i>No backup logs found
+            </td>
+          </tr>
+        </ng-template>
+  
+      </p-table>
+    </div>
+  </div>
+  

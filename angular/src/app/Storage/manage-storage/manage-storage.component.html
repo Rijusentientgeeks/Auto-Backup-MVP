@@ -37,6 +37,7 @@
     (onHide)="closeDialog()"
     [dismissableMask]="false"
     [closable]="false"
+    [draggable]="false"
   >
     <form [formGroup]="storageForm" style="text-align: left">
       <div class="row">
@@ -77,7 +78,18 @@
             Cloud Storage is required.
           </div>
         </div>
+        <div class="col-md-2 mb-3 ml-3">
+          <label for="description">Storage Destination Name</label>
+          <input id="description" type="text" class="form-control" formControlName="backupName"
+            placeholder="Enter destination name" />
+            <div *ngIf="isInvalid('backupName')" class="invalid-feedback d-block">
+              Destination Name is required.
+            </div>
+        </div>
         <div class="col-md-8"></div>
+      </div>
+      <div class="col-md-2 mb-3" *ngIf="isCloudStorage">
+        <label for="cloudStorage">Cloud Storage</label><br />
       </div>
 
       <div class="row">
@@ -291,6 +303,7 @@
           <button
             class="btn btn-success"
             type="button"
+            [disabled]="storageForm.invalid"
             (click)="saveStorageDestination()"
           >
             Save

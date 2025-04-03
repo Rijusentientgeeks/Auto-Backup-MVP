@@ -8,7 +8,7 @@ import { ReactiveFormsModule } from "@angular/forms";
 import { ButtonModule } from "primeng/button";
 import { DropdownModule } from "primeng/dropdown";
 import { InputTextModule } from "primeng/inputtext";
-import { BackUpStorageConfiguationServiceProxy, BackUPTypeServiceProxy, DBTypeServiceProxy, SourceConfiguationServiceProxy } from "@shared/service-proxies/service-proxies";
+import { AutoBackupServiceProxy, BackUpStorageConfiguationServiceProxy, BackUPTypeServiceProxy, DBTypeServiceProxy, SourceConfiguationServiceProxy } from "@shared/service-proxies/service-proxies";
 import { FileUploadModule } from 'primeng/fileupload';
 @NgModule({
   declarations: [SourceConfigurationComponent],
@@ -21,10 +21,8 @@ import { FileUploadModule } from 'primeng/fileupload';
     InputTextModule,
     ButtonModule,
     FileUploadModule
-    
-    
   ],
-  providers: [BackUPTypeServiceProxy,DBTypeServiceProxy,BackUpStorageConfiguationServiceProxy,SourceConfiguationServiceProxy ],
+  providers: [BackUPTypeServiceProxy,DBTypeServiceProxy,BackUpStorageConfiguationServiceProxy,SourceConfiguationServiceProxy,AutoBackupServiceProxy ],
   exports: [SourceConfigurationComponent],
 })
 export class SourceConfigurationModule {}

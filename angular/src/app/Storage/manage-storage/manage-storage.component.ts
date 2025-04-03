@@ -25,8 +25,8 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     private fb: FormBuilder,
     injector: Injector,
     private storageMasterTypeService: StorageMasterTypeServiceProxy,
-    private CloudStorageService: CloudStorageServiceProxy,
-    private BackUpStorageConfiguationService: BackUpStorageConfiguationServiceProxy
+    private cloudStorageService: CloudStorageServiceProxy,
+    private backUpStorageConfiguationService: BackUpStorageConfiguationServiceProxy
   ) {
     super(injector);
     this.initForm();
@@ -106,6 +106,7 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     this.storageForm = this.fb.group({
       StorageTypeId: [null, Validators.required],
       CloudStorageId: [null, Validators.required],
+      backupName: ['', Validators.required],
       NFS_IP: [null],
       NFS_AccessUserID: [null],
       NFS_Password: [null],
@@ -120,7 +121,7 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     });
   }
   loadDestinationConfiguration(): void {
-    this.BackUpStorageConfiguationService.getAll(
+    this.backUpStorageConfiguationService.getAll(
       undefined,
       undefined,
       1000,
@@ -156,7 +157,7 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     });
   }
   loadCloudStorageTypes(): void {
-    this.CloudStorageService.getAll().subscribe({
+    this.cloudStorageService.getAll().subscribe({
       next: (result) => {
         if (result && result.items) {
           this.cloudStorages = result.items.map((item: CloudStorageDto) => ({
@@ -267,13 +268,14 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
   }
 
   mapFormToDto(): BackUpStorageConfiguationCreateDto {
+    debugger;
     const formValues = this.storageForm.value;
-
     const dto = new BackUpStorageConfiguationCreateDto();
     dto.storageMasterTypeId = formValues.StorageTypeId.value;
     dto.cloudStorageId = this.isCloudStorage
       ? formValues.CloudStorageId.value
       : undefined;
+    dto.backupName = formValues.backupName;
     dto.nfS_IP = !this.isCloudStorage ? formValues.NFS_IP : undefined;
     dto.nfS_AccessUserID = !this.isCloudStorage
       ? formValues.NFS_AccessUserID
@@ -301,7 +303,7 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
       this.isSaving = true;
 
       const backupDto = this.mapFormToDto();
-      this.BackUpStorageConfiguationService.create(backupDto).subscribe({
+      this.backUpStorageConfiguationService.create(backupDto).subscribe({
         next: (result) => {
           console.log("Backup Configuration Saved Successfully:", result);
           this.closeDialog();
