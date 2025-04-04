@@ -18,6 +18,7 @@ namespace GeekathonAutoSync.BackUpSchedules
         public virtual SourceConfiguation SourceConfiguation { get; set; }
         public DateTime? BackupDate { get; set; }
         public TimeSpan? BackupTime { get; set; }
+        public string CronExpression { get; set; }
         public Guid? BackUpFrequencyId { get; set; }
         [ForeignKey("BackUpFrequencyId")]
         public virtual BackUpFrequency BackUpFrequency { get; set; }

@@ -16,14 +16,11 @@
             class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2"
           >
             <h5 class="text-primary mb-0">
-              <i class="pi pi-database me-2"></i> {{ config.backUPType.name }}
+              <!-- <i class="pi pi-database me-2"></i> {{ config.backUPType.name }} -->
+              <i class="pi pi-database me-2"></i> {{ config.backupName }}
             </h5>
             <div class="actions">
-              <button
-                class="btn btn-warning btn-sm me-2"
-                (click)="editConfig(config)"
-                title="Edit Configuration"
-              >
+              <button class="btn btn-warning btn-sm me-2" (click)="editConfig(config)" title="Edit Configuration">
                 <i class="pi pi-pencil"></i>
               </button>
               <!-- &nbsp;
@@ -69,8 +66,7 @@
             </p>
             <p class="mb-2">
               <i class="pi pi-key text-secondary me-2"></i>
-              <strong> Private Key Path:</strong>
-              {{ config.privateKeyPath || "N/A" }}
+              <strong> Private Key Path:</strong> {{ config.privateKeyPath ? '*******' : 'N/A' }}
             </p>
             <p class="mb-2">
               <i class="pi pi-folder-open text-secondary me-2"></i>
@@ -92,7 +88,7 @@
             </div>
             <button
               class="btn btn-primary btn-sm"
-              (click)="triggerOnDemandBackup()"
+              (click)="triggerOnDemandBackup(config.id)"
             >
               <i class="pi pi-cloud-upload me-2"></i> Backup Now!
             </button>

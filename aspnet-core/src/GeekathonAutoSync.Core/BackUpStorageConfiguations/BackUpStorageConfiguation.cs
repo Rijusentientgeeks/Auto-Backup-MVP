@@ -11,9 +11,9 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace GeekathonAutoSync.BackUpStorageConfiguations
 {
-    public class BackUpStorageConfiguation : FullAuditedEntity<Guid>, IMustHaveTenant
+    public class BackUpStorageConfiguation : FullAuditedEntity<Guid>,IMayHaveTenant
     {
-        public int TenantId { get; set; }
+        public int? TenantId { get; set; }
         [ForeignKey("TenantId")]
         public virtual Tenant Tenant { get; set; }
         public Guid StorageMasterTypeId { get; set; }
@@ -33,6 +33,7 @@ namespace GeekathonAutoSync.BackUpStorageConfiguations
         public string AWS_backUpPath { get; set; }
         public string AZ_AccountName { get; set; }
         public string AZ_AccountKey { get; set; }
+        public string BackupName { get; set; }
         public ICollection<SourceConfiguation> SourceConfiguations { get; set; } = new List<SourceConfiguation>();
         public ICollection<BackUpLog> BackUpLogs { get; set; } = new List<BackUpLog>();
     }

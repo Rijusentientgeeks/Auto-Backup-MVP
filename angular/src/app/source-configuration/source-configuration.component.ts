@@ -1,12 +1,14 @@
 import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
 import {
+  AutoBackupServiceProxy,
   BackUpStorageConfiguationServiceProxy,
   BackUPTypeDto,
   BackUPTypeServiceProxy,
   DBTypeDto,
   DBTypeServiceProxy,
   SourceConfiguationCreateDto,
+  SourceConfiguationDto,
   SourceConfiguationServiceProxy,
   SourceConfiguationUpdateDto,
 } from "@shared/service-proxies/service-proxies";
@@ -18,7 +20,7 @@ import Swal from "sweetalert2";
   styleUrl: "./source-configuration.component.css",
 })
 export class SourceConfigurationComponent implements OnInit {
-  sourceConfigs = [];
+  sourceConfigs: SourceConfiguationDto[] = [];
   displayDialog: boolean = false;
   sourceForm!: FormGroup;
   isEdit: boolean = false;
@@ -36,8 +38,9 @@ export class SourceConfigurationComponent implements OnInit {
     private DatabaseTypeService: DBTypeServiceProxy,
     private BackupStorageConfigService: BackUpStorageConfiguationServiceProxy,
     private sourceConfigService: SourceConfiguationServiceProxy,
+    private autoBackupService: AutoBackupServiceProxy,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
   ngOnInit(): void {
     this.loadSourceConfigs();
@@ -58,10 +61,12 @@ export class SourceConfigurationComponent implements OnInit {
       password: [""],
       os: [""],
       privateKeyPath: [null],
-      sourcePath: [""],
-      backUpInitiatedPath: [""],
-      backUpStorageConfiguationId: ["", Validators.required],
+      sourcePath: [''],
+      backUpInitiatedPath: [''],
+      backUpStorageConfiguationId: ['', Validators.required],
+      backupName: [''],
     });
+
   }
   onFileSelect(event: any): void {
     debugger;
@@ -70,7 +75,17 @@ export class SourceConfigurationComponent implements OnInit {
       this.convertToBase64(file);
     }
   }
-  triggerOnDemandBackup() {}
+  triggerOnDemandBackup(id: string): void {
+    debugger
+    this.autoBackupService.createBackup(id).subscribe({
+      next: (result) => {
+        if (result) {
+          console.log('API Response:', result);
+          Swal.fire("Success", "Backup Created Successfully", "success");
+        }
+      }
+    });
+  }
   isInvalid(controlName: string): boolean {
     const control = this.sourceForm.get(controlName);
     return control?.invalid && (control?.dirty || control?.touched);
@@ -100,8 +115,9 @@ export class SourceConfigurationComponent implements OnInit {
   loadSourceConfigs(): void {
     this.sourceConfigService.getAll(undefined, undefined, 1000, 0).subscribe({
       next: (result) => {
+        debugger;
         if (result && result.items) {
-          console.log("API Response:", result.items);
+          console.log('API Response:', result.items);
           this.sourceConfigs = result.items;
 
           this.cdr.detectChanges();
@@ -151,26 +167,23 @@ export class SourceConfigurationComponent implements OnInit {
       undefined,
       undefined,
       1000,
-      0
-    ).subscribe({
-      next: (result) => {
-        if (result && result.items) {
-          this.BackupStorageConfigs = result.items.map((item: any) => ({
-            name: item.cloudStorage
-              ? item.cloudStorage.name
-              : item.storageMasterType.name,
-            value: item.id,
-          }));
-        }
-      },
-      error: (err) => {
-        console.error("Error fetching Backup Storage Configurations:", err);
-      },
-    });
+      0).subscribe({
+        next: (result) => {
+          if (result && result.items) {
+            this.BackupStorageConfigs = result.items.map((item: any) => ({
+              // name: item.cloudStorage ? item.cloudStorage.name : item.storageMasterType.name,
+              name: item.backupName,
+              value: item.id,
+            }));
+          }
+        },
+        error: (err) => {
+          console.error("Error fetching Backup Storage Configurations:", err);
+        },
+      });
   }
   onBackupTypeChange(event: any) {
-    this.showDatabaseFields = event.value?.name === "DataBase";
-
+    this.showDatabaseFields = event.value?.name === 'DataBase';
     if (this.showDatabaseFields) {
       this.sourceForm.controls["dbType"].setValidators(Validators.required);
       this.sourceForm.controls["serverIP"].setValidators(Validators.required);
@@ -191,13 +204,13 @@ export class SourceConfigurationComponent implements OnInit {
       this.sourceForm.controls["sourcePath"].setValidators(Validators.required);
     }
 
-    this.sourceForm.controls["dbType"].updateValueAndValidity();
-    this.sourceForm.controls["serverIP"].updateValueAndValidity();
-    this.sourceForm.controls["dbInitialCatalog"].updateValueAndValidity();
-    this.sourceForm.controls["userID"].updateValueAndValidity();
-    this.sourceForm.controls["password"].updateValueAndValidity();
-    this.sourceForm.controls["os"].updateValueAndValidity();
-    this.sourceForm.controls["sourcePath"].updateValueAndValidity();
+    this.sourceForm.controls['dbType'].updateValueAndValidity();
+    this.sourceForm.controls['serverIP'].updateValueAndValidity();
+    this.sourceForm.controls['dbInitialCatalog'].updateValueAndValidity();
+    this.sourceForm.controls['userID'].updateValueAndValidity();
+    this.sourceForm.controls['password'].updateValueAndValidity();
+    this.sourceForm.controls['os'].updateValueAndValidity();
+    this.sourceForm.controls['sourcePath'].updateValueAndValidity();
   }
   openAddSourceDialog(): void {
     this.isEdit = false;
@@ -237,7 +250,6 @@ export class SourceConfigurationComponent implements OnInit {
     if (this.sourceForm.valid) {
       this.isSaving = true;
       const formData = this.prepareFormData();
-
       if (this.isEdit && this.selectedConfigId) {
         this.sourceConfigService
           .update(formData as SourceConfiguationUpdateDto)
@@ -277,11 +289,14 @@ export class SourceConfigurationComponent implements OnInit {
 
   prepareFormData(): SourceConfiguationCreateDto | SourceConfiguationUpdateDto {
     const formData = this.sourceForm.value;
-
+    let description = formData.backupName?.trim();
+    if (!description) {
+      description = `${formData.backupName || 'Backup'} - ${formData.backUPType?.name || 'Type'} - ${formData.serverIP || 'Server'}`;
+    }
     if (this.isEdit && this.selectedConfigId) {
       return new SourceConfiguationUpdateDto({
         id: this.selectedConfigId,
-        backUPTypeId: formData.backUPType.value || "",
+        backUPTypeId: formData.backUPType.value || '',
         dbTypeId: formData.dbType || undefined,
         databaseName: formData.databaseName || undefined,
         dbUsername: formData.dbUsername || undefined,
@@ -297,12 +312,12 @@ export class SourceConfigurationComponent implements OnInit {
         backUpInitiatedPath: formData.backUpInitiatedPath || undefined,
         sourcepath: formData.sourcePath || undefined,
         os: formData.os || undefined,
-        backUpStorageConfiguationId:
-          formData.backUpStorageConfiguationId || undefined,
+        backUpStorageConfiguationId: formData.backUpStorageConfiguationId || undefined,
+        backupName: description,
       });
     } else {
       return new SourceConfiguationCreateDto({
-        backUPTypeId: formData.backUPType.value || "",
+        backUPTypeId: formData.backUPType.value || '',
         dbTypeId: formData.dbType || undefined,
         databaseName: formData.databaseName || undefined,
         dbUsername: formData.dbUsername || undefined,
@@ -318,8 +333,8 @@ export class SourceConfigurationComponent implements OnInit {
         backUpInitiatedPath: formData.backUpInitiatedPath || undefined,
         sourcepath: formData.sourcePath || undefined,
         os: formData.os || undefined,
-        backUpStorageConfiguationId:
-          formData.backUpStorageConfiguationId || undefined,
+        backUpStorageConfiguationId: formData.backUpStorageConfiguationId || undefined,
+        backupName: description,
       });
     }
   }

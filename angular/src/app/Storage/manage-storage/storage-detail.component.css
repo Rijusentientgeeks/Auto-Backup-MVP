@@ -95,4 +95,29 @@
       }
     }
   }
+  .header-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: relative;
+  
+    .icon-actions {
+      display: flex;
+      gap: 8px;
+    }
+  
+    .edit-icon, .delete-icon {
+      cursor: pointer;
+      font-size: 1.2rem;
+      transition: color 0.3s ease;
+  
+      &:hover {
+        color: #007bff;
+      }
+    }
+  
+    .delete-icon:hover {
+      color: #dc3545;
+    }
+  }
   

@@ -18,6 +18,8 @@ namespace GeekathonAutoSync.BackUpLogs
         public DateTime? StartedTimeStamp { get; set; }
         public DateTime? CompletedTimeStamp { get; set; }
         public BackupLogStatus? BackupLogStatus { get; set; }
+        public string BackUpFileName { get; set; }
+        public string BackupFilPath { get; set; }
         public Guid? BackUpStorageConfiguationId { get; set; }
         [ForeignKey("BackUpStorageConfiguationId")]
         public virtual BackUpStorageConfiguation BackUpStorageConfiguation { get; set; }

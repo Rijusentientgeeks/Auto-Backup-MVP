@@ -29,6 +29,7 @@ namespace GeekathonAutoSync.SourceConfiguations.Dto
         public Guid? BackUpStorageConfiguationId { get; set; }
         public BackUPTypeDto BackUPType { get; set; } = new BackUPTypeDto();
         public DBTypeDto DBType { get; set; } = new DBTypeDto();
+        public string BackupName { get; set; }
         public BackUpStorageConfiguationDto BackUpStorageConfiguation { get; set; } = new BackUpStorageConfiguationDto();
         //public List<BackUpScheduleDto> BackUpSchedules { get; set; } = new List<BackUpScheduleDto>();
         //public List<BackUpLogDto> BackUpLogs { get; set; } = new List<BackUpLogDto>();
