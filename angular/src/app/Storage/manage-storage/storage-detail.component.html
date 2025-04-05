@@ -23,7 +23,7 @@
             {{ entry?.backupName || entry.cloudStorage?.name || entry.storageMasterType?.name }}
           </h3>
           <div class="icon-actions">
-            <button class="btn btn-warning btn-sm me-2" (click)="editEntry(entry)" title="Edit Configuration">
+            <button class="btn btn-warning btn-sm me-2" (click)="GetDetailsbyID(entry.id)" title="Edit Configuration">
               <i class="pi pi-pencil"></i>
             </button>
             <button class="btn btn-danger btn-sm" (click)="deleteEntry(entry)" title="Delete Configuration">

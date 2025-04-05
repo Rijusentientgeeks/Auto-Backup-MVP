@@ -15,5 +15,7 @@ namespace GeekathonAutoSync.BackUpStorageConfiguations
         Task<BackUpStorageConfiguationDto> CreateAsync(BackUpStorageConfiguationCreateDto input);
         Task<BackUpStorageConfiguationDto> UpdateAsync(BackUpStorageConfiguationUpdateDto input);
         Task<BackUpStorageConfiguationDto> GetAsync(Guid id);
+        Task<BackUpStorageConfiguationDto> DeleteAsync(Guid id);
+
     }
 }

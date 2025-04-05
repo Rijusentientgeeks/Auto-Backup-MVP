@@ -12,6 +12,7 @@ using GeekathonAutoSync.CloudStorages;
 using GeekathonAutoSync.StorageMasterTypes;
 using Abp.Authorization;
 using GeekathonAutoSync.Authorization;
+using Abp.Domain.Entities;
 
 namespace GeekathonAutoSync.BackUpStorageConfiguations
 {
@@ -157,5 +158,24 @@ namespace GeekathonAutoSync.BackUpStorageConfiguations
                 }
             }
         }
+        public async Task<BackUpStorageConfiguationDto> DeleteAsync(Guid id)
+        {
+            var query = await _backUpStorageConfiguationRepository.GetAll()
+                .Include(i => i.CloudStorage)
+                .Include(i => i.StorageMasterType)
+                .FirstOrDefaultAsync(i => i.Id == id);
+
+            if (query == null)
+            {
+                throw new UserFriendlyException("Something Went wrong");
+            }
+
+            await _backUpStorageConfiguationRepository.DeleteAsync(query);
+
+            var resultDto = ObjectMapper.Map<BackUpStorageConfiguationDto>(query);
+            return resultDto;
+        }
+
+
     }
 }
