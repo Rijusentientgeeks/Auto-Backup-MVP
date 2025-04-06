@@ -172,13 +172,15 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     });
   }
   onEditStorage(entry: any): void {
-    this.storageForm.patchValue(entry); // Set values in form
+    debugger
+    this.displayModal = true;
+
+    this.storageForm.patchValue(entry);
     this.isCloudStorage = !!entry.cloudStorageId;
-    this.isNFSStorage = entry.storageType === 'NFS'; // Adjust based on your logic
+    this.isNFSStorage = entry.storageType === 'NFS';
     this.isAWS = entry.storageType === 'AWS';
     this.isAzure = entry.storageType === 'AZURE';
-    this.displayModal = true;
-    this.showDetail = false; // Optional: go back to grid view
+    this.showDetail = false;
   }
   
   onStorageTypeChange(event: any) {

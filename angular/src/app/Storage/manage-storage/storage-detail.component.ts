@@ -6,6 +6,7 @@ import {
   OnInit,
   Output,
 } from "@angular/core";
+import { Router } from "@node_modules/@angular/router";
 import { BackUpStorageConfiguationServiceProxy, SourceConfiguationDto } from "@shared/service-proxies/service-proxies";
 
 @Component({
@@ -21,8 +22,9 @@ export class StorageDetailComponent implements OnChanges, OnInit {
   @Output() editEntry = new EventEmitter<any>();
 
   filteredEntries: any[] = [];
-constructor(    private backUpStorageConfiguationService: BackUpStorageConfiguationServiceProxy
-){}
+  constructor(private backUpStorageConfiguationService: BackUpStorageConfiguationServiceProxy,
+    private router: Router
+  ) { }
   ngOnInit(): void {
     debugger;
     var res = this.entries;
@@ -67,14 +69,14 @@ constructor(    private backUpStorageConfiguationService: BackUpStorageConfiguat
       awS_BucketName: 'Bucket Name',
       awS_Region: 'Region',
       awS_backUpPath: 'Backup Path',
-      aZ_AccountName:'Account Name',
-      aZ_AccountKey:'Account key',
-      nfS_IP:'IP Address',
-      nfS_AccessUserID:'Access user ID',
-      nfS_Password:'Password',
-      nfS_LocationPath:'Location Path'
+      aZ_AccountName: 'Account Name',
+      aZ_AccountKey: 'Account key',
+      nfS_IP: 'IP Address',
+      nfS_AccessUserID: 'Access user ID',
+      nfS_Password: 'Password',
+      nfS_LocationPath: 'Location Path'
     };
-  
+
     return labelMap[key] || key
       .replace(/([A-Z])/g, ' $1')
       .replace(/^./, (str) => str.toUpperCase())
@@ -91,16 +93,17 @@ constructor(    private backUpStorageConfiguationService: BackUpStorageConfiguat
     this.backUpStorageConfiguationService.get(entry).subscribe({
       next: (result) => {
         this.editEntry.emit(result);
-
-
-      }});
-      
-      
-      
       }
-  
-  deleteEntry(entry: string) {
-    console.log('Delete clicked for:', entry);
+    });
   }
-  
+
+  deleteEntryDetails(id: string) {
+    this.backUpStorageConfiguationService.delete(id).subscribe({
+      next: (result) => {
+        debugger
+        this.router.navigate(['manage-storage']);
+      }
+    });
+  }
+
 }

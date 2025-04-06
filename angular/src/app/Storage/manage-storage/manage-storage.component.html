@@ -78,7 +78,9 @@
             Cloud Storage is required.
           </div>
         </div>
-        <div class="col-md-2 mb-3 ml-3">
+        <div class="col-md-1 mb-3"></div>
+
+        <div class="col-md-4 mb-3">
           <label for="description">Storage Destination Name</label>
           <input id="description" type="text" class="form-control" formControlName="backupName"
             placeholder="Enter destination name" />
@@ -86,8 +88,8 @@
               Destination Name is required.
             </div>
         </div>
-        <div class="col-md-8"></div>
       </div>
+      <hr class="text-danger">
       <div class="col-md-2 mb-3" *ngIf="isCloudStorage">
         <label for="cloudStorage">Cloud Storage</label><br />
       </div>

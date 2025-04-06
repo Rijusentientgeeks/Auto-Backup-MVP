@@ -16,7 +16,6 @@ export class HomeComponent extends AppComponentBase {
     { label: 'Last Backup', value: 'Success', icon: 'pi pi-check-circle', color: 'green' },
     { label: 'Next Scheduled', value: 'Today 3:00 PM', icon: 'pi pi-clock', color: 'blue' },
     { label: 'Total Backups', value: '24', icon: 'pi pi-database', color: 'orange' },
-    { label: 'Storage Used', value: '1.2 GB / 10 GB', icon: 'pi pi-save', color: 'purple' },
   ];
 
   logs = [

@@ -1,27 +1,30 @@
-﻿
-<div class="grid gap-4">
-  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-    <p-card *ngFor="let metric of metrics" class="shadow-md">
-      <div class="flex items-center gap-3">
-        <i [class]="metric.icon" [style.color]="metric.color"></i>
-        <div>
-          <div class="text-gray-500 text-sm">{{ metric.label }}</div>
-          <div class="text-xl font-semibold">{{ metric.value }}</div>
-        </div>
+﻿<div class="grid gap-6 p-4">
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div class="row">
+      <div class="col-md-4 mb-4" *ngFor="let metric of metrics">
+        <p-card class="shadow-md">
+          <div class="flex items-center gap-4">
+            <i [class]="metric.icon" [style.color]="metric.color" class="text-2xl"></i>
+            <div>
+              <div class="text-sm text-gray-500">{{ metric.label }}</div>
+              <div class="text-xl font-semibold">{{ metric.value }}</div>
+            </div>
+          </div>
+        </p-card>
       </div>
-    </p-card>
+    </div>
   </div>
 
-  <p-card header="Recent Backup Logs" class="mt-4">
+  <p-card header="Recent Backup Logs" class="shadow-md">
     <ul class="list-none p-0">
-      <li *ngFor="let log of logs" class="mb-2">
-        <div class="flex justify-between">
-          <span><b>{{ log.type }}</b> - {{ log.trigger }}</span>
+      <li *ngFor="let log of logs" class="py-2 border-b last:border-none">
+        <div class="flex justify-between items-center text-sm">
+          <span><strong>{{ log.type }}</strong> - {{ log.trigger }}</span>
           <span [ngClass]="{
-            'text-green-600': log.status === 'Success',
-            'text-red-500': log.status === 'Failed',
-            'text-yellow-600': log.status === 'Pending'
-          }">
+              'text-green-600 font-semibold': log.status === 'Success',
+              'text-red-500 font-semibold': log.status === 'Failed',
+              'text-yellow-600 font-semibold': log.status === 'Pending'
+            }">
             {{ log.status }} ({{ log.time }})
           </span>
         </div>
@@ -29,17 +32,22 @@
     </ul>
   </p-card>
 
-  <!-- <div class="mt-4">
-    <p-card header="Backup Summary">
-      <p-chart type="doughnut" [data]="chartData" [options]="chartOptions"></p-chart>
-    </p-card>
-  </div> -->
 
-  <div class="flex gap-4 mt-6 justify-end">
-    <p-button label="Quick Backup" icon="pi pi-refresh" class="p-button-success"></p-button>
-    <p-button label="Configure Source" icon="pi pi-cog" class="p-button-info"></p-button>
-    <p-button label="View Logs" icon="pi pi-list" class="p-button-secondary"></p-button>
+
+
+
+
+  <div class="container mt-4">
+    <div class="row justify-content-end g-3">
+      <div class="col-auto">
+        <p-button label="Quick Backup" icon="pi pi-refresh" class="p-button w-100"></p-button>
+      </div>
+      <div class="col-auto">
+        <p-button label="Configure Source" icon="pi pi-cog" class="p-button w-100"></p-button>
+      </div>
+      <div class="col-auto">
+        <p-button label="View Logs" icon="pi pi-list" class="p-button  w-100"></p-button>
+      </div>
+    </div>
   </div>
-</div>
-
-
+  
