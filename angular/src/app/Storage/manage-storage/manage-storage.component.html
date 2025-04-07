@@ -33,7 +33,7 @@
     header="{{l('BackupStorageConfiguration')}}"
     [(visible)]="displayModal"
     [modal]="true"
-    [style]="{ width: '90%', height: '80vh' }"
+    [style]="{ width: '90%', height: '100vh' }"
     (onHide)="closeDialog()"
     [dismissableMask]="false"
     [closable]="false"
@@ -48,6 +48,7 @@
             formControlName="StorageTypeId"
             [options]="storageTypes"
             optionLabel="name"
+            [optionValue]="'value'"
             placeholder="{{l('SelectStorageType')}}"
             [ngClass]="{ 'is-invalid': isInvalid('StorageTypeId') }"
             (onChange)="onStorageTypeChange($event)"
@@ -67,6 +68,7 @@
             formControlName="CloudStorageId"
             [options]="cloudStorages"
             optionLabel="name"
+            [optionValue]="'value'"
             placeholder="Select Cloud Storage"
             [ngClass]="{ 'is-invalid': isInvalid('CloudStorageId') }"
             (onChange)="onCloudStorageChange($event)"
@@ -78,7 +80,9 @@
             Cloud Storage is required.
           </div>
         </div>
-        <div class="col-md-2 mb-3 ml-3">
+        <div class="col-md-1 mb-3"></div>
+
+        <div class="col-md-4 mb-3">
           <label for="description">Storage Destination Name</label>
           <input id="description" type="text" class="form-control" formControlName="backupName"
             placeholder="Enter destination name" />
@@ -86,8 +90,8 @@
               Destination Name is required.
             </div>
         </div>
-        <div class="col-md-8"></div>
       </div>
+      <hr class="text-danger">
       <div class="col-md-2 mb-3" *ngIf="isCloudStorage">
         <label for="cloudStorage">Cloud Storage</label><br />
       </div>
@@ -327,4 +331,6 @@
   [entries]="storageEntries"
   [selectedStorage]="selectedStorage"
   (back)="goBack()"
+  (editEntry)="onEditStorage($event)"
+
 ></app-storage-detail>

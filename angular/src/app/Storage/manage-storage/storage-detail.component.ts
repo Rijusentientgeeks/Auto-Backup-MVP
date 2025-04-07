@@ -6,6 +6,8 @@ import {
   OnInit,
   Output,
 } from "@angular/core";
+import { Router } from "@node_modules/@angular/router";
+import { BackUpStorageConfiguationServiceProxy, SourceConfiguationDto } from "@shared/service-proxies/service-proxies";
 
 @Component({
   selector: "app-storage-detail",
@@ -17,8 +19,12 @@ export class StorageDetailComponent implements OnChanges, OnInit {
   @Input() entries: any[] = [];
   @Input() selectedStorage: string = "";
   @Output() back = new EventEmitter<void>();
-  filteredEntries: any[] = [];
+  @Output() editEntry = new EventEmitter<any>();
 
+  filteredEntries: any[] = [];
+  constructor(private backUpStorageConfiguationService: BackUpStorageConfiguationServiceProxy,
+    private router: Router
+  ) { }
   ngOnInit(): void {
      ;
     var res = this.entries;
@@ -48,7 +54,6 @@ export class StorageDetailComponent implements OnChanges, OnInit {
     "nfS_Password",
     "nfS_LocationPath",
   ];
-  // Dynamically get keys that are not null or undefined
   getFilteredKeys(entry: any): string[] {
     return Object.keys(entry).filter(
       (key) =>
@@ -64,14 +69,14 @@ export class StorageDetailComponent implements OnChanges, OnInit {
       awS_BucketName: 'Bucket Name',
       awS_Region: 'Region',
       awS_backUpPath: 'Backup Path',
-      aZ_AccountName:'Account Name',
-      aZ_AccountKey:'Account key',
-      nfS_IP:'IP Address',
-      nfS_AccessUserID:'Access user ID',
-      nfS_Password:'Password',
-      nfS_LocationPath:'Location Path'
+      aZ_AccountName: 'Account Name',
+      aZ_AccountKey: 'Account key',
+      nfS_IP: 'IP Address',
+      nfS_AccessUserID: 'Access user ID',
+      nfS_Password: 'Password',
+      nfS_LocationPath: 'Location Path'
     };
-  
+
     return labelMap[key] || key
       .replace(/([A-Z])/g, ' $1')
       .replace(/^./, (str) => str.toUpperCase())
@@ -83,12 +88,22 @@ export class StorageDetailComponent implements OnChanges, OnInit {
     this.back.emit();
   }
 
-  editEntry(entry: any) {
-    console.log('Edit clicked for:', entry);
+  GetDetailsbyID(entry: string) {
+    debugger
+    this.backUpStorageConfiguationService.get(entry).subscribe({
+      next: (result) => {
+        this.editEntry.emit(result);
+      }
+    });
   }
-  
-  deleteEntry(entry: any) {
-    console.log('Delete clicked for:', entry);
+
+  deleteEntryDetails(id: string) {
+    this.backUpStorageConfiguationService.delete(id).subscribe({
+      next: () => {
+        debugger
+        this.back.emit();
+      }
+    });
   }
-  
+
 }

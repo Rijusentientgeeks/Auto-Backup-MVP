@@ -10,31 +10,34 @@
     .config-card {
       border-left: 5px solid #03a9f4;
       transition: 0.3s;
-  
+      display: flex;
+      flex-direction: column;
+      height: 400px;
+      overflow: hidden;
+    
       &:hover {
         transform: translateY(-5px);
         box-shadow: 0 6px 15px rgba(0, 0, 0, 0.15);
       }
-  
-      .config-details p {
-        margin-bottom: 8px;
-        font-size: 0.9rem;
-        color: #333;
-  
-        i {
-          margin-right: 8px;
-          color: #03a9f4;
-        }
+    
+      .config-details {
+        flex-grow: 1; 
+        overflow-y: auto;
+        padding-right: 8px;
       }
-  
+    
+      .footer {
+        flex-shrink: 0;
+        padding: 10px 0;
+        border-top: 1px solid #ddd;
+        background: white;
+      }
+    
       .actions button {
         border-radius: 5px;
       }
     }
-  
-    .text-warning {
-      color: #ffc107;
-    }
+    
   }
   
   p-dialog {

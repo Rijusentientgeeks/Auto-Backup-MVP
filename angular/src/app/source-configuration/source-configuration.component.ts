@@ -1,6 +1,17 @@
 import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
-import { AutoBackupServiceProxy, BackUpStorageConfiguationServiceProxy, BackUPTypeDto, BackUPTypeServiceProxy, DBTypeDto, DBTypeServiceProxy, SourceConfiguationCreateDto, SourceConfiguationDto, SourceConfiguationServiceProxy, SourceConfiguationUpdateDto } from "@shared/service-proxies/service-proxies";
+import {
+  AutoBackupServiceProxy,
+  BackUpStorageConfiguationServiceProxy,
+  BackUPTypeDto,
+  BackUPTypeServiceProxy,
+  DBTypeDto,
+  DBTypeServiceProxy,
+  SourceConfiguationCreateDto,
+  SourceConfiguationDto,
+  SourceConfiguationServiceProxy,
+  SourceConfiguationUpdateDto,
+} from "@shared/service-proxies/service-proxies";
 import Swal from "sweetalert2";
 
 @Component({
@@ -37,20 +48,18 @@ export class SourceConfigurationComponent implements OnInit {
     this.LoadBackupTypes();
     this.LoadDatabaseTypes();
     this.LoadBackupStorageConfigs();
-
   }
 
   initSourceForm(): void {
-
     this.sourceForm = this.fb.group({
-      backUPType: ['', Validators.required],
-      dbType: [''],
-      serverIP: [''],
-      dbInitialCatalog: [''],
-      port: [''],
-      userID: [''],
-      password: [''],
-      os: [''],
+      backUPType: ["", Validators.required],
+      dbType: [""],
+      serverIP: [""],
+      dbInitialCatalog: [""],
+      port: [""],
+      userID: [""],
+      password: [""],
+      os: [""],
       privateKeyPath: [null],
       sourcePath: [''],
       backUpInitiatedPath: [''],
@@ -91,12 +100,12 @@ export class SourceConfigurationComponent implements OnInit {
       const base64String = reader.result as string;
 
       // Extract the Base64 part without the data URL prefix
-      const base64Data = base64String.split(',')[1];
-      this.sourceForm.controls['privateKeyPath'].setValue(base64Data);
+      const base64Data = base64String.split(",")[1];
+      this.sourceForm.controls["privateKeyPath"].setValue(base64Data);
     };
 
     reader.onerror = (error) => {
-      console.error('Error reading file:', error);
+      console.error("Error reading file:", error);
     };
 
     // Read the file as a data URL (Base64)
@@ -158,7 +167,8 @@ export class SourceConfigurationComponent implements OnInit {
     });
   }
   LoadBackupStorageConfigs(): void {
-    this.BackupStorageConfigService.getAll(undefined,
+    this.BackupStorageConfigService.getAll(
+      undefined,
       undefined,
       1000,
       0).subscribe({
@@ -179,21 +189,23 @@ export class SourceConfigurationComponent implements OnInit {
   onBackupTypeChange(event: any) {
     this.showDatabaseFields = event.value?.name === 'DataBase';
     if (this.showDatabaseFields) {
-      this.sourceForm.controls['dbType'].setValidators(Validators.required);
-      this.sourceForm.controls['serverIP'].setValidators(Validators.required);
-      this.sourceForm.controls['dbInitialCatalog'].setValidators(Validators.required);
-      this.sourceForm.controls['userID'].setValidators(Validators.required);
-      this.sourceForm.controls['password'].setValidators(Validators.required);
-      this.sourceForm.controls['os'].clearValidators();
-      this.sourceForm.controls['sourcePath'].clearValidators();
+      this.sourceForm.controls["dbType"].setValidators(Validators.required);
+      this.sourceForm.controls["serverIP"].setValidators(Validators.required);
+      this.sourceForm.controls["dbInitialCatalog"].setValidators(
+        Validators.required
+      );
+      this.sourceForm.controls["userID"].setValidators(Validators.required);
+      this.sourceForm.controls["password"].setValidators(Validators.required);
+      this.sourceForm.controls["os"].clearValidators();
+      this.sourceForm.controls["sourcePath"].clearValidators();
     } else {
-      this.sourceForm.controls['dbType'].clearValidators();
-      this.sourceForm.controls['serverIP'].clearValidators();
-      this.sourceForm.controls['dbInitialCatalog'].clearValidators();
-      this.sourceForm.controls['userID'].clearValidators();
-      this.sourceForm.controls['password'].clearValidators();
-      this.sourceForm.controls['os'].setValidators(Validators.required);
-      this.sourceForm.controls['sourcePath'].setValidators(Validators.required);
+      this.sourceForm.controls["dbType"].clearValidators();
+      this.sourceForm.controls["serverIP"].clearValidators();
+      this.sourceForm.controls["dbInitialCatalog"].clearValidators();
+      this.sourceForm.controls["userID"].clearValidators();
+      this.sourceForm.controls["password"].clearValidators();
+      this.sourceForm.controls["os"].setValidators(Validators.required);
+      this.sourceForm.controls["sourcePath"].setValidators(Validators.required);
     }
 
     this.sourceForm.controls['dbType'].updateValueAndValidity();
@@ -215,9 +227,27 @@ export class SourceConfigurationComponent implements OnInit {
      
     this.isEdit = true;
     this.selectedConfigId = config.id;
-    this.sourceForm.patchValue(config);
+      const selectedBackupType = this.BackupTypes.find(
+      (type) => type.value === config.backUPType?.id
+    );
+  
+    const selectedDbType = this.DbTypes.find(
+      (type) => type.value === config.dbType?.id
+    );
+  
+    this.sourceForm.patchValue({
+      ...config,
+      backUPType: selectedBackupType,
+      dbType: selectedDbType,
+    });
+  
+    if (selectedBackupType) {
+      this.onBackupTypeChange({ value: selectedBackupType });
+    }
+  
     this.displayDialog = true;
   }
+  
 
   saveSourceConfig(): void {
      
@@ -235,7 +265,7 @@ export class SourceConfigurationComponent implements OnInit {
             },
             (error) => {
               this.isSaving = false;
-              console.error('Error updating config:', error);
+              console.error("Error updating config:", error);
             }
           );
       } else {
@@ -252,7 +282,7 @@ export class SourceConfigurationComponent implements OnInit {
             (error) => {
               this.isSaving = false;
 
-              console.error('Error creating config:', error);
+              console.error("Error creating config:", error);
             }
           );
       }
