@@ -124,19 +124,22 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     });
   }
   loadDestinationConfiguration(): void {
-    this.backUpStorageConfiguationService
-      .getAll(undefined, undefined, 1000, 0)
-      .subscribe({
-        next: (result) => {
-          debugger;
-          if (result && result.items) {
-            this.storageEntries = result.items;
-          }
-        },
-        error: (err) => {
-          console.error("Error fetching storage destination:", err);
-        },
-      });
+    this.backUpStorageConfiguationService.getAll(
+      undefined,
+      undefined,
+      1000,
+      0
+    ).subscribe({
+      next: (result) => {
+         ;
+        if (result && result.items) {
+          this.storageEntries = result.items;
+        }
+      },
+      error: (err) => {
+        console.error("Error fetching storage destination:", err);
+      },
+    });
   }
 
   loadStorageTypes(): void {
@@ -416,7 +419,7 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
   editingStorageId: string | undefined;
 
   saveStorageDestination() {
-    debugger
+     
     if (this.storageForm.valid) {
       this.isSaving = true;
   

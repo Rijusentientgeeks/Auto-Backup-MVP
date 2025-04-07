@@ -1,10 +1,15 @@
-﻿using Abp.Application.Services.Dto;
+﻿using Abp.Application.Services;
+using Abp.Application.Services.Dto;
+using Abp.Authorization;
 using Abp.Collections.Extensions;
 using Abp.Domain.Repositories;
 using Abp.UI;
 using Amazon;
+using Amazon.Runtime;
 using Amazon.S3;
+using Amazon.S3.Model;
 using Amazon.S3.Transfer;
+using Azure;
 using GeekathonAutoSync.Authorization.Users;
 using GeekathonAutoSync.AutoBackup.Dto;
 using GeekathonAutoSync.BackUpLogs;
@@ -25,6 +30,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Web;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace GeekathonAutoSync.AutoBackup
@@ -71,118 +77,135 @@ namespace GeekathonAutoSync.AutoBackup
 
             //insert to BackLog
             await CreatebackLog(BackUPConfig.Id, DateTime.UtcNow, (Guid)BackUPConfig.BackUpStorageConfiguationId);
-
-            (bool, string) resp = (false, "");
-            switch (BackUPConfig.BackUPType.Name)
+            try
             {
-                case "DataBase":
-                    switch (BackUPConfig.DBType.Name)
-                    {
-                        case "PostgreSQL":
-                            resp = await PostGresDBBackUp(BackUPConfig.BackUpInitiatedPath, BackUPConfig.SshUserName, BackUPConfig.SshPassword, BackUPConfig.ServerIP, BackUPConfig.DbPassword, BackUPConfig.DbUsername, BackUPConfig.DatabaseName);
-                            break;
-                        case "Microsoft SQL Server":
-                            resp = await MSSQLBackUp(BackUPConfig.ServerIP, BackUPConfig.DBInitialCatalog, BackUPConfig.DbUsername, BackUPConfig.DbPassword, BackUPConfig.BackUpInitiatedPath, BackUPConfig.DatabaseName);
-                            break;
-                        case "Oracle Database":
-                            resp = (false, "Work Inprogress.");
-                            break;
-                        case "MySQL":
-                            resp = (false, "Work Inprogress.");
-                            break;
-                        case "MongoDB":
-                            resp = (false, "Work Inprogress.");
-                            break;
-                        default:
-                            resp = (false, BackUPConfig.DBType.Name + " database type is not valid.");
-                            break;
-                            //backupFileName = res;
-                    }
-                    backupFileName = resp.Item2;
-                    string nameWithoutExtension = Path.GetFileNameWithoutExtension(backupFileName);
-                    string backupZipFileWithPath = Path.Combine(BackUPConfig.BackUpInitiatedPath, $"{nameWithoutExtension}.zip");
-
-                    var response = await ZipAndDownloadBackupSSHToLocal(BackUPConfig.ServerIP, BackUPConfig.SshUserName, BackUPConfig.SshPassword, BackUPConfig.BackUpInitiatedPath, backupZipFileWithPath, serverPath, backupFileName, BackUPConfig.PrivateKeyPath);
-                    fileDownloadflag = resp.Item1;
-                    downLoadedFileName = $"{nameWithoutExtension}.zip";
-                    break;
-
-                case "Application Files":
-
-                    resp = await ApplicationBackup(BackUPConfig.Sourcepath, BackUPConfig.BackUpInitiatedPath, BackUPConfig.PrivateKeyPath, BackUPConfig.DbPassword, BackUPConfig.ServerIP, BackUPConfig.SshPassword, serverPath);
-                    downLoadedFileName = resp.Item2;
-                    fileDownloadflag = resp.Item1;
-                    break;
-
-                case "Specific File":
-                    break;
-                default:
-                    break;
-            }
-
-
-            if (fileDownloadflag == true)
-            {
-                string storageType = BackUPConfig.BackUpStorageConfiguation.StorageMasterType.Name.ToString();
-                string cloudStorageType = BackUPConfig.BackUpStorageConfiguation?.CloudStorage.Name.ToString();
-
-                switch (storageType)
+                (bool, string) resp = (false, "");
+                switch (BackUPConfig.BackUPType.Name)
                 {
-                    case "Public Cloud":
-                        switch (cloudStorageType)
+                    case "DataBase":
+                        switch (BackUPConfig.DBType.Name)
                         {
-                            case "Amazon S3":
-                                string downloadedFileWithPath = Path.Combine(serverPath, downLoadedFileName);
-                                resFromUpload = await UploadFileToS3(BackUPConfig.BackUpStorageConfiguation.AWS_AccessKey, BackUPConfig.BackUpStorageConfiguation.AWS_SecretKey, BackUPConfig.BackUpStorageConfiguation.AWS_BucketName, $"/{downLoadedFileName}", $"{downloadedFileWithPath}");
+                            case "PostgreSQL":
+                                resp = await PostGresDBBackUp(BackUPConfig.BackUpInitiatedPath, BackUPConfig.SshUserName, BackUPConfig.SshPassword, BackUPConfig.ServerIP, BackUPConfig.DbPassword, BackUPConfig.DbUsername, BackUPConfig.DatabaseName);
                                 break;
-                            case "Microsoft Azure":
+                            case "Microsoft SQL Server":
+                                resp = await MSSQLBackUp(BackUPConfig.ServerIP, BackUPConfig.DBInitialCatalog, BackUPConfig.DbUsername, BackUPConfig.DbPassword, BackUPConfig.BackUpInitiatedPath, BackUPConfig.DatabaseName);
                                 break;
-                            case "Google Cloud":
+                            case "Oracle Database":
+                                resp = (false, "Work Inprogress.");
                                 break;
-                            case "Alibaba Cloud":
+                            case "MySQL":
+                                resp = (false, "Work Inprogress.");
+                                break;
+                            case "MongoDB":
+                                resp = (false, "Work Inprogress.");
                                 break;
                             default:
+                                resp = (false, BackUPConfig.DBType.Name + " database type is not valid.");
                                 break;
+                                //backupFileName = res;
                         }
+                        backupFileName = resp.Item2;
+                        string nameWithoutExtension = Path.GetFileNameWithoutExtension(backupFileName);
+                        string backupZipFileWithPath = Path.Combine(BackUPConfig.BackUpInitiatedPath, $"{nameWithoutExtension}.zip");
 
+                        var response = await ZipAndDownloadBackupSSHToLocal(BackUPConfig.ServerIP, BackUPConfig.SshUserName, BackUPConfig.SshPassword, BackUPConfig.BackUpInitiatedPath, backupZipFileWithPath, serverPath, backupFileName, BackUPConfig.PrivateKeyPath);
+                        fileDownloadflag = resp.Item1;
+                        downLoadedFileName = $"{nameWithoutExtension}.zip";
                         break;
-                    case "Network File System":
+
+                    case "Application Files":
+
+                        resp = await ApplicationBackup(BackUPConfig.Sourcepath, BackUPConfig.BackUpInitiatedPath, BackUPConfig.PrivateKeyPath, BackUPConfig.DbPassword, BackUPConfig.ServerIP, BackUPConfig.SshPassword, serverPath);
+                        downLoadedFileName = resp.Item2;
+                        fileDownloadflag = resp.Item1;
                         break;
-                    case "GeekSync Infrastructure Cluster":
+
+                    case "Specific File":
                         break;
                     default:
                         break;
-
                 }
+
+
+                if (fileDownloadflag == true)
+                {
+                    string storageType = BackUPConfig.BackUpStorageConfiguation.StorageMasterType.Name.ToString();
+                    string cloudStorageType = BackUPConfig.BackUpStorageConfiguation?.CloudStorage.Name.ToString();
+
+                    switch (storageType)
+                    {
+                        case "Public Cloud":
+                            switch (cloudStorageType)
+                            {
+                                case "Amazon S3":
+                                    string downloadedFileWithPath = Path.Combine(serverPath, downLoadedFileName);
+                                    resFromUpload = await UploadFileToS3(BackUPConfig.BackUpStorageConfiguation.AWS_AccessKey, BackUPConfig.BackUpStorageConfiguation.AWS_SecretKey, BackUPConfig.BackUpStorageConfiguation.AWS_BucketName, $"/{downLoadedFileName}", $"{downloadedFileWithPath}");
+                                    break;
+                                case "Microsoft Azure":
+                                    break;
+                                case "Google Cloud":
+                                    break;
+                                case "Alibaba Cloud":
+                                    break;
+                                default:
+                                    break;
+                            }
+
+                            break;
+                        case "Network File System":
+                            break;
+                        case "GeekSync Infrastructure Cluster":
+                            break;
+                        default:
+                            break;
+
+                    }
+                }
+                await UpdatebackLogStatus(BackUPConfig.Id, DateTime.UtcNow, BackupLogStatus.Success, downLoadedFileName, "");
             }
-            await UpdatebackLogStatus(BackUPConfig.Id, DateTime.UtcNow, BackupLogStatus.Success, downLoadedFileName,"");
+            catch(Exception ex)
+            {
+                //throw new UserFriendlyException(ex.Message);
+            }
+
+            
             return resFromUpload;
         }
 
         public async Task<PagedResultDto<BackUpLogDto>> GetAllBackupLogAsync(PagedBackLogRequestDto input)
         {
-           
-            var query =  _backUpLogsRepository.GetAll()
+            try
+            {
+                var query =  _backUpLogsRepository.GetAll()
                 .Include(i => i.SourceConfiguation)
                 .Include(i => i.BackUpStorageConfiguation)
                 .Where(i => i.TenantId == AbpSession.TenantId);
 
-            var filteredQry = query.AsQueryable().WhereIf(!string.IsNullOrWhiteSpace(input.Keyword),
-                    u => u.BackUpFileName.ToLower().Contains(input.Keyword) ||
-                         u.SourceConfiguation.BackupName.ToLower().Contains(input.Keyword))
-                .WhereIf(!string.IsNullOrEmpty(input.SourceConfigId), u => u.SourceConfiguationId?.ToString().ToLower() == input.SourceConfigId.ToLower())
-                .WhereIf(!string.IsNullOrEmpty(input.BackupStorageid), u => u.BackUpStorageConfiguationId?.ToString().ToLower() == input.BackupStorageid.ToLower())
-                .WhereIf(!string.IsNullOrEmpty(input.BackupTypeId), u => u.BackUpStorageConfiguation?.StorageMasterTypeId.ToString().ToLower() == input.BackupTypeId.ToLower())
-                .WhereIf(!string.IsNullOrEmpty(input.CloudStorageTypeId), u => u.BackUpStorageConfiguation?.CloudStorageId?.ToString().ToLower() == input.CloudStorageTypeId.ToLower())
-                .Skip(input.SkipCount)
-                .Take(input.MaxResultCount)
-                .ToList();
-            var totalCount =  filteredQry.Count();
-            return new PagedResultDto<BackUpLogDto>
+                var filteredQry = query.AsQueryable().WhereIf(!string.IsNullOrWhiteSpace(input.Keyword),
+                        u => u.BackUpFileName.ToLower().Contains(input.Keyword) ||
+                             u.SourceConfiguation.BackupName.ToLower().Contains(input.Keyword))
+                    .WhereIf(!string.IsNullOrEmpty(input.SourceConfigId), u => u.SourceConfiguationId?.ToString().ToLower() == input.SourceConfigId.ToLower())
+                    .WhereIf(!string.IsNullOrEmpty(input.BackupStorageid), u => u.BackUpStorageConfiguationId?.ToString().ToLower() == input.BackupStorageid.ToLower())
+                    .WhereIf(!string.IsNullOrEmpty(input.BackupTypeId), u => u.BackUpStorageConfiguation?.StorageMasterTypeId.ToString().ToLower() == input.BackupTypeId.ToLower())
+                    .WhereIf(!string.IsNullOrEmpty(input.CloudStorageTypeId), u => u.BackUpStorageConfiguation?.CloudStorageId?.ToString().ToLower() == input.CloudStorageTypeId.ToLower())
+                    .Skip(input.SkipCount)
+                    .Take(input.MaxResultCount)
+                    .ToList();
+                var totalCount = filteredQry.Count();
+
+                //var mappedResult = ObjectMapper.Map<List<BackUpLog>, List<BackUpLogDto>>(filteredQry);
+
+                return new PagedResultDto<BackUpLogDto>
+                {
+                    TotalCount = totalCount,
+                    Items = ObjectMapper.Map<List<BackUpLogDto>>(query)
+                };
+            }
+            catch(Exception ex)
             {
-                TotalCount = totalCount,
-                Items = ObjectMapper.Map<List<BackUpLogDto>>(filteredQry)
-            };
+                throw new UserFriendlyException(ex.Message);
+            }   
         }
 
         #region DB Backup
@@ -660,6 +683,100 @@ namespace GeekathonAutoSync.AutoBackup
             catch (Exception ex) { }
             return true;
         }
+
+        [RemoteService(false)]
+        public async Task<Tuple<Stream, string, string>> DownloadBackupStreamAsync(string sourceConfigurationId, string backUpFileName)
+        {
+            var sourceConfig = await _sourceConfiguationRepository.GetAll()
+                .Include(i => i.BackUpStorageConfiguation)
+                    .ThenInclude(e => e.StorageMasterType)
+                .Include(i => i.BackUpStorageConfiguation)
+                    .ThenInclude(e => e.CloudStorage)
+                .FirstOrDefaultAsync(i => i.Id.ToString().ToLower() == sourceConfigurationId.ToLower());
+
+
+            if (sourceConfig == null)
+                throw new UserFriendlyException($"Source configuration with ID {sourceConfigurationId} not found");
+
+            if (sourceConfig.BackUpStorageConfiguation == null)
+                throw new UserFriendlyException("Backup storage configuration not found");
+
+            string storageType = sourceConfig.BackUpStorageConfiguation.StorageMasterType?.Name;
+            string cloudStorageType = sourceConfig.BackUpStorageConfiguation.CloudStorage?.Name;
+
+            switch (storageType)
+            {
+                case "Public Cloud":
+                    switch (cloudStorageType)
+                    {
+                        case "Amazon S3":
+                            return await DownloadFromAwsS3Async(
+                                sourceConfig.BackUpStorageConfiguation.AWS_AccessKey,
+                                sourceConfig.BackUpStorageConfiguation.AWS_SecretKey,
+                                sourceConfig.BackUpStorageConfiguation.AWS_Region,
+                                sourceConfig.BackUpStorageConfiguation.AWS_backUpPath,
+                                backUpFileName,
+                                sourceConfig.BackUpStorageConfiguation.AWS_BucketName);
+                        default:
+                            throw new NotSupportedException($"Cloud storage type {cloudStorageType} is not Implemented");
+                    }
+
+                default:
+                    throw new NotSupportedException($"Storage type {storageType} is not Implemented");
+            }
+        }
+
+        private async Task<Tuple<Stream, string, string>> DownloadFromAwsS3Async(
+            string awsAccessKey,
+            string awsSecretKey,
+            string awsRegion,
+            string backupPath,
+            string backUpFileName,
+            string bucketName)
+        {
+            try
+            {
+                using var s3Client = new AmazonS3Client(
+                    awsAccessKey,
+                    awsSecretKey,
+                    RegionEndpoint.GetBySystemName(awsRegion));
+
+                var s3Key = string.IsNullOrEmpty(backupPath)
+                    ? backUpFileName
+                    : $"{backupPath.TrimEnd('/')}/{backUpFileName}";
+
+                var metadataRequest = new GetObjectMetadataRequest
+                {
+                    BucketName = bucketName,
+                    Key = s3Key
+                };
+
+                var metadata = await s3Client.GetObjectMetadataAsync(metadataRequest);
+
+                var request = new GetObjectRequest
+                {
+                    BucketName = bucketName,
+                    Key = s3Key
+                };
+
+                var response = await s3Client.GetObjectAsync(request);
+
+                var memoryStream = new MemoryStream();
+                await response.ResponseStream.CopyToAsync(memoryStream);
+                memoryStream.Position = 0;
+
+                var contentType = metadata.Headers.ContentType ?? "application/octet-stream";
+
+                return new Tuple<Stream, string, string>(memoryStream, contentType, backUpFileName);
+            }
+            catch (Exception ex)
+            {
+                Logger.Error("Download failed", ex);
+                throw new UserFriendlyException("An error occurred while downloading the backup");
+            }
+        }
+
+
 
         #endregion
     }
