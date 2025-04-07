@@ -67,7 +67,7 @@ export class ScheduleBackupComponent implements OnInit {
     this.sourceConfigService.getAll(undefined, undefined, 1000, 0).subscribe({
       next: (result) => {
         if (result && result.items) {
-          debugger;
+           ;
           this.backupConfigs = result.items.map((config: any) => ({
             backupName: config.backupName,
             backUpStorageConfiguationId: config.backUpStorageConfiguationId,
@@ -145,7 +145,7 @@ export class ScheduleBackupComponent implements OnInit {
   }
 
   onFrequencyChange(event: any): void {
-    debugger;
+     ;
     const selectedValue = event.value?.value;
 
     this.showDayOfWeek = selectedValue === "weekly";

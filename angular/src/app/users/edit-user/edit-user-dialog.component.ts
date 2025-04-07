@@ -38,7 +38,7 @@ export class EditUserDialogComponent extends AppComponentBase
   }
 
   ngOnInit(): void {
-    debugger
+     
     this._userService.get(this.id).subscribe((result) => {
       this.user = result;
 

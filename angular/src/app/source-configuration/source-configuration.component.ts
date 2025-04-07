@@ -60,14 +60,14 @@ export class SourceConfigurationComponent implements OnInit {
 
   }
   onFileSelect(event: any): void {
-    debugger
+     
     const file = event.files[0];
     if (file) {
       this.convertToBase64(file);
     }
   }
   triggerOnDemandBackup(id: string): void {
-    debugger
+     
     this.autoBackupService.createBackup(id).subscribe({
       next: (result) => {
         if (result) {
@@ -84,7 +84,7 @@ export class SourceConfigurationComponent implements OnInit {
 
   // Convert PEM file to Base64 string
   convertToBase64(file: File): void {
-    debugger
+     
     const reader = new FileReader();
 
     reader.onload = () => {
@@ -106,7 +106,7 @@ export class SourceConfigurationComponent implements OnInit {
   loadSourceConfigs(): void {
     this.sourceConfigService.getAll(undefined, undefined, 1000, 0).subscribe({
       next: (result) => {
-        debugger;
+         ;
         if (result && result.items) {
           console.log('API Response:', result.items);
           this.sourceConfigs = result.items;
@@ -124,7 +124,7 @@ export class SourceConfigurationComponent implements OnInit {
     this.BackUPTypeService.getAll().subscribe({
       next: (result) => {
         if (result && result.items) {
-          debugger
+           
           this.BackupTypes = result.items.map(
             (item: BackUPTypeDto) => ({
               name: item.name,
@@ -143,7 +143,7 @@ export class SourceConfigurationComponent implements OnInit {
     this.DatabaseTypeService.getAll().subscribe({
       next: (result) => {
         if (result && result.items) {
-          debugger
+           
           this.DbTypes = result.items.map(
             (item: DBTypeDto) => ({
               name: item.name,
@@ -212,7 +212,7 @@ export class SourceConfigurationComponent implements OnInit {
   }
 
   editConfig(config: any): void {
-    debugger
+     
     this.isEdit = true;
     this.selectedConfigId = config.id;
     this.sourceForm.patchValue(config);
@@ -220,7 +220,7 @@ export class SourceConfigurationComponent implements OnInit {
   }
 
   saveSourceConfig(): void {
-    debugger
+     
     if (this.sourceForm.valid) {
       this.isSaving = true;
       const formData = this.prepareFormData();
@@ -239,7 +239,7 @@ export class SourceConfigurationComponent implements OnInit {
             }
           );
       } else {
-        debugger
+         
         this.sourceConfigService
           .create(formData as SourceConfiguationCreateDto)
           .subscribe(
