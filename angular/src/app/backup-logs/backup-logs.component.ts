@@ -135,7 +135,12 @@ export class BackupLogsComponent implements OnInit {
   }
 
   downloadBackup(backupLog: BackUpLogDto) {
-    debugger;
-    this.backupDownloadService.downloadBackup(backupLog.sourceConfiguationId, backupLog.backUpFileName);
+    debugger
+    // this.backupDownloadService.downloadBackup(backupLog.sourceConfiguationId, backupLog.backUpFileName);
+    this.backupDownloadService.downloadBackup({
+      sourceConfigurationId: backupLog.sourceConfiguationId,
+      backUpFileName: backupLog.backUpFileName,
+    });
+    
   }
 }

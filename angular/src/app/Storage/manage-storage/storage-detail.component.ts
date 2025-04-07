@@ -7,7 +7,9 @@ import {
   Output,
 } from "@angular/core";
 import { Router } from "@node_modules/@angular/router";
-import { BackUpStorageConfiguationServiceProxy, SourceConfiguationDto } from "@shared/service-proxies/service-proxies";
+import { LazyLoadEvent } from "@node_modules/primeng/api";
+import { BackupService } from "@shared/service-proxies/backup-download.service";
+import { AutoBackupServiceProxy, BackUpLogDto, BackUpStorageConfiguationServiceProxy, SourceConfiguationDto } from "@shared/service-proxies/service-proxies";
 
 @Component({
   selector: "app-storage-detail",
@@ -20,20 +22,26 @@ export class StorageDetailComponent implements OnChanges, OnInit {
   @Input() selectedStorage: string = "";
   @Output() back = new EventEmitter<void>();
   @Output() editEntry = new EventEmitter<any>();
-
   filteredEntries: any[] = [];
+  successfulBackupLogs: BackUpLogDto[] = [];
+  totalSuccessfulLogs: number = 0;
+  showBackupLogDialog: boolean = false;
+  selectedStorageConfigurationId: string;
+
   constructor(private backUpStorageConfiguationService: BackUpStorageConfiguationServiceProxy,
+    private autoBackupService: AutoBackupServiceProxy,
+    private backupDownloadService: BackupService,
     private router: Router
   ) { }
   ngOnInit(): void {
-     ;
+    ;
     var res = this.entries;
   }
   ngOnChanges(): void {
     this.filterData();
   }
   filterData(): void {
-     ;
+    ;
     this.filteredEntries = this.entries.filter(
       (entry) =>
         entry.storageMasterType?.name.toLowerCase() ===
@@ -106,4 +114,79 @@ export class StorageDetailComponent implements OnChanges, OnInit {
     });
   }
 
+  openBackupLogDialog(id: string) {
+    this.selectedStorageConfigurationId = id;
+    this.showBackupLogDialog = true;
+  
+    // Manually trigger initial data load
+    const initialLazyLoadEvent: LazyLoadEvent = {
+      first: 0,
+      rows: 10
+    };
+    this.getSuccessullBackupLogLazy(initialLazyLoadEvent);
+  }
+
+  
+  getSuccessullBackupLogLazy(event: LazyLoadEvent) {
+    if (!this.showBackupLogDialog) return;
+
+    const skipCount = event.first ?? 0;
+    const maxResultCount = event.rows ?? 10;
+  
+    this.autoBackupService
+      .getAllCompletedBackupLogByStorageConfigId(
+        this.selectedStorageConfigurationId,
+        skipCount,
+        maxResultCount
+      )
+      .subscribe({
+        next: (result) => {
+          this.successfulBackupLogs = result.items || [];
+          this.totalSuccessfulLogs = result.totalCount || 0;
+        },
+        error: (err) => {
+          console.error("Error fetching backup logs:", err);
+        },
+      });
+  }
+  
+  // getSuccessullBackupLogLazy(event: LazyLoadEvent) {
+  //   this.autoBackupService.getAllCompletedBackupLogByStorageConfigId(this.selectedStorageConfigurationId, event.first, event.rows).subscribe({
+  //     next: (result) => {
+  //       this.successfulBackupLogs = result.items;
+  //     },
+  //     error: (err) => {
+  //       console.error('Error fetching backup logs:', err);
+  //     }
+  //   });
+  // }
+
+  // openBackupLogDialog(id: string) {
+  //   this.selectedStorageConfigurationId = id;
+  //   this.autoBackupService.getAllCompletedBackupLogByStorageConfigId(id, undefined, undefined).subscribe({
+  //     next: (result) => {
+  //       this.successfulBackupLogs = result.items;
+  //       this.showBackupLogDialog = true;
+  //     },
+  //     error: (err) => {
+  //       console.error('Error fetching backup logs:', err);
+  //     }
+  //   });
+  // }
+
+  // openBackupLogDialog(id: string) {
+  //   this.selectedStorageConfigurationId = id;
+  //   this.showBackupLogDialog = true; // open dialog first
+  // }
+
+  downloadBackup(backupLog: BackUpLogDto) {
+    debugger
+    // this.backupDownloadService.downloadBackup(backupLog.sourceConfiguationId, backupLog.backUpFileName);
+    this.backupDownloadService.downloadBackup({
+      storageConfigurationId: backupLog.backUpStorageConfiguationId,
+      backUpFileName: backupLog.backUpFileName,
+    });
+    
+  }
+  
 }

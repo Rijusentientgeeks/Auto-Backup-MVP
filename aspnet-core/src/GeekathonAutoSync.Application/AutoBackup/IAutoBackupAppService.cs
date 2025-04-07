@@ -16,6 +16,8 @@ namespace GeekathonAutoSync.AutoBackup
     {
         Task<string> CreateBackup(string sConfigurationId);
         Task<PagedResultDto<BackUpLogDto>> GetAllBackupLogAsync(PagedBackLogRequestDto input);
-        Task<Tuple<Stream, string, string>> DownloadBackupStreamAsync(string sourceConfigurationId, string backUpFileName);
+        Task<PagedResultDto<BackUpLogDto>> GetAllCompletedBackupLogByStorageConfigIdAsync(PagedBackupLogInputDto input);
+        //Task<Tuple<Stream, string, string>> DownloadBackupStreamAsync(string sourceConfigurationId, string backUpFileName);
+        Task<Tuple<Stream, string, string>> DownloadBackupStreamAsync(string? sourceConfigurationId, string? storageCongigurationId, string backUpFileName);
     }
 }

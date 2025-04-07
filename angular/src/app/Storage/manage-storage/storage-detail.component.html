@@ -23,6 +23,9 @@
             {{ entry?.backupName || entry.cloudStorage?.name || entry.storageMasterType?.name }}
           </h3>
           <div class="icon-actions">
+            <button class="btn btn-primary btn-sm" (click)="openBackupLogDialog(entry.id)" title="Delete Configuration">
+              <i class="pi pi-list"></i>
+            </button>
             <button class="btn btn-warning btn-sm me-2" (click)="GetDetailsbyID(entry.id)" title="Edit Configuration">
               <i class="pi pi-pencil"></i>
             </button>
@@ -57,3 +60,59 @@
     </div>
   </ng-template>
 </div>
+
+<p-dialog
+  [(visible)]="showBackupLogDialog"
+  [modal]="true"
+  [style]="{ width: '50vw' }"
+  [closable]="true"
+  (onHide)="showBackupLogDialog = false"
+  [draggable]="false"
+>
+  <p-table
+    [value]="successfulBackupLogs"
+    [lazy]="true"
+    [paginator]="true"
+    [rows]="10"
+    [totalRecords]="totalSuccessfulLogs"
+    (onLazyLoad)="getSuccessullBackupLogLazy($event)"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [showCurrentPageReport]="true"
+    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+    responsiveLayout="scroll"
+    styleClass="p-datatable-striped p-datatable-gridlines"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th>Backup File Name</th>
+        <th>Completion Time</th>
+        <th>Action</th>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="body" let-log>
+      <tr>
+        <td>{{ log.backUpFileName }}</td>
+        <td>{{ log.completedTimeStamp | date: 'yyyy-MM-dd HH:mm' }}</td>
+        <td>
+          <button
+            pButton
+            icon="pi pi-download"
+            class="p-button-icon-only p-button rounded"
+            [disabled]="log.backupLogStatus !== 0"
+            title="Download"
+            (click)="downloadBackup(log)"
+          ></button>
+        </td>
+      </tr>
+    </ng-template>
+
+    <ng-template pTemplate="emptymessage">
+      <tr>
+        <td colspan="3" class="text-center py-4 text-muted">
+          <i class="pi pi-info-circle me-2"></i>No backup logs found
+        </td>
+      </tr>
+    </ng-template>
+  </p-table>
+</p-dialog>

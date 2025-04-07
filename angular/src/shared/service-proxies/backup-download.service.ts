@@ -8,14 +8,28 @@ import { AppConsts } from '../AppConsts';
 export class BackupService {
   constructor(private httpClient: HttpClient) {}
 
-  downloadBackup(sourceConfigurationId: string, backUpFileName: string) {
-    debugger;
+  downloadBackup({
+    sourceConfigurationId,
+    storageConfigurationId,
+    backUpFileName
+  }: {
+    sourceConfigurationId?: string,
+    storageConfigurationId?: string,
+    backUpFileName: string
+  }) {
     let params = new HttpParams()
-      .set('sourceConfigurationId', sourceConfigurationId)
       .set('backUpFileName', backUpFileName);
-
-    const url =AppConsts.remoteServiceBaseUrl + `/api/backup/download`;
-
+  
+    if (sourceConfigurationId) {
+      params = params.set('sourceConfigurationId', sourceConfigurationId);
+    }
+  
+    if (storageConfigurationId) {
+      params = params.set('storageConfigurationId', storageConfigurationId);
+    }
+  
+    const url = AppConsts.remoteServiceBaseUrl + `/api/backup/download`;
+  
     this.httpClient.get(url, {
       params: params,
       responseType: 'blob',
@@ -28,7 +42,7 @@ export class BackupService {
         const blob = response.body!;
         const contentDisposition = response.headers.get('Content-Disposition');
         const filename = this.getFilenameFromDisposition(contentDisposition, backUpFileName);
-
+  
         const link = document.createElement('a');
         link.href = window.URL.createObjectURL(blob);
         link.download = filename;
@@ -36,7 +50,7 @@ export class BackupService {
         document.body.appendChild(link);
         link.click();
         document.body.removeChild(link);
-
+  
         window.URL.revokeObjectURL(link.href);
       },
       error: err => {
@@ -44,6 +58,7 @@ export class BackupService {
       }
     });
   }
+  
 
   private getFilenameFromDisposition(contentDisposition: string | null, defaultName: string): string {
     if (!contentDisposition) return defaultName;
