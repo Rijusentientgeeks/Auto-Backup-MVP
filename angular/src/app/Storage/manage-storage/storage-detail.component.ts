@@ -99,9 +99,9 @@ export class StorageDetailComponent implements OnChanges, OnInit {
 
   deleteEntryDetails(id: string) {
     this.backUpStorageConfiguationService.delete(id).subscribe({
-      next: (result) => {
+      next: () => {
         debugger
-        this.router.navigate(['manage-storage']);
+        this.back.emit();
       }
     });
   }
