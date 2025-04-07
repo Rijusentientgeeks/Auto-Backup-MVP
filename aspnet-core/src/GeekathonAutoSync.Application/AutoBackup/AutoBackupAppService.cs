@@ -208,6 +208,35 @@ namespace GeekathonAutoSync.AutoBackup
             }   
         }
 
+        public async Task<PagedResultDto<BackUpLogDto>> GetAllCompletedBackupLogByStorageConfigIdAsync(PagedBackupLogInputDto input)
+            {
+            try
+            {
+                var query = _backUpLogsRepository.GetAll()
+                .Include(i => i.BackUpStorageConfiguation)
+                .Where(
+                    i => i.TenantId == AbpSession.TenantId
+                    && i.BackUpStorageConfiguationId.ToString().ToLower() == input.BackupStorageConfigId.ToLower());
+                    //&& i.BackupLogStatus == BackupLogStatus.Success);
+
+                var filteredQry = await query
+                    .Skip(input.SkipCount)
+                    .Take(input.MaxResultCount)
+                    .ToListAsync();
+                var totalCount = filteredQry.Count();
+
+                return new PagedResultDto<BackUpLogDto>
+                {
+                    TotalCount = totalCount,
+                    Items = ObjectMapper.Map<List<BackUpLogDto>>(query)
+                };
+            }
+            catch (Exception ex)
+            {
+                throw new UserFriendlyException(ex.Message);
+            }
+        }
+
         #region DB Backup
 
         private async Task<(bool, string)> MSSQLBackUp(string ServerIP, string DBInitialCatalog, string DbUsername, string DbPassword, string BackUpInitiatedPath, string DatabaseName)
@@ -253,7 +282,7 @@ namespace GeekathonAutoSync.AutoBackup
                 };
 
                 using (var client = new SshClient(connectionInfo))
-                using (var sftp = new SftpClient(connectionInfo))
+                //using (var sftp = new SftpClient(connectionInfo))
                 {
                     client.Connect();
 
@@ -262,27 +291,26 @@ namespace GeekathonAutoSync.AutoBackup
                         throw new UserFriendlyException("SSH connection failed.");
                     }
 
-                    // 🏆 Run pg_dump command on the remote server
                     string command = $"PGPASSWORD='{DbPassword}' pg_dump -U {DbUsername} -h localhost -p 5432 -F c -b -v -f \"{remoteBackupPath}\" {DatabaseName}";
                     var cmd = client.CreateCommand(command);
                     var result = cmd.Execute();
 
-                    sftp.Connect();
+                    //sftp.Connect();
 
-                    if (!sftp.Exists(remoteBackupPath))
-                    {
-                        throw new UserFriendlyException($"Backup file not found on remote server: {remoteBackupPath}");
-                    }
+                    //if (!sftp.Exists(remoteBackupPath))
+                    //{
+                    //    throw new UserFriendlyException($"Backup file not found on remote server: {remoteBackupPath}");
+                    //}
 
-                    using (var fileStream = new FileStream(localBackupPath, FileMode.Create, FileAccess.Write))
-                    {
-                        sftp.DownloadFile(remoteBackupPath, fileStream);
-                    }
+                    //using (var fileStream = new FileStream(localBackupPath, FileMode.Create, FileAccess.Write))
+                    //{
+                    //    sftp.DownloadFile(remoteBackupPath, fileStream);
+                    //}
 
-                    //  Delete the remote file after download
-                    sftp.DeleteFile(remoteBackupPath);
+                    ////  Delete the remote file after download
+                    //sftp.DeleteFile(remoteBackupPath);
 
-                    sftp.Disconnect();
+                    //sftp.Disconnect();
                     client.Disconnect();
                 }
 
@@ -685,24 +713,83 @@ namespace GeekathonAutoSync.AutoBackup
         }
 
         [RemoteService(false)]
-        public async Task<Tuple<Stream, string, string>> DownloadBackupStreamAsync(string sourceConfigurationId, string backUpFileName)
+        //public async Task<Tuple<Stream, string, string>> DownloadBackupStreamAsync(string? sourceConfigurationId, string? storageCongigurationId, string backUpFileName)
+        //{
+        //    var sourceConfig = await _sourceConfiguationRepository.GetAll()
+        //        .Include(i => i.BackUpStorageConfiguation)
+        //            //.ThenInclude(e => e.StorageMasterType)
+        //        .Include(i => i.BackUpStorageConfiguation)
+        //            //.ThenInclude(e => e.CloudStorage)
+        //        .FirstOrDefaultAsync(i => i.Id.ToString().ToLower() == sourceConfigurationId.ToLower());
+
+        //    if (sourceConfig == null)
+        //        throw new UserFriendlyException($"Source configuration with ID {sourceConfigurationId} not found");
+
+        //    if (sourceConfig.BackUpStorageConfiguation == null)
+        //        throw new UserFriendlyException("Backup storage configuration not found");
+
+        //    string storageType = sourceConfig.BackUpStorageConfiguation.StorageMasterType?.Name;
+        //    string cloudStorageType = sourceConfig.BackUpStorageConfiguation.CloudStorage?.Name;
+
+        //    switch (storageType)
+        //    {
+        //        case "Public Cloud":
+        //            switch (cloudStorageType)
+        //            {
+        //                case "Amazon S3":
+        //                    return await DownloadFromAwsS3Async(
+        //                        sourceConfig.BackUpStorageConfiguation.AWS_AccessKey,
+        //                        sourceConfig.BackUpStorageConfiguation.AWS_SecretKey,
+        //                        sourceConfig.BackUpStorageConfiguation.AWS_Region,
+        //                        sourceConfig.BackUpStorageConfiguation.AWS_backUpPath,
+        //                        backUpFileName,
+        //                        sourceConfig.BackUpStorageConfiguation.AWS_BucketName);
+        //                default:
+        //                    throw new NotSupportedException($"Cloud storage type {cloudStorageType} is not Implemented");
+        //            }
+
+        //        default:
+        //            throw new NotSupportedException($"Storage type {storageType} is not Implemented");
+        //    }
+        //}
+        public async Task<Tuple<Stream, string, string>> DownloadBackupStreamAsync(string? sourceConfigurationId, string? storageCongigurationId, string backUpFileName)
         {
-            var sourceConfig = await _sourceConfiguationRepository.GetAll()
-                .Include(i => i.BackUpStorageConfiguation)
-                    .ThenInclude(e => e.StorageMasterType)
-                .Include(i => i.BackUpStorageConfiguation)
-                    .ThenInclude(e => e.CloudStorage)
-                .FirstOrDefaultAsync(i => i.Id.ToString().ToLower() == sourceConfigurationId.ToLower());
+            BackUpStorageConfiguation storageConfig = null;
 
+            if (!string.IsNullOrWhiteSpace(sourceConfigurationId))
+            {
+                var sourceConfig = await _sourceConfiguationRepository.GetAll()
+                    .Include(i => i.BackUpStorageConfiguation)
+                        .ThenInclude(e => e.StorageMasterType)
+                    .Include(i => i.BackUpStorageConfiguation)
+                        .ThenInclude(e => e.CloudStorage)
+                    .FirstOrDefaultAsync(i => i.Id.ToString().ToLower() == sourceConfigurationId.ToLower());
 
-            if (sourceConfig == null)
-                throw new UserFriendlyException($"Source configuration with ID {sourceConfigurationId} not found");
+                if (sourceConfig == null)
+                    throw new UserFriendlyException($"Source configuration with ID {sourceConfigurationId} not found");
 
-            if (sourceConfig.BackUpStorageConfiguation == null)
-                throw new UserFriendlyException("Backup storage configuration not found");
+                if (sourceConfig.BackUpStorageConfiguation == null)
+                    throw new UserFriendlyException("Backup storage configuration not found in source config");
 
-            string storageType = sourceConfig.BackUpStorageConfiguation.StorageMasterType?.Name;
-            string cloudStorageType = sourceConfig.BackUpStorageConfiguation.CloudStorage?.Name;
+                storageConfig = sourceConfig.BackUpStorageConfiguation;
+            }
+            else if (!string.IsNullOrWhiteSpace(storageCongigurationId))
+            {
+                storageConfig = await _backUpStorageConfiguationRepository.GetAll()
+                    .Include(x => x.CloudStorage)
+                    .Include(x => x.StorageMasterType)
+                    .FirstOrDefaultAsync(x => x.Id.ToString().ToLower() == storageCongigurationId.ToLower());
+
+                if (storageConfig == null)
+                    throw new UserFriendlyException($"Backup storage configuration with ID {storageCongigurationId} not found");
+            }
+            else
+            {
+                throw new UserFriendlyException("Either sourceConfigurationId or storageCongigurationId must be provided");
+            }
+
+            string storageType = storageConfig.StorageMasterType?.Name;
+            string cloudStorageType = storageConfig.CloudStorage?.Name;
 
             switch (storageType)
             {
@@ -711,18 +798,19 @@ namespace GeekathonAutoSync.AutoBackup
                     {
                         case "Amazon S3":
                             return await DownloadFromAwsS3Async(
-                                sourceConfig.BackUpStorageConfiguation.AWS_AccessKey,
-                                sourceConfig.BackUpStorageConfiguation.AWS_SecretKey,
-                                sourceConfig.BackUpStorageConfiguation.AWS_Region,
-                                sourceConfig.BackUpStorageConfiguation.AWS_backUpPath,
+                                storageConfig.AWS_AccessKey,
+                                storageConfig.AWS_SecretKey,
+                                storageConfig.AWS_Region,
+                                storageConfig.AWS_backUpPath,
                                 backUpFileName,
-                                sourceConfig.BackUpStorageConfiguation.AWS_BucketName);
+                                storageConfig.AWS_BucketName);
+
                         default:
-                            throw new NotSupportedException($"Cloud storage type {cloudStorageType} is not Implemented");
+                            throw new NotSupportedException($"Cloud storage type {cloudStorageType} is not implemented");
                     }
 
                 default:
-                    throw new NotSupportedException($"Storage type {storageType} is not Implemented");
+                    throw new NotSupportedException($"Storage type {storageType} is not implemented");
             }
         }
 

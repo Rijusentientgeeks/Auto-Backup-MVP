@@ -11,7 +11,8 @@ import { InputTextModule } from 'primeng/inputtext';
 import { PasswordModule } from 'primeng/password';
 import { ManageStorageComponent } from './manage-storage.component';
 import { StorageDetailComponent } from './storage-detail.component';
-import { StorageMasterTypeServiceProxy, CloudStorageServiceProxy, BackUpStorageConfiguationServiceProxy } from '@shared/service-proxies/service-proxies';
+import { StorageMasterTypeServiceProxy, CloudStorageServiceProxy, BackUpStorageConfiguationServiceProxy, AutoBackupServiceProxy } from '@shared/service-proxies/service-proxies';
+import { TableModule } from 'primeng/table';
 
 
 @NgModule({
@@ -27,11 +28,11 @@ import { StorageMasterTypeServiceProxy, CloudStorageServiceProxy, BackUpStorageC
         ButtonModule,
         PasswordModule,
         DialogModule,
-    
+        TableModule
     
   ],
   exports:[ManageStorageComponent],
-  providers: [StorageMasterTypeServiceProxy, CloudStorageServiceProxy,BackUpStorageConfiguationServiceProxy],
+  providers: [StorageMasterTypeServiceProxy, CloudStorageServiceProxy,BackUpStorageConfiguationServiceProxy, AutoBackupServiceProxy],
 
 })
 export class ManageStorageModule { }
