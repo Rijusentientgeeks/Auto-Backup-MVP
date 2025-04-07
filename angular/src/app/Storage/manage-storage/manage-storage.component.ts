@@ -128,7 +128,7 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
       0
     ).subscribe({
       next: (result) => {
-        debugger;
+         ;
         if (result && result.items) {
           this.storageEntries = result.items;
         }
@@ -173,7 +173,7 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
   }
 
   onStorageTypeChange(event: any) {
-    debugger;
+     ;
     const selectedType = event.value?.name;
     this.resetConditionalValidators();
 
@@ -193,7 +193,7 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
   }
 
   onCloudStorageChange(event: any) {
-    debugger;
+     ;
     const selectedCloud = event.value?.name;
     this.resetConditionalValidators();
     if (selectedCloud === "Amazon S3") {
@@ -268,7 +268,7 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
   }
 
   mapFormToDto(): BackUpStorageConfiguationCreateDto {
-    debugger;
+     ;
     const formValues = this.storageForm.value;
     const dto = new BackUpStorageConfiguationCreateDto();
     dto.storageMasterTypeId = formValues.StorageTypeId.value;
@@ -298,7 +298,7 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
   }
 
   saveStorageDestination() {
-    debugger;
+     ;
     if (this.storageForm.valid) {
       this.isSaving = true;
 

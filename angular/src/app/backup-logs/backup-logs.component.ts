@@ -1,5 +1,6 @@
 import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
-import { AutoBackupServiceProxy, BackUPTypeDto, BackUPTypeServiceProxy, CloudStorageServiceProxy, SourceConfiguationServiceProxy, StorageMasterTypeServiceProxy } from '@shared/service-proxies/service-proxies';
+import { AutoBackupServiceProxy, BackUpLogDto, BackUPTypeDto, BackUPTypeServiceProxy, CloudStorageServiceProxy, SourceConfiguationDto, SourceConfiguationServiceProxy, StorageMasterTypeServiceProxy } from '@shared/service-proxies/service-proxies';
+import { BackupService } from '@shared/service-proxies/backup-download.service';
 import { LazyLoadEvent } from 'primeng/api';
 @Component({
   selector: 'app-backup-log',
@@ -32,6 +33,7 @@ export class BackupLogsComponent implements OnInit {
     private storageMasterTypeService: StorageMasterTypeServiceProxy,
     private cloudStorageService: CloudStorageServiceProxy,
     private sourceConfigService: SourceConfiguationServiceProxy,
+    private backupDownloadService: BackupService,
     private cdr: ChangeDetectorRef
   ) {}
 
@@ -40,6 +42,7 @@ export class BackupLogsComponent implements OnInit {
     this.loadStorageTypes();
     this.loadCloudStorageTypes();
     this.loadSourceConfigs();
+    this.loadBackupLogsLazy({ first: this.first, rows: this.rows });
   }
 
 
@@ -47,7 +50,6 @@ export class BackupLogsComponent implements OnInit {
       this.backUPTypeService.getAll().subscribe({
         next: (result) => {
           if (result && result.items) {
-            debugger
             this.backupTypes = result.items.map(
               (item: BackUPTypeDto) => ({
                 name: item.name,
@@ -120,6 +122,7 @@ export class BackupLogsComponent implements OnInit {
       event.rows
     ).subscribe({
       next: (result) => {
+        debugger;
         this.backupLogs = result.items || [];
         this.totalRecords = result.totalCount || 0;
         this.loading = false;
@@ -129,5 +132,10 @@ export class BackupLogsComponent implements OnInit {
         this.loading = false;
       }
     });
+  }
+
+  downloadBackup(backupLog: BackUpLogDto) {
+    debugger;
+    this.backupDownloadService.downloadBackup(backupLog.sourceConfiguationId, backupLog.backUpFileName);
   }
 }
