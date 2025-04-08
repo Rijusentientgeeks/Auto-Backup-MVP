@@ -86,6 +86,19 @@
   .text-danger {
     font-size: 0.85rem;
   }
+
+  .swal2-container {
+    z-index: 9999 !important;
+  }
+  ::ng-deep{
+    .swal2-container.swal2-center.swal2-backdrop-show{
+      z-index: 9999 !important;
+    }
+  }
+  
+  ::ng-deep .p-dialog {
+    z-index: 999 !important;
+  }
   
 
   .loading-overlay {
