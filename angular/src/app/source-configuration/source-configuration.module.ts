@@ -11,6 +11,8 @@ import { InputTextModule } from "primeng/inputtext";
 import { AutoBackupServiceProxy, BackUpStorageConfiguationServiceProxy, BackUPTypeServiceProxy, DBTypeServiceProxy, SourceConfiguationServiceProxy } from "@shared/service-proxies/service-proxies";
 import { FileUploadModule } from 'primeng/fileupload';
 import { TooltipModule } from 'primeng/tooltip';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 @NgModule({
   declarations: [SourceConfigurationComponent],
@@ -23,9 +25,10 @@ import { TooltipModule } from 'primeng/tooltip';
     InputTextModule,
     ButtonModule,
     FileUploadModule,
-    TooltipModule
+    TooltipModule,
+    ToastModule,
   ],
-  providers: [BackUPTypeServiceProxy,DBTypeServiceProxy,BackUpStorageConfiguationServiceProxy,SourceConfiguationServiceProxy,AutoBackupServiceProxy ],
+  providers: [MessageService,BackUPTypeServiceProxy,DBTypeServiceProxy,BackUpStorageConfiguationServiceProxy,SourceConfiguationServiceProxy,AutoBackupServiceProxy ],
   exports: [SourceConfigurationComponent],
 })
 export class SourceConfigurationModule {}

@@ -115,6 +115,8 @@
       </div>
     </ng-template>
   </div>
+  <p-toast></p-toast>
+
     <p-dialog
       [(visible)]="displayDialog"
       [modal]="true"
@@ -124,6 +126,7 @@
     >
       <form [formGroup]="sourceForm" (ngSubmit)="saveSourceConfig()">
       <div class="row">
+
         <div class="col-md-3 mb-3">
           <label for="backUPTypeId"
             >Backup Type <span class="text-danger">*</span></label
