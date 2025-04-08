@@ -15,7 +15,9 @@ using GeekathonAutoSync.AutoBackup.Dto;
 using GeekathonAutoSync.BackUpLogs;
 using GeekathonAutoSync.BackUpStorageConfiguations;
 using GeekathonAutoSync.BackUpStorageConfiguations.Dto;
+using GeekathonAutoSync.BackUPTypes;
 using GeekathonAutoSync.CloudStorages;
+using GeekathonAutoSync.DBTypes;
 using GeekathonAutoSync.SourceConfiguations;
 using GeekathonAutoSync.SourceConfiguations.Dto;
 using GeekathonAutoSync.StorageMasterTypes;
@@ -80,24 +82,24 @@ namespace GeekathonAutoSync.AutoBackup
             try
             {
                 (bool, string) resp = (false, "");
-                switch (BackUPConfig.BackUPType.Name)
+                switch (BackUPConfig.BackUPType.BackupTypeEnum)
                 {
-                    case "DataBase":
-                        switch (BackUPConfig.DBType.Name)
+                    case BackupTypeEnum.DataBase:
+                        switch (BackUPConfig.DBType.Type)
                         {
-                            case "PostgreSQL":
+                            case DbTypeEnum.PostgreSQL:
                                 resp = await PostGresDBBackUp(BackUPConfig.BackUpInitiatedPath, BackUPConfig.SshUserName, BackUPConfig.SshPassword, BackUPConfig.ServerIP, BackUPConfig.DbPassword, BackUPConfig.DbUsername, BackUPConfig.DatabaseName);
                                 break;
-                            case "Microsoft SQL Server":
+                            case DbTypeEnum.MicrosoftSQLServer:
                                 resp = await MSSQLBackUp(BackUPConfig.ServerIP, BackUPConfig.DBInitialCatalog, BackUPConfig.DbUsername, BackUPConfig.DbPassword, BackUPConfig.BackUpInitiatedPath, BackUPConfig.DatabaseName);
                                 break;
-                            case "Oracle Database":
+                            case DbTypeEnum.OracleDatabase:
                                 resp = (false, "Work Inprogress.");
                                 break;
-                            case "MySQL":
+                            case DbTypeEnum.MySQL:
                                 resp = (false, "Work Inprogress.");
                                 break;
-                            case "MongoDB":
+                            case DbTypeEnum.MongoDB:
                                 resp = (false, "Work Inprogress.");
                                 break;
                             default:
@@ -114,14 +116,14 @@ namespace GeekathonAutoSync.AutoBackup
                         downLoadedFileName = $"{nameWithoutExtension}.zip";
                         break;
 
-                    case "Application Files":
+                    case BackupTypeEnum.ApplicationFiles:
 
                         resp = await ApplicationBackup(BackUPConfig.Sourcepath, BackUPConfig.BackUpInitiatedPath, BackUPConfig.PrivateKeyPath, BackUPConfig.DbPassword, BackUPConfig.ServerIP, BackUPConfig.SshPassword, serverPath);
                         downLoadedFileName = resp.Item2;
                         fileDownloadflag = resp.Item1;
                         break;
 
-                    case "Specific File":
+                    case BackupTypeEnum.SpecificFile:
                         break;
                     default:
                         break;
@@ -130,32 +132,32 @@ namespace GeekathonAutoSync.AutoBackup
 
                 if (fileDownloadflag == true)
                 {
-                    string storageType = BackUPConfig.BackUpStorageConfiguation.StorageMasterType.Name.ToString();
-                    string cloudStorageType = BackUPConfig.BackUpStorageConfiguation?.CloudStorage.Name.ToString();
+                    var storageType = BackUPConfig.BackUpStorageConfiguation.StorageMasterType.Type;
+                    var cloudStorageType = BackUPConfig.BackUpStorageConfiguation?.CloudStorage.Type;
 
                     switch (storageType)
                     {
-                        case "Public Cloud":
+                        case StorageMasterTypeEnum.PublicCloud:
                             switch (cloudStorageType)
                             {
-                                case "Amazon S3":
+                                case CloudStorageType.AmazonS3:
                                     string downloadedFileWithPath = Path.Combine(serverPath, downLoadedFileName);
                                     resFromUpload = await UploadFileToS3(BackUPConfig.BackUpStorageConfiguation.AWS_AccessKey, BackUPConfig.BackUpStorageConfiguation.AWS_SecretKey, BackUPConfig.BackUpStorageConfiguation.AWS_BucketName, $"/{downLoadedFileName}", $"{downloadedFileWithPath}");
                                     break;
-                                case "Microsoft Azure":
+                                case CloudStorageType.MicrosoftAzure:
                                     break;
-                                case "Google Cloud":
+                                case CloudStorageType.GoogleCloud:
                                     break;
-                                case "Alibaba Cloud":
+                                case CloudStorageType.AlibabaCloud:
                                     break;
                                 default:
                                     break;
                             }
 
                             break;
-                        case "Network File System":
+                        case StorageMasterTypeEnum.NFS:
                             break;
-                        case "GeekSync Infrastructure Cluster":
+                        case StorageMasterTypeEnum.GeekSyncInfrastructureCluste:
                             break;
                         default:
                             break;

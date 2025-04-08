@@ -10,5 +10,6 @@ namespace GeekathonAutoSync.CloudStorages.Dto
     public class CloudStorageDto : FullAuditedEntity<Guid>
     {
         public string Name { get; set; }
+        public CloudStorageType? Type { get; set; }
     }
 }

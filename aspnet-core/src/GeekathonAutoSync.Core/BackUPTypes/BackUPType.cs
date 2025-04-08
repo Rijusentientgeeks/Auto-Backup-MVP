@@ -10,12 +10,14 @@ namespace GeekathonAutoSync.BackUPTypes
 {
     public class BackUPType : Entity<Guid>
     {
-        public BackUPType(Guid id, string name)
+        public BackUPType(Guid id, string name, BackupTypeEnum? backupTypeEnum)
         {
             Id = id;
             Name = name;
+            BackupTypeEnum = backupTypeEnum;
         }
         public string Name { get; set; }
+        public BackupTypeEnum? BackupTypeEnum { get; set; }
         ICollection<SourceConfiguation> SourceConfiguations { get; set; } = new List<SourceConfiguation>();
     }
 }

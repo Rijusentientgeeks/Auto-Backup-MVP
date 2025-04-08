@@ -10,12 +10,14 @@ namespace GeekathonAutoSync.CloudStorages
 {
     public class CloudStorage : Entity<Guid>
     {
-        public CloudStorage(Guid id, string name)
+        public CloudStorage(Guid id, string name, CloudStorageType? type)
         {
             Id = id;
             Name = name;
+            Type = type;
         }
         public string Name { get; set; }
+        public CloudStorageType? Type { get; set; }
         ICollection<BackUpStorageConfiguation> BackUpStorageConfiguations { get; set; } = new List<BackUpStorageConfiguation>();
     }
 }

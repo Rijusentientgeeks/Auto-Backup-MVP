@@ -10,5 +10,6 @@ namespace GeekathonAutoSync.BackUPTypes.Dto
     public class BackUPTypeDto : FullAuditedEntity<Guid>
     {
         public string Name { get; set; }
+        public BackupTypeEnum? BackupTypeEnum { get; set; }
     }
 }
