@@ -10,6 +10,8 @@ import { DropdownModule } from "primeng/dropdown";
 import { InputTextModule } from "primeng/inputtext";
 import { AutoBackupServiceProxy, BackUpStorageConfiguationServiceProxy, BackUPTypeServiceProxy, DBTypeServiceProxy, SourceConfiguationServiceProxy } from "@shared/service-proxies/service-proxies";
 import { FileUploadModule } from 'primeng/fileupload';
+import { TooltipModule } from 'primeng/tooltip';
+
 @NgModule({
   declarations: [SourceConfigurationComponent],
   imports: [
@@ -20,7 +22,8 @@ import { FileUploadModule } from 'primeng/fileupload';
     DropdownModule,
     InputTextModule,
     ButtonModule,
-    FileUploadModule
+    FileUploadModule,
+    TooltipModule
   ],
   providers: [BackUPTypeServiceProxy,DBTypeServiceProxy,BackUpStorageConfiguationServiceProxy,SourceConfiguationServiceProxy,AutoBackupServiceProxy ],
   exports: [SourceConfigurationComponent],
