@@ -20,7 +20,11 @@
               <i class="pi pi-database me-2"></i> {{ config.backupName }}
             </h5>
             <div class="actions">
-              <button class="btn btn-warning btn-sm me-2" (click)="editConfig(config)" title="Edit Configuration">
+              <button
+                class="btn btn-warning btn-sm me-2"
+                (click)="editConfig(config)"
+                title="Edit Configuration"
+              >
                 <i class="pi pi-pencil"></i>
               </button>
               <!-- &nbsp;
@@ -74,7 +78,8 @@
             </p>
             <p class="mb-2">
               <i class="pi pi-key text-secondary me-2"></i>
-              <strong> Private Key Path:</strong> {{ config.privateKeyPath ? '*******' : 'N/A' }}
+              <strong> Private Key Path:</strong>
+              {{ config.privateKeyPath ? "*******" : "N/A" }}
             </p>
             <p class="mb-2">
               <i class="pi pi-folder-open text-secondary me-2"></i>
@@ -117,16 +122,15 @@
   </div>
   <p-toast></p-toast>
 
-    <p-dialog
-      [(visible)]="displayDialog"
-      [modal]="true"
-      [header]="isEdit ? 'Edit Source Configuration' : 'Add Source Configuration'"
-      [style]="{ width: '80vw', height: '100vh' }"
-      [closable]="true"
-    >
-      <form [formGroup]="sourceForm" (ngSubmit)="saveSourceConfig()">
+  <p-dialog
+    [(visible)]="displayDialog"
+    [modal]="true"
+    [header]="isEdit ? 'Edit Source Configuration' : 'Add Source Configuration'"
+    [style]="{ width: '80vw', height: '100vh' }"
+    [closable]="true"
+  >
+    <form [formGroup]="sourceForm" (ngSubmit)="saveSourceConfig()">
       <div class="row">
-
         <div class="col-md-3 mb-3">
           <label for="backUPTypeId"
             >Backup Type <span class="text-danger">*</span></label
@@ -137,7 +141,6 @@
             formControlName="backUPType"
             optionLabel="name"
             [style]="{ width: '100%' }"
-
             [ngClass]="{ 'is-invalid': isInvalid('backUPType') }"
             placeholder="Select a Backup Type"
             (onChange)="onBackupTypeChange($event)"
@@ -165,7 +168,7 @@
             <div *ngIf="isInvalid('dbType')" class="text-danger small">
               Database Type is required
             </div>
-          </div>        
+          </div>
 
           <div class="col-md-3 mb-3">
             <label for="dbInitialCatalog"
@@ -187,9 +190,10 @@
             </div>
           </div>
 
-         
           <div class="col-md-3 mb-3">
-            <label for="dbuser">DB Username <span class="text-danger">*</span></label>
+            <label for="dbuser"
+              >DB Username <span class="text-danger">*</span></label
+            >
             <input
               id="dbuser"
               type="text"
@@ -199,7 +203,9 @@
             />
           </div>
           <div class="col-md-3 mb-3">
-            <label for="DBPass">DB Password <span class="text-danger">*</span></label>
+            <label for="DBPass"
+              >DB Password <span class="text-danger">*</span></label
+            >
             <input
               id="DBPass"
               type="password"
@@ -219,90 +225,90 @@
             />
           </div>
         </ng-container>
-          <div class="col-md-3 mb-3">
-            <label for="serverIP"
-              >Server IP <span class="text-danger">*</span></label
-            >
-            <input
-              id="serverIP"
-              type="text"
-              class="form-control"
-              formControlName="serverIP"
-              [ngClass]="{ 'is-invalid': isInvalid('serverIP') }"
-              placeholder="Enter Server IP"
-            />
-            <div *ngIf="isInvalid('serverIP')" class="text-danger small">
-              Server IP is required
-            </div>
+        <div class="col-md-3 mb-3">
+          <label for="serverIP"
+            >Server IP <span class="text-danger">*</span></label
+          >
+          <input
+            id="serverIP"
+            type="text"
+            class="form-control"
+            formControlName="serverIP"
+            [ngClass]="{ 'is-invalid': isInvalid('serverIP') }"
+            placeholder="Enter Server IP"
+          />
+          <div *ngIf="isInvalid('serverIP')" class="text-danger small">
+            Server IP is required
           </div>
-          <div class="col-md-3 mb-3">
-            <label for="userID">Server User ID <span class="text-danger">*</span></label>
-            <input
-              id="userID"
-              type="text"
-              class="form-control"
-              formControlName="sshUserName"
-              [ngClass]="{ 'is-invalid': isInvalid('userID') }"
-              placeholder="Enter User ID"
-            />
-            <div *ngIf="isInvalid('userID')" class="text-danger small">
-              User ID is required
-            </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label for="userID"
+            >Server User ID <span class="text-danger">*</span></label
+          >
+          <input
+            id="userID"
+            type="text"
+            class="form-control"
+            formControlName="sshUserName"
+            [ngClass]="{ 'is-invalid': isInvalid('userID') }"
+            placeholder="Enter User ID"
+          />
+          <div *ngIf="isInvalid('userID')" class="text-danger small">
+            User ID is required
           </div>
+        </div>
 
-          <div class="col-md-3 mb-3">
-            <label for="password"
-              >Server Password</label
-            >
-            <input
-              id="password"
-              type="password"
-              class="form-control"
-              formControlName="sshPassword"
-              [ngClass]="{ 'is-invalid': isInvalid('password') }"
-              placeholder="Enter Password"
-              pTooltip="Enter the SSH password for server access or leave blank if using a private key"
-              tooltipPosition="top"
+        <div class="col-md-3 mb-3">
+          <label for="password">Server Password</label>
+          <input
+            id="password"
+            type="password"
+            class="form-control"
+            formControlName="sshPassword"
+            [ngClass]="{ 'is-invalid': isInvalid('password') }"
+            placeholder="Enter Password"
+            pTooltip="Enter the SSH password for server access or leave blank if using a private key"
+            tooltipPosition="top"
+          />
+          <div *ngIf="isInvalid('password')" class="text-danger small">
+            Password is required
+          </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label for="privateKeyPath">Private Key</label><br />
+          <p-fileUpload
+            id="privateKeyPath"
+            name="privateKeyPath"
+            mode="basic"
+            chooseLabel="Upload Private Key File"
+            accept=".pem,.key"
+            [customUpload]="true"
+            (onSelect)="onFileSelect($event)"
+            pTooltip="Upload your private key file (.pem or .key) or leave blank if using password"
+            tooltipPosition="top"
+            class="small-upload"
+          ></p-fileUpload>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label for="os"
+            >Operating System <span class="text-danger">*</span></label
+          ><br />
+          <p-dropdown
+            id="os"
+            formControlName="os"
+            [options]="osOptions"
+            optionLabel="label"
+            optionValue="value"
+            placeholder="Select OS"
+            [style]="{ width: '100%' }"
+            [ngClass]="{ 'is-invalid': isInvalid('os') }"
+          ></p-dropdown>
+          <div *ngIf="isInvalid('os')" class="text-danger small">
+            OS is required
+          </div>
+        </div>
 
-            />
-            <div *ngIf="isInvalid('password')" class="text-danger small">
-              Password is required
-            </div>
-          </div>
-          <div class="col-md-3 mb-3">
-            <label for="privateKeyPath">Private Key</label><br />
-            <p-fileUpload
-              id="privateKeyPath"
-              name="privateKeyPath"
-              mode="basic"
-              chooseLabel="Upload Private Key File"
-              accept=".pem,.key"
-              [customUpload]="true"
-              (onSelect)="onFileSelect($event)"
-              pTooltip="Upload your private key file (.pem or .key) or leave blank if using password"
-              tooltipPosition="top"
-              class="small-upload"
-            ></p-fileUpload>
-          </div>
-          <div class="col-md-3 mb-3">
-            <label for="os">Operating System <span class="text-danger">*</span></label><br />
-            <p-dropdown
-              id="os"
-              formControlName="os"
-              [options]="osOptions"
-              optionLabel="label"
-              optionValue="value"
-              placeholder="Select OS"
-              [style]="{ width: '100%' }"
-              [ngClass]="{ 'is-invalid': isInvalid('os') }"
-            ></p-dropdown>
-            <div *ngIf="isInvalid('os')" class="text-danger small">
-              OS is required
-            </div>
-          </div>
-          
-
-        <ng-container *ngIf="!showDatabaseFields">      
+        <ng-container *ngIf="!showDatabaseFields">
           <div class="col-md-3 mb-3">
             <label for="sourcePath"
               >Source Path <span class="text-danger">*</span></label
@@ -311,7 +317,7 @@
               id="sourcePath"
               type="text"
               class="form-control"
-              formControlName="sourcepath"
+              formControlName="sourcePath"
               [ngClass]="{ 'is-invalid': isInvalid('sourcePath') }"
               placeholder="Enter Source Path"
             />
@@ -321,9 +327,7 @@
           </div>
         </ng-container>
         <div class="col-md-3 mb-3">
-          <label for="backUpInitiatedPath"
-            >Backup Initiated Path</label
-          >
+          <label for="backUpInitiatedPath">Backup Initiated Path</label>
           <input
             id="backUpInitiatedPath"
             type="text"
@@ -358,28 +362,27 @@
             Backup Storage Configuration is required
           </div>
         </div>
-        
       </div>
 
       <div class="footer mt-4 pt-3 border-top text-right">
         <div class="row">
           <div class="col-md-8"></div>
           <div class="col-md-4">
-        <button
-          type="submit"
-          class="btn btn-primary"
-          [disabled]="sourceForm.invalid"
-        >
-          <i class="pi pi-save"></i> Save
-        </button>
-        &nbsp;
-        <button
-          type="button"
-          class="btn btn-danger me-2"
-          (click)="closeDialog()"
-        >
-          <i class="pi pi-times"></i> Cancel
-        </button>
+            <button
+              type="submit"
+              class="btn btn-primary"
+              [disabled]="sourceForm.invalid"
+            >
+              <i class="pi pi-save"></i> Save
+            </button>
+            &nbsp;
+            <button
+              type="button"
+              class="btn btn-danger me-2"
+              (click)="closeDialog()"
+            >
+              <i class="pi pi-times"></i> Cancel
+            </button>
           </div>
         </div>
       </div>
