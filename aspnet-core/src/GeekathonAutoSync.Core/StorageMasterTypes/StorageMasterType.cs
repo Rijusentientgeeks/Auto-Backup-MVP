@@ -10,12 +10,14 @@ namespace GeekathonAutoSync.StorageMasterTypes
 {
     public class StorageMasterType : Entity<Guid>
     {
-        public StorageMasterType(Guid id, string name) 
+        public StorageMasterType(Guid id, string name, StorageMasterTypeEnum? type) 
         {
             Id = id;
             Name = name;
+            Type = type;
         }
         public string Name { get; set; }
+        public StorageMasterTypeEnum? Type { get; set; }
         ICollection<BackUpStorageConfiguation> BackUpStorageConfiguations { get; set; } = new List<BackUpStorageConfiguation>();
     }
 }

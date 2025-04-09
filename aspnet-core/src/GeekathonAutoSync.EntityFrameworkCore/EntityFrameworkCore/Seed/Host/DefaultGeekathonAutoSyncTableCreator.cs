@@ -61,9 +61,9 @@ namespace GeekathonAutoSync.EntityFrameworkCore.Seed.Host
         {
             return new List<StorageMasterType>
             {
-                new StorageMasterType(Guid.NewGuid(), "Public Cloud"),
-                new StorageMasterType(Guid.NewGuid(), "GeekSync Infrastructure Cluste"),
-                new StorageMasterType(Guid.NewGuid(), "Network File System")
+                new StorageMasterType(Guid.NewGuid(), "Public Cloud", StorageMasterTypeEnum.PublicCloud),
+                new StorageMasterType(Guid.NewGuid(), "GeekSync Infrastructure Cluste", StorageMasterTypeEnum.GeekSyncInfrastructureCluste),
+                new StorageMasterType(Guid.NewGuid(), "Network File System", StorageMasterTypeEnum.NFS)
             };
         }
         #endregion
@@ -90,9 +90,9 @@ namespace GeekathonAutoSync.EntityFrameworkCore.Seed.Host
         {
             return new List<BackUPType>
             {
-                new BackUPType(Guid.NewGuid(), "DataBase"),
-                new BackUPType(Guid.NewGuid(), "Application Files"),
-                new BackUPType(Guid.NewGuid(), "Specific File")
+                new BackUPType(Guid.NewGuid(), "DataBase", BackupTypeEnum.DataBase),
+                new BackUPType(Guid.NewGuid(), "Application Files", BackupTypeEnum.ApplicationFiles),
+                new BackUPType(Guid.NewGuid(), "Specific File", BackupTypeEnum.SpecificFile)
             };
         }
         #endregion
@@ -119,11 +119,11 @@ namespace GeekathonAutoSync.EntityFrameworkCore.Seed.Host
         {
             return new List<DBType>
             {
-                new DBType(Guid.NewGuid(), "PostgreSQL"),
-                new DBType(Guid.NewGuid(), "Microsoft SQL Server"),
-                new DBType(Guid.NewGuid(), "Oracle Database"),
-                new DBType(Guid.NewGuid(), "MySQL"),
-                new DBType(Guid.NewGuid(), "MongoDB")
+                new DBType(Guid.NewGuid(), "PostgreSQL", DbTypeEnum.PostgreSQL),
+                new DBType(Guid.NewGuid(), "Microsoft SQL Server", DbTypeEnum.MicrosoftSQLServer),
+                new DBType(Guid.NewGuid(), "Oracle Database", DbTypeEnum.OracleDatabase),
+                new DBType(Guid.NewGuid(), "MySQL", DbTypeEnum.MySQL),
+                new DBType(Guid.NewGuid(), "MongoDB", DbTypeEnum.MongoDB)
             };
         }
         #endregion
@@ -181,10 +181,10 @@ namespace GeekathonAutoSync.EntityFrameworkCore.Seed.Host
         {
             return new List<CloudStorage>
             {
-                new CloudStorage(Guid.NewGuid(), "Amazon S3"),
-                new CloudStorage(Guid.NewGuid(), "Microsoft Azure"),
-                new CloudStorage(Guid.NewGuid(), "Google Cloud"),
-                new CloudStorage(Guid.NewGuid(), "Alibaba Cloud")
+                new CloudStorage(Guid.NewGuid(), "Amazon S3", CloudStorageType.AmazonS3),
+                new CloudStorage(Guid.NewGuid(), "Microsoft Azure", CloudStorageType.MicrosoftAzure),
+                new CloudStorage(Guid.NewGuid(), "Google Cloud", CloudStorageType.GoogleCloud),
+                new CloudStorage(Guid.NewGuid(), "Alibaba Cloud", CloudStorageType.AlibabaCloud)
             };
         }
         #endregion

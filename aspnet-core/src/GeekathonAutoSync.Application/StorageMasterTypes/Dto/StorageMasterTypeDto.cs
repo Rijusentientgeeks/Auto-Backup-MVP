@@ -10,5 +10,6 @@ namespace GeekathonAutoSync.StorageMasterTypes.Dto
     public class StorageMasterTypeDto : FullAuditedEntity<Guid>
     {
         public string Name { get; set; }
+        public StorageMasterTypeEnum? Type { get; set; }
     }
 }

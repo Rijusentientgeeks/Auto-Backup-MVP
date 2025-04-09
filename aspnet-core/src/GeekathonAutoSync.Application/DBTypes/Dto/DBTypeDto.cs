@@ -10,5 +10,6 @@ namespace GeekathonAutoSync.DBTypes.Dto
     public class DBTypeDto : FullAuditedEntity<Guid>
     {
         public string Name { get; set; }
+        public DbTypeEnum? Type { get; set; }
     }
 }
