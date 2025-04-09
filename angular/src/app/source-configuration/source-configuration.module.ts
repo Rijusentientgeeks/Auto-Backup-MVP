@@ -13,7 +13,7 @@ import { FileUploadModule } from 'primeng/fileupload';
 import { TooltipModule } from 'primeng/tooltip';
 import { ToastModule } from 'primeng/toast';
 import { MessageService } from 'primeng/api';
-
+import { ProgressSpinnerModule } from 'primeng/progressspinner';
 @NgModule({
   declarations: [SourceConfigurationComponent],
   imports: [
@@ -27,6 +27,7 @@ import { MessageService } from 'primeng/api';
     FileUploadModule,
     TooltipModule,
     ToastModule,
+    ProgressSpinnerModule
   ],
   providers: [MessageService,BackUPTypeServiceProxy,DBTypeServiceProxy,BackUpStorageConfiguationServiceProxy,SourceConfiguationServiceProxy,AutoBackupServiceProxy ],
   exports: [SourceConfigurationComponent],

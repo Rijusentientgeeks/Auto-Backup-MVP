@@ -38,6 +38,7 @@ export class ScheduleBackupComponent implements OnInit {
     { label: "Saturday", value: 6 },
   ];
   sourceConfigs: SourceConfiguationDto[];
+  isSaving: any;
 
   constructor(
     private fb: FormBuilder,
@@ -88,11 +89,12 @@ export class ScheduleBackupComponent implements OnInit {
           this.backupConfigs = result.items.map((config: any) => {
             const backUPType = config.backUPType?.name || "";
             const dbType = config.dbType?.name || "";
+            const IP = config.serverIP || "";
             return {
               backUPType,
               dbType,
               backUpStorageConfiguationId: config.id,
-              label: dbType ? `${backUPType} - ${dbType}` : backUPType,
+              label: dbType ? `${backUPType} - ${dbType}` : `${backUPType} - ${IP}`
             };
           });
           this.cdr.detectChanges();
@@ -119,6 +121,7 @@ export class ScheduleBackupComponent implements OnInit {
 
   onSubmit(): void {
     if (this.scheduleForm.valid) {
+      this.isSaving = true;
       const frequencyValue = this.scheduleForm.value.frequency?.value ?? "*";
       const dayOfWeekValue = this.scheduleForm.value.dayOfWeek?.value ?? "*";
       const time = this.scheduleForm.value.time;
@@ -129,7 +132,6 @@ export class ScheduleBackupComponent implements OnInit {
         time,
         dayOfMonthValue
       );
-      this.scheduleTask(this.cronExpression);
       const formValue = this.scheduleForm.value;
       const formattedTime = formValue.time
         ? `${formValue.time}:00` // Append seconds to match "HH:mm:ss"
@@ -154,6 +156,9 @@ export class ScheduleBackupComponent implements OnInit {
           this.loadSourceConfigs();
           this.loadfrequencies();
           this.scheduleForm.reset();
+          this.isSaving = false;
+          this.cronExpression = "";
+          this.showDayOfWeek = false; 
         },
         error: (err) => {
           this.messageService.add({
@@ -162,6 +167,7 @@ export class ScheduleBackupComponent implements OnInit {
             detail: "Something went wrong!",
             life: 2000,
           });
+          this.isSaving = false;
         },
       });
     } else {
@@ -184,6 +190,8 @@ export class ScheduleBackupComponent implements OnInit {
     const [hour, minute] = time.split(":");
 
     switch (frequency) {
+      case "Hourly":
+        return `${minute} * * * *`; // Every hour at the specified minute
       case "Daily":
         return `${minute} ${hour} * * *`; // Every day at the specified time
       case "Weekly":
@@ -209,7 +217,4 @@ export class ScheduleBackupComponent implements OnInit {
     }
   }
 
-  scheduleTask(cronExpression: string): void {
-    console.log(`Task scheduled with cron: ${cronExpression}`);
-  }
 }

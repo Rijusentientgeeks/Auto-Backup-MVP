@@ -121,7 +121,6 @@
     </ng-template>
   </div>
   <p-toast></p-toast>
-
   <p-dialog
     [(visible)]="displayDialog"
     [modal]="true"
@@ -390,7 +389,7 @@
   </p-dialog>
 
   <div *ngIf="isSaving" class="loading-overlay">
-    <i class="pi pi-spin pi-spinner loader-icon"></i>
-    <p class="loading-text text-white">Saving data, please wait...</p>
+    <i class="pi pi-spin pi-spinner loader-icon"></i>&nbsp;
+    <p class="loading-text text-white">Please Wait...</p>
   </div>
 </div>

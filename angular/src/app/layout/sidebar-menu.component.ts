@@ -42,7 +42,7 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
     getMenuItems(): MenuItem[] {
         return [
             // new MenuItem(this.l('About'), '/app/about', 'fas fa-info-circle'),
-            new MenuItem(this.l('HomePage'), '/app/home', 'fas fa-home'),
+            new MenuItem(this.l('Dashboard'), '/app/home', 'fas fa-home'),
             new MenuItem(
                 this.l('Administration'),
                 '',
@@ -99,13 +99,7 @@ export class SidebarMenuComponent extends AppComponentBase implements OnInit {
                             '/app/schedule-backup',
                             'fas fa-calendar-alt',
                             'Pages.Users'
-                        ),
-                        new MenuItem(
-                            this.l('QuickBackup'),
-                            '/app/Source-configuration',
-                            'fas fa-play-circle',
-                            'Pages.Users'
-                        ),
+                        ),                     
                         new MenuItem(
                             this.l('BackupLogs'),
                             '/app/backup-logs',

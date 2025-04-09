@@ -10,4 +10,34 @@
   button {
     margin-top: 10px;
   }
+  .loading-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-color: rgba(0, 0, 0, 0.5); 
+    z-index: 9999; 
+    display: flex;
+    align-items: center;
+    justify-content: center;
   
+    .loader-container {
+      text-align: center;
+      background-color: #fff;
+      padding: 20px 40px;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+  
+    .loader-icon {
+      font-size: 2.5rem;
+      color: #007bff; 
+    }
+  
+    .loading-text {
+      margin-top: 10px;
+      font-size: 1.2rem;
+      color: #333;
+    }
+  }

@@ -91,4 +91,8 @@
       </div>
     </form>
   </div>
+  <div *ngIf="isSaving" class="loading-overlay">
+    <i class="pi pi-spin pi-spinner loader-icon"></i>
+    <p class="loading-text text-white">&nbsp;Please Wait...</p>
+  </div>
 </div>
