@@ -17,6 +17,8 @@ using Abp.AspNetCore.SignalR.Hubs;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
 using System.IO;
+using Hangfire;
+using GeekathonAutoSync.Jobs;
 
 namespace GeekathonAutoSync.Web.Host.Startup
 {
@@ -42,6 +44,16 @@ namespace GeekathonAutoSync.Web.Host.Startup
             {
                 options.Filters.Add(new AbpAutoValidateAntiforgeryTokenAttribute());
             });
+
+            // Add Hangfire services
+            services.AddHangfire(configuration =>
+                configuration.SetDataCompatibilityLevel(CompatibilityLevel.Version_170)
+                             .UseSimpleAssemblyNameTypeSerializer()
+                             .UseSqlServerStorage(_appConfiguration.GetConnectionString("Default")));
+
+            services.AddHangfireServer();
+
+            
 
             IdentityRegistrar.Register(services);
             AuthConfigurer.Configure(services, _appConfiguration);
@@ -79,6 +91,8 @@ namespace GeekathonAutoSync.Web.Host.Startup
                     )
                 )
             );
+            // Register the job scheduler service
+            services.AddTransient<JobSchedulerAppService>();
         }
 
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
@@ -89,18 +103,26 @@ namespace GeekathonAutoSync.Web.Host.Startup
 
             app.UseStaticFiles();
 
+            app.UseHangfireDashboard("/hangfire"); // Hangfire Dashboard
+
             app.UseRouting();
 
             app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseAbpRequestLocalization();
+            //using (var scope = app.ApplicationServices.CreateScope())
+            //{
+            //    var jobScheduler = scope.ServiceProvider.GetRequiredService<JobSchedulerAppService>();
+            //    jobScheduler.ScheduleJobs();
+            //}
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapHub<AbpCommonHub>("/signalr");
                 endpoints.MapControllerRoute("default", "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapControllerRoute("defaultWithArea", "{area}/{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapHangfireDashboard(); // Enable Hangfire Dashboard
             });
 
             // Enable middleware to serve generated Swagger as a JSON endpoint

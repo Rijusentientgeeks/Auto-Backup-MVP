@@ -1,0 +1,45 @@
+/* Filter Section Styling */
+.filter-section {
+    margin-bottom: 1.5rem;
+  }
+  
+  .filter-group {
+    margin-bottom: 1rem;
+  }
+  
+  .filter-label {
+    color: #495057;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+  
+  .filter-dropdown {
+    border-radius: 6px;
+    border: 1px solid #ced4da;
+    transition: border-color 0.15s ease-in-out;
+  }
+  
+  .filter-dropdown:hover {
+    border-color: #80bdff;
+  }
+  
+  .filter-dropdown:focus {
+    border-color: #80bdff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+  }
+  
+  .filter-input {
+    padding-left: 2.5rem;
+    border-radius: 6px;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .filter-section {
+      margin-bottom: 1rem;
+    }
+    
+    .filter-group {
+      margin-bottom: 0.75rem;
+    }
+  }

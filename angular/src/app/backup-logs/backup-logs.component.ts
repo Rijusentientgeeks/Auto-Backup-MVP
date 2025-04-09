@@ -37,13 +37,14 @@ export class BackupLogsComponent implements OnInit {
     private cdr: ChangeDetectorRef
   ) {}
 
-  ngOnInit(): void {
-    this.LoadBackupTypes();
-    this.loadStorageTypes();
-    this.loadCloudStorageTypes();
-    this.loadSourceConfigs();
-    this.loadBackupLogsLazy({ first: this.first, rows: this.rows });
-  }
+  // Remove the setTimeout and modify ngOnInit like this:
+ngOnInit(): void {
+  this.LoadBackupTypes();
+  this.loadStorageTypes();
+  this.loadCloudStorageTypes();
+  this.loadSourceConfigs();
+  // this.loadBackupLogsLazy({ first: 0, rows: 10 });
+}
 
 
   LoadBackupTypes(): void {
@@ -105,12 +106,16 @@ export class BackupLogsComponent implements OnInit {
     
     this.searchTimer = setTimeout(() => {
       this.first = 0;
-      this.loadBackupLogsLazy({ first: this.first, rows: this.rows });
+      this.loadBackupLogsLazy({ first: 0, rows: this.rows });
     }, 500);
   }
 
   loadBackupLogsLazy(event: LazyLoadEvent): void {
     this.loading = true;
+    
+    // Ensure we have proper pagination values
+    const first = event.first || 0;
+    const rows = event.rows || 10;
     
     this.backupService.getAllBackupLog(
       this.keyword, 
@@ -118,24 +123,27 @@ export class BackupLogsComponent implements OnInit {
       this.selectedStorageType, 
       this.selectedBackupType, 
       this.selectedCloudStorage, 
-      event.first, 
-      event.rows
+      first, 
+      rows
     ).subscribe({
       next: (result) => {
-        debugger;
         this.backupLogs = result.items || [];
         this.totalRecords = result.totalCount || 0;
         this.loading = false;
+        this.first = first; // Update the first position
+        this.rows = rows;   // Update the rows per page
+        this.cdr.detectChanges(); // Ensure change detection runs
       },
       error: (err) => {
         console.error('Error fetching backup logs:', err);
         this.loading = false;
+        this.cdr.detectChanges();
       }
     });
   }
 
   downloadBackup(backupLog: BackUpLogDto) {
-    debugger
+    debugger;
     // this.backupDownloadService.downloadBackup(backupLog.sourceConfiguationId, backupLog.backUpFileName);
     this.backupDownloadService.downloadBackup({
       sourceConfigurationId: backupLog.sourceConfiguationId,

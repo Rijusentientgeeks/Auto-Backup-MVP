@@ -19,7 +19,7 @@
         [ngStyle]="{ backgroundColor: '#F1F8E9' }">
         <div class="header-row">
           <i class="storage-icon"></i>
-          <h3 class="storage-title text-primary" *ngIf="entry.cloudStorage">
+          <h3 class="storage-title text-primary">
             {{ entry?.backupName || entry.cloudStorage?.name || entry.storageMasterType?.name }}
           </h3>
           <div class="icon-actions">
@@ -80,6 +80,8 @@
     [showCurrentPageReport]="true"
     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
     responsiveLayout="scroll"
+    [scrollable]="true"
+    scrollHeight="300px"
     styleClass="p-datatable-striped p-datatable-gridlines"
   >
     <ng-template pTemplate="header">
@@ -99,7 +101,6 @@
             pButton
             icon="pi pi-download"
             class="p-button-icon-only p-button rounded"
-            [disabled]="log.backupLogStatus !== 0"
             title="Download"
             (click)="downloadBackup(log)"
           ></button>
