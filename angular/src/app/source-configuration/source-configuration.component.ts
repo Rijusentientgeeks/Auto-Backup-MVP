@@ -189,20 +189,33 @@ export class SourceConfigurationComponent implements OnInit {
       );
       this.sourceForm.controls["dbUsername"].setValidators(Validators.required);
       this.sourceForm.controls["dbPassword"].setValidators(Validators.required);
+      this.sourceForm.controls["backUPType"].setValidators(Validators.required);
+      this.sourceForm.controls["backUpStorageConfiguationId"].setValidators(
+        Validators.required
+      );
       this.sourceForm.controls["os"].clearValidators();
-      this.sourceForm.controls["sourcepath"].clearValidators();
+      this.sourceForm.controls["sourcePath"].clearValidators();
       this.sourceForm.controls["privateKeyPath"].clearValidators();
       this.sourceForm.controls["backUpInitiatedPath"].clearValidators();
     } else {
       this.sourceForm.controls["dbType"].clearValidators();
-      this.sourceForm.controls["serverIP"].clearValidators();
+      this.sourceForm.controls["serverIP"].setValidators(Validators.required);
       // this.sourceForm.controls["dbInitialCatalog"].clearValidators();
-      this.sourceForm.controls["sshUserName"].clearValidators();
+      this.sourceForm.controls["sshUserName"].setValidators(
+        Validators.required
+      );
       this.sourceForm.controls["sshPassword"].clearValidators();
-      this.sourceForm.controls["os"].clearValidators();
+      this.sourceForm.controls["databaseName"].clearValidators();
+      this.sourceForm.controls["dbUsername"].clearValidators();
+      this.sourceForm.controls["dbPassword"].clearValidators();
+      this.sourceForm.controls["os"].setValidators(Validators.required);
       this.sourceForm.controls["privateKeyPath"].clearValidators();
       this.sourceForm.controls["backUpInitiatedPath"].clearValidators();
-      this.sourceForm.controls["sourcepath"].setValidators(Validators.required);
+      this.sourceForm.controls["sourcePath"].setValidators(Validators.required);
+      this.sourceForm.controls["backUPType"].setValidators(Validators.required);
+      this.sourceForm.controls["backUpStorageConfiguationId"].setValidators(
+        Validators.required
+      );
     }
 
     this.sourceForm.controls["dbType"].updateValueAndValidity();
@@ -214,9 +227,13 @@ export class SourceConfigurationComponent implements OnInit {
     this.sourceForm.controls["dbUsername"].updateValueAndValidity();
     this.sourceForm.controls["dbPassword"].updateValueAndValidity();
     this.sourceForm.controls["os"].updateValueAndValidity();
-    this.sourceForm.controls["sourcepath"].updateValueAndValidity();
+    this.sourceForm.controls["sourcePath"].updateValueAndValidity();
     this.sourceForm.controls["backUpInitiatedPath"].updateValueAndValidity();
     this.sourceForm.controls["privateKeyPath"].updateValueAndValidity();
+    this.sourceForm.controls["backUPType"].updateValueAndValidity();
+    this.sourceForm.controls[
+      "backUpStorageConfiguationId"
+    ].updateValueAndValidity();
   }
   openAddSourceDialog(): void {
     this.isEdit = false;
@@ -234,11 +251,14 @@ export class SourceConfigurationComponent implements OnInit {
     const selectedDbType = this.DbTypes.find(
       (type) => type.value === config.dbType?.id
     );
+
     this.sourceForm.patchValue({
       ...config,
+      sourcePath: config.sourcepath,
       backUPType: selectedBackupType,
       dbType: selectedDbType ? selectedDbType.value : null,
     });
+
     setTimeout(() => {
       if (selectedBackupType) {
         this.onBackupTypeChange({ value: selectedBackupType });
@@ -275,6 +295,12 @@ export class SourceConfigurationComponent implements OnInit {
             () => {
               this.closeDialog();
               this.isSaving = false;
+              this.messageService.add({
+                severity: "success",
+                summary: "success",
+                detail: "Configuration updated successfully!",
+                life: 2000,
+              });
               this.loadSourceConfigs();
             },
             (error) => {
@@ -294,6 +320,12 @@ export class SourceConfigurationComponent implements OnInit {
             () => {
               this.closeDialog();
               this.isSaving = false;
+              this.messageService.add({
+                severity: "success",
+                summary: "success",
+                detail: "Configuration Created successfully!",
+                life: 2000,
+              });
               this.loadSourceConfigs();
             },
             (error) => {

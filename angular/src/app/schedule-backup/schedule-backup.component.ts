@@ -4,7 +4,12 @@ import {
   FormGroup,
   Validators,
 } from "@node_modules/@angular/forms";
+import { MessageService } from "primeng/api";
 import {
+  BackUpFrequencyDto,
+  BackUpFrequencyServiceProxy,
+  BackUpScheduleCreateDto,
+  BackUpScheduleServiceProxy,
   SourceConfiguationDto,
   SourceConfiguationServiceProxy,
 } from "@shared/service-proxies/service-proxies";
@@ -19,15 +24,10 @@ export class ScheduleBackupComponent implements OnInit {
   cronExpression: string = "";
   showDayOfWeek = false;
   showDayOfMonth: boolean;
-  backupConfigs: any[] = []; // Backup configurations
+  backupConfigs: any[] = [];
 
   daysOfMonth: { label: string; value: number }[] = [];
-  frequencies = [
-    { label: "Daily", value: "daily" },
-    { label: "Weekly", value: "weekly" },
-    { label: "Monthly", value: "monthly" },
-  ];
-
+  frequencies = [];
   daysOfWeek = [
     { label: "Sunday", value: 0 },
     { label: "Monday", value: 1 },
@@ -42,16 +42,22 @@ export class ScheduleBackupComponent implements OnInit {
   constructor(
     private fb: FormBuilder,
     private sourceConfigService: SourceConfiguationServiceProxy,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    private BackUPTypeService: BackUpFrequencyServiceProxy,
+    private BackUpScheduleService: BackUpScheduleServiceProxy,
+    private messageService: MessageService
   ) {}
 
   ngOnInit(): void {
     this.loadSourceConfigs();
+    this.loadfrequencies();
     this.scheduleForm = this.fb.group({
       frequency: ["", Validators.required],
       dayOfWeek: [null],
       dayOfMonth: [null],
       time: ["", Validators.required],
+      sourceConfiguationId: ["", Validators.required],
+      backupDate: [null],
     });
     this.scheduleForm.get("frequency")?.valueChanges.subscribe((value) => {
       this.showDayOfWeek = value === "weekly";
@@ -62,24 +68,37 @@ export class ScheduleBackupComponent implements OnInit {
       value: i + 1,
     }));
   }
-
+  loadfrequencies(): void {
+    this.BackUPTypeService.getAll().subscribe({
+      next: (result) => {
+        if (result && result.items) {
+          this.frequencies = result.items.map((item: BackUpFrequencyDto) => ({
+            label: item.name,
+            value: item.id,
+          }));
+        }
+      },
+      error: (err) => {},
+    });
+  }
   loadSourceConfigs(): void {
     this.sourceConfigService.getAll(undefined, undefined, 1000, 0).subscribe({
       next: (result) => {
         if (result && result.items) {
-           ;
-          this.backupConfigs = result.items.map((config: any) => ({
-            backUPType: config.backUPType.name,
-            dbType: config.dbType?.name,
-            backUpStorageConfiguationId: config.backUpStorageConfiguationId,
-          }));
-
+          this.backupConfigs = result.items.map((config: any) => {
+            const backUPType = config.backUPType?.name || "";
+            const dbType = config.dbType?.name || "";
+            return {
+              backUPType,
+              dbType,
+              backUpStorageConfiguationId: config.id,
+              label: dbType ? `${backUPType} - ${dbType}` : backUPType,
+            };
+          });
           this.cdr.detectChanges();
         }
       },
-      error: (err) => {
-        console.error("Error fetching Source Configurations:", err);
-      },
+      error: (err) => {},
     });
   }
   getDaySuffix(day: number): string {
@@ -105,21 +124,54 @@ export class ScheduleBackupComponent implements OnInit {
       const time = this.scheduleForm.value.time;
       const dayOfMonthValue = this.scheduleForm.value.dayOfMonth?.value ?? "*";
       this.cronExpression = this.generateCron(
-        frequencyValue,
+        this.scheduleForm.value.frequency?.label,
         dayOfWeekValue,
         time,
         dayOfMonthValue
       );
       this.scheduleTask(this.cronExpression);
+      const formValue = this.scheduleForm.value;
+      const formattedTime = formValue.time
+        ? `${formValue.time}:00` // Append seconds to match "HH:mm:ss"
+        : null;
 
-      const formData = {
-        ...this.scheduleForm.value,
+      const payload = BackUpScheduleCreateDto.fromJS({
+        sourceConfiguationId: formValue.sourceConfiguationId,
+        backupDate: null,
+        backupTime: formattedTime,
+        backUpFrequencyId: formValue.frequency?.value,
         cronExpression: this.cronExpression,
-      };
-
-      console.log("Final Payload:", formData);
+      });
+      payload.backupDate = null;
+      this.BackUpScheduleService.create(payload).subscribe({
+        next: (response) => {
+          this.messageService.add({
+            severity: "success",
+            summary: "success",
+            detail: "Scheduled successfully!",
+            life: 2000,
+          });
+          this.loadSourceConfigs();
+          this.loadfrequencies();
+          this.scheduleForm.reset();
+        },
+        error: (err) => {
+          this.messageService.add({
+            severity: "error",
+            summary: "Error",
+            detail: "Something went wrong!",
+            life: 2000,
+          });
+        },
+      });
     } else {
       this.scheduleForm.markAllAsTouched();
+      this.messageService.add({
+        severity: "error",
+        summary: "Error",
+        detail: "All fields are required!",
+        life: 2000,
+      });
     }
   }
 
@@ -132,11 +184,11 @@ export class ScheduleBackupComponent implements OnInit {
     const [hour, minute] = time.split(":");
 
     switch (frequency) {
-      case "daily":
+      case "Daily":
         return `${minute} ${hour} * * *`; // Every day at the specified time
-      case "weekly":
+      case "Weekly":
         return `${minute} ${hour} * * ${dayOfWeek !== null ? dayOfWeek : "*"}`; // Use dayOfWeek if available
-      case "monthly":
+      case "Monthly":
         return `${minute} ${hour} ${
           dayOfMonth !== null ? dayOfMonth : "*"
         } * *`; // Use dayOfMonth if available
@@ -146,12 +198,9 @@ export class ScheduleBackupComponent implements OnInit {
   }
 
   onFrequencyChange(event: any): void {
-     ;
-    const selectedValue = event.value?.value;
-
-    this.showDayOfWeek = selectedValue === "weekly";
-    this.showDayOfMonth = selectedValue === "monthly";
-
+    const selectedValue = event.value?.label;
+    this.showDayOfWeek = selectedValue === "Weekly";
+    this.showDayOfMonth = selectedValue === "Monthly";
     if (selectedValue !== "weekly") {
       this.scheduleForm.get("dayOfWeek")?.setValue(null);
     }

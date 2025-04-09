@@ -4,26 +4,29 @@
   </div>
 
   <div class="card shadow-lg p-4 bg-white rounded">
+    <p-toast></p-toast>
     <form [formGroup]="scheduleForm" (ngSubmit)="onSubmit()">
       <div class="row mb-3">
         <div class="col-md-3">
           <label for="backUpStorageConfiguationId" class="form-label fw-bold">
-            <i class="pi pi-database"></i> Backup Configuration </label
+            <i class="pi pi-database"></i> Backup Configuration
+            <span class="text-danger">*</span> </label
           ><br />
           <p-dropdown
             id="backUpStorageConfiguationId"
             [options]="backupConfigs"
-            formControlName="backUpStorageConfiguationId"
-            optionLabel="backupName"
+            formControlName="sourceConfiguationId"
+            optionLabel="label"
             optionValue="backUpStorageConfiguationId"
             placeholder="Select Configuration"
-            class="w-100"
+            [style]="{ width: '100%' }"
           ></p-dropdown>
         </div>
 
         <div class="col-md-3">
           <label for="frequency" class="form-label fw-bold">
-            <i class="pi pi-clock"></i> Frequency </label
+            <i class="pi pi-clock text-primary"></i> Frequency
+            <span class="text-danger">*</span> </label
           ><br />
           <p-dropdown
             id="frequency"
@@ -31,43 +34,45 @@
             formControlName="frequency"
             optionLabel="label"
             placeholder="Select Frequency"
-            class="w-100"
+            [style]="{ width: '100%' }"
             (onChange)="onFrequencyChange($event)"
           ></p-dropdown>
         </div>
 
         <div class="col-md-3" *ngIf="showDayOfMonth">
           <label for="dayOfMonth" class="form-label fw-bold">
-            <i class="pi pi-calendar-plus"></i> Day of the Month
-          </label><br>
+            <i class="pi pi-calendar-plus text-primary"></i> Day of the Month
+            <span class="text-danger">*</span> </label
+          ><br />
           <p-dropdown
             id="dayOfMonth"
             [options]="daysOfMonth"
             formControlName="dayOfMonth"
             optionLabel="label"
             placeholder="Select Day"
-            class="w-100"
+            [style]="{ width: '100%' }"
           ></p-dropdown>
         </div>
 
         <div class="col-md-3" *ngIf="showDayOfWeek">
           <label for="dayOfWeek" class="form-label fw-bold">
-            <i class="pi pi-calendar"></i> Day of the Week
-          </label><br>
+            <i class="pi pi-calendar text-primary"></i> Day of the Week
+            <span class="text-danger">*</span> </label
+          ><br />
           <p-dropdown
             id="dayOfWeek"
             [options]="daysOfWeek"
             formControlName="dayOfWeek"
             optionLabel="label"
             placeholder="Select Day"
-            class="w-100"
+            [style]="{ width: '100%' }"
           ></p-dropdown>
         </div>
-      </div>
-      <div class="row mb-3">
-        <div class="col-md-6">
+
+        <div class="col-md-3">
           <label for="time" class="form-label fw-bold">
-            <i class="pi pi-clock"></i> Time
+            <i class="pi pi-clock text-primary"></i> Time
+            <span class="text-danger">*</span>
           </label>
           <input
             type="time"
