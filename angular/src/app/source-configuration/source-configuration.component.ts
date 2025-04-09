@@ -1,5 +1,6 @@
 import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { FormBuilder, FormGroup, Validators } from "@angular/forms";
+import { MessageService } from "primeng/api";
 import {
   AutoBackupServiceProxy,
   BackUpStorageConfiguationServiceProxy,
@@ -32,6 +33,12 @@ export class SourceConfigurationComponent implements OnInit {
   base64String: string = null;
   noData: false;
   isSaving: boolean = false;
+  osOptions = [
+    { label: "Windows", value: "Windows" },
+    { label: "Linux", value: "Linux" },
+    { label: "MacOS", value: "MacOS" },
+  ];
+
   constructor(
     private fb: FormBuilder,
     private BackUPTypeService: BackUPTypeServiceProxy,
@@ -39,8 +46,9 @@ export class SourceConfigurationComponent implements OnInit {
     private BackupStorageConfigService: BackUpStorageConfiguationServiceProxy,
     private sourceConfigService: SourceConfiguationServiceProxy,
     private autoBackupService: AutoBackupServiceProxy,
-    private cdr: ChangeDetectorRef
-  ) { }
+    private cdr: ChangeDetectorRef,
+    private messageService: MessageService
+  ) {}
 
   ngOnInit(): void {
     this.loadSourceConfigs();
@@ -57,33 +65,32 @@ export class SourceConfigurationComponent implements OnInit {
       serverIP: [""],
       dbInitialCatalog: [""],
       port: [""],
-      userID: [""],
-      password: [""],
       os: [""],
       privateKeyPath: [null],
-      sourcePath: [''],
-      backUpInitiatedPath: [''],
-      backUpStorageConfiguationId: ['', Validators.required],
-      backupName: [''],
+      sourcePath: [""],
+      backUpInitiatedPath: [""],
+      backUpStorageConfiguationId: ["", Validators.required],
+      backupName: [""],
+      databaseName: [""],
+      dbUsername: [""],
+      dbPassword: [""],
+      sshUserName: [""],
+      sshPassword: [""],
     });
-
   }
   onFileSelect(event: any): void {
-     
     const file = event.files[0];
     if (file) {
       this.convertToBase64(file);
     }
   }
   triggerOnDemandBackup(id: string): void {
-     
     this.autoBackupService.createBackup(id).subscribe({
       next: (result) => {
         if (result) {
-          console.log('API Response:', result);
           Swal.fire("Success", "Backup Created Successfully", "success");
         }
-      }
+      },
     });
   }
   isInvalid(controlName: string): boolean {
@@ -93,7 +100,6 @@ export class SourceConfigurationComponent implements OnInit {
 
   // Convert PEM file to Base64 string
   convertToBase64(file: File): void {
-     
     const reader = new FileReader();
 
     reader.onload = () => {
@@ -104,9 +110,7 @@ export class SourceConfigurationComponent implements OnInit {
       this.sourceForm.controls["privateKeyPath"].setValue(base64Data);
     };
 
-    reader.onerror = (error) => {
-      console.error("Error reading file:", error);
-    };
+    reader.onerror = (error) => {};
 
     // Read the file as a data URL (Base64)
     reader.readAsDataURL(file);
@@ -115,17 +119,12 @@ export class SourceConfigurationComponent implements OnInit {
   loadSourceConfigs(): void {
     this.sourceConfigService.getAll(undefined, undefined, 1000, 0).subscribe({
       next: (result) => {
-         ;
         if (result && result.items) {
-          console.log('API Response:', result.items);
           this.sourceConfigs = result.items;
-
           this.cdr.detectChanges();
         }
       },
-      error: (err) => {
-        console.error("Error fetching Source Configurations:", err);
-      },
+      error: (err) => {},
     });
   }
 
@@ -133,18 +132,13 @@ export class SourceConfigurationComponent implements OnInit {
     this.BackUPTypeService.getAll().subscribe({
       next: (result) => {
         if (result && result.items) {
-           
-          this.BackupTypes = result.items.map(
-            (item: BackUPTypeDto) => ({
-              name: item.name,
-              value: item.id,
-            })
-          );
+          this.BackupTypes = result.items.map((item: BackUPTypeDto) => ({
+            name: item.name,
+            value: item.id,
+          }));
         }
       },
-      error: (err) => {
-        console.error("Error fetching Details:", err);
-      },
+      error: (err) => {},
     });
   }
 
@@ -152,18 +146,13 @@ export class SourceConfigurationComponent implements OnInit {
     this.DatabaseTypeService.getAll().subscribe({
       next: (result) => {
         if (result && result.items) {
-           
-          this.DbTypes = result.items.map(
-            (item: DBTypeDto) => ({
-              name: item.name,
-              value: item.id,
-            })
-          );
+          this.DbTypes = result.items.map((item: DBTypeDto) => ({
+            name: item.name,
+            value: item.id,
+          }));
         }
       },
-      error: (err) => {
-        console.error("Error fetching Details:", err);
-      },
+      error: (err) => {},
     });
   }
   LoadBackupStorageConfigs(): void {
@@ -171,50 +160,63 @@ export class SourceConfigurationComponent implements OnInit {
       undefined,
       undefined,
       1000,
-      0).subscribe({
-        next: (result) => {
-          if (result && result.items) {
-            this.BackupStorageConfigs = result.items.map((item: any) => ({
-              // name: item.cloudStorage ? item.cloudStorage.name : item.storageMasterType.name,
-              name: item.backupName,
-              value: item.id,
-            }));
-          }
-        },
-        error: (err) => {
-          console.error("Error fetching Backup Storage Configurations:", err);
-        },
-      });
+      0
+    ).subscribe({
+      next: (result) => {
+        if (result && result.items) {
+          this.BackupStorageConfigs = result.items.map((item: any) => ({
+            // name: item.cloudStorage ? item.cloudStorage.name : item.storageMasterType.name,
+            name: item.backupName,
+            value: item.id,
+          }));
+        }
+      },
+      error: (err) => {},
+    });
   }
   onBackupTypeChange(event: any) {
-    this.showDatabaseFields = event.value?.name === 'DataBase';
+    this.showDatabaseFields = event.value?.name === "DataBase";
     if (this.showDatabaseFields) {
       this.sourceForm.controls["dbType"].setValidators(Validators.required);
       this.sourceForm.controls["serverIP"].setValidators(Validators.required);
-      this.sourceForm.controls["dbInitialCatalog"].setValidators(
+      // this.sourceForm.controls["dbInitialCatalog"].setValidators(Validators.required);
+      this.sourceForm.controls["sshUserName"].setValidators(
         Validators.required
       );
-      this.sourceForm.controls["userID"].setValidators(Validators.required);
-      this.sourceForm.controls["password"].setValidators(Validators.required);
+      this.sourceForm.controls["sshPassword"].clearValidators();
+      this.sourceForm.controls["databaseName"].setValidators(
+        Validators.required
+      );
+      this.sourceForm.controls["dbUsername"].setValidators(Validators.required);
+      this.sourceForm.controls["dbPassword"].setValidators(Validators.required);
       this.sourceForm.controls["os"].clearValidators();
-      this.sourceForm.controls["sourcePath"].clearValidators();
+      this.sourceForm.controls["sourcepath"].clearValidators();
+      this.sourceForm.controls["privateKeyPath"].clearValidators();
+      this.sourceForm.controls["backUpInitiatedPath"].clearValidators();
     } else {
       this.sourceForm.controls["dbType"].clearValidators();
       this.sourceForm.controls["serverIP"].clearValidators();
-      this.sourceForm.controls["dbInitialCatalog"].clearValidators();
-      this.sourceForm.controls["userID"].clearValidators();
-      this.sourceForm.controls["password"].clearValidators();
-      this.sourceForm.controls["os"].setValidators(Validators.required);
-      this.sourceForm.controls["sourcePath"].setValidators(Validators.required);
+      // this.sourceForm.controls["dbInitialCatalog"].clearValidators();
+      this.sourceForm.controls["sshUserName"].clearValidators();
+      this.sourceForm.controls["sshPassword"].clearValidators();
+      this.sourceForm.controls["os"].clearValidators();
+      this.sourceForm.controls["privateKeyPath"].clearValidators();
+      this.sourceForm.controls["backUpInitiatedPath"].clearValidators();
+      this.sourceForm.controls["sourcepath"].setValidators(Validators.required);
     }
 
-    this.sourceForm.controls['dbType'].updateValueAndValidity();
-    this.sourceForm.controls['serverIP'].updateValueAndValidity();
-    this.sourceForm.controls['dbInitialCatalog'].updateValueAndValidity();
-    this.sourceForm.controls['userID'].updateValueAndValidity();
-    this.sourceForm.controls['password'].updateValueAndValidity();
-    this.sourceForm.controls['os'].updateValueAndValidity();
-    this.sourceForm.controls['sourcePath'].updateValueAndValidity();
+    this.sourceForm.controls["dbType"].updateValueAndValidity();
+    this.sourceForm.controls["serverIP"].updateValueAndValidity();
+    // this.sourceForm.controls['dbInitialCatalog'].updateValueAndValidity();
+    this.sourceForm.controls["sshUserName"].updateValueAndValidity();
+    this.sourceForm.controls["sshPassword"].updateValueAndValidity();
+    this.sourceForm.controls["databaseName"].updateValueAndValidity();
+    this.sourceForm.controls["dbUsername"].updateValueAndValidity();
+    this.sourceForm.controls["dbPassword"].updateValueAndValidity();
+    this.sourceForm.controls["os"].updateValueAndValidity();
+    this.sourceForm.controls["sourcepath"].updateValueAndValidity();
+    this.sourceForm.controls["backUpInitiatedPath"].updateValueAndValidity();
+    this.sourceForm.controls["privateKeyPath"].updateValueAndValidity();
   }
   openAddSourceDialog(): void {
     this.isEdit = false;
@@ -224,33 +226,45 @@ export class SourceConfigurationComponent implements OnInit {
   }
 
   editConfig(config: any): void {
-     
     this.isEdit = true;
     this.selectedConfigId = config.id;
-      const selectedBackupType = this.BackupTypes.find(
+    const selectedBackupType = this.BackupTypes.find(
       (type) => type.value === config.backUPType?.id
     );
-  
     const selectedDbType = this.DbTypes.find(
       (type) => type.value === config.dbType?.id
     );
-  
     this.sourceForm.patchValue({
       ...config,
       backUPType: selectedBackupType,
-      dbType: selectedDbType,
+      dbType: selectedDbType ? selectedDbType.value : null,
     });
-  
-    if (selectedBackupType) {
-      this.onBackupTypeChange({ value: selectedBackupType });
-    }
-  
+    setTimeout(() => {
+      if (selectedBackupType) {
+        this.onBackupTypeChange({ value: selectedBackupType });
+      }
+    }, 0);
+
     this.displayDialog = true;
   }
-  
+
+  private isPasswordOrPrivateKeyProvided(): boolean {
+    const password = this.sourceForm.controls["sshPassword"].value;
+    const privateKey = this.sourceForm.controls["privateKeyPath"].value;
+    return !!password || !!privateKey;
+  }
 
   saveSourceConfig(): void {
-     
+    if (!this.isPasswordOrPrivateKeyProvided()) {
+      this.sourceForm.controls["sshPassword"].markAsTouched();
+      this.messageService.add({
+        severity: "error",
+        summary: "Error",
+        detail: "Please provide either Password or Private Key File.",
+        life: 2000,
+      });
+      return;
+    }
     if (this.sourceForm.valid) {
       this.isSaving = true;
       const formData = this.prepareFormData();
@@ -265,24 +279,31 @@ export class SourceConfigurationComponent implements OnInit {
             },
             (error) => {
               this.isSaving = false;
-              console.error("Error updating config:", error);
+              this.messageService.add({
+                severity: "error",
+                summary: "Error",
+                detail: "Something went wrong!",
+                life: 2000,
+              });
             }
           );
       } else {
-         
         this.sourceConfigService
           .create(formData as SourceConfiguationCreateDto)
           .subscribe(
             () => {
               this.closeDialog();
               this.isSaving = false;
-
               this.loadSourceConfigs();
             },
             (error) => {
               this.isSaving = false;
-
-              console.error("Error creating config:", error);
+              this.messageService.add({
+                severity: "error",
+                summary: "Error",
+                detail: "Something went wrong!",
+                life: 2000,
+              });
             }
           );
       }
@@ -295,12 +316,14 @@ export class SourceConfigurationComponent implements OnInit {
     const formData = this.sourceForm.value;
     let description = formData.backupName?.trim();
     if (!description) {
-      description = `${formData.backupName || 'Backup'} - ${formData.backUPType?.name || 'Type'} - ${formData.serverIP || 'Server'}`;
+      description = `${formData.backupName || "Backup"} - ${
+        formData.backUPType?.name || "Type"
+      } - ${formData.serverIP || "Server"}`;
     }
     if (this.isEdit && this.selectedConfigId) {
       return new SourceConfiguationUpdateDto({
         id: this.selectedConfigId,
-        backUPTypeId: formData.backUPType.value || '',
+        backUPTypeId: formData.backUPType.value || "",
         dbTypeId: formData.dbType || undefined,
         databaseName: formData.databaseName || undefined,
         dbUsername: formData.dbUsername || undefined,
@@ -316,12 +339,13 @@ export class SourceConfigurationComponent implements OnInit {
         backUpInitiatedPath: formData.backUpInitiatedPath || undefined,
         sourcepath: formData.sourcePath || undefined,
         os: formData.os || undefined,
-        backUpStorageConfiguationId: formData.backUpStorageConfiguationId || undefined,
+        backUpStorageConfiguationId:
+          formData.backUpStorageConfiguationId || undefined,
         backupName: description,
       });
     } else {
       return new SourceConfiguationCreateDto({
-        backUPTypeId: formData.backUPType.value || '',
+        backUPTypeId: formData.backUPType.value || "",
         dbTypeId: formData.dbType || undefined,
         databaseName: formData.databaseName || undefined,
         dbUsername: formData.dbUsername || undefined,
@@ -337,7 +361,8 @@ export class SourceConfigurationComponent implements OnInit {
         backUpInitiatedPath: formData.backUpInitiatedPath || undefined,
         sourcepath: formData.sourcePath || undefined,
         os: formData.os || undefined,
-        backUpStorageConfiguationId: formData.backUpStorageConfiguationId || undefined,
+        backUpStorageConfiguationId:
+          formData.backUpStorageConfiguationId || undefined,
         backupName: description,
       });
     }
