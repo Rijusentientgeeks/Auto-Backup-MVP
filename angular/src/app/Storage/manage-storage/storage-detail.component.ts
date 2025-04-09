@@ -34,14 +34,13 @@ export class StorageDetailComponent implements OnChanges, OnInit {
     private router: Router
   ) { }
   ngOnInit(): void {
-    ;
     var res = this.entries;
   }
   ngOnChanges(): void {
     this.filterData();
   }
   filterData(): void {
-    ;
+    debugger;
     this.filteredEntries = this.entries.filter(
       (entry) =>
         entry.storageMasterType?.name.toLowerCase() ===

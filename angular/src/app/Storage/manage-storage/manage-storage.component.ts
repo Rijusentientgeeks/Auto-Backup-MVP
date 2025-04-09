@@ -14,7 +14,6 @@ import {
   StorageMasterTypeDto,
   StorageMasterTypeServiceProxy,
 } from "@shared/service-proxies/service-proxies";
-import Swal from "sweetalert2";
 
 @Component({
   selector: "app-manage-storage",
@@ -131,8 +130,8 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
       0
     ).subscribe({
       next: (result) => {
-         ;
         if (result && result.items) {
+          debugger;
           this.storageEntries = result.items;
         }
       },
@@ -330,7 +329,7 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     const dto = new BackUpStorageConfiguationCreateDto();
   
     dto.storageMasterTypeId = formValues.StorageTypeId;
-    dto.cloudStorageId = this.isCloudStorage ? formValues.CloudStorageId.value : undefined;
+    dto.cloudStorageId = this.isCloudStorage ? formValues.CloudStorageId : undefined;
     dto.backupName = formValues.backupName;
     dto.nfS_IP = !this.isCloudStorage ? formValues.NFS_IP : undefined;
     dto.nfS_AccessUserID = !this.isCloudStorage ? formValues.NFS_AccessUserID : undefined;
@@ -353,7 +352,7 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
   
     dto.id = this.editingStorageId!;
     dto.storageMasterTypeId = formValues.StorageTypeId;
-    dto.cloudStorageId = this.isCloudStorage ? formValues.CloudStorageId.value : undefined;
+    dto.cloudStorageId = this.isCloudStorage ? formValues.CloudStorageId : undefined;
     dto.backupName = formValues.backupName;
     dto.nfS_IP = !this.isCloudStorage ? formValues.NFS_IP : undefined;
     dto.nfS_AccessUserID = !this.isCloudStorage ? formValues.NFS_AccessUserID : undefined;
