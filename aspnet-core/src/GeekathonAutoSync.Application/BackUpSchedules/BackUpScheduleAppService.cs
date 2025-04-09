@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Linq.Dynamic.Core;
+using GeekathonAutoSync.Jobs;
 
 namespace GeekathonAutoSync.BackUpSchedules
 {
@@ -18,14 +19,18 @@ namespace GeekathonAutoSync.BackUpSchedules
         private readonly IRepository<BackUpSchedule, Guid> _backUpScheduleRepository;
         private readonly IRepository<SourceConfiguation, Guid> _sourceConfiguationRepository;
         private readonly IRepository<BackUpFrequency, Guid> _backUpFrequencyRepository;
+        private readonly IJobSchedulerAppService _scheduler;
         public BackUpScheduleAppService(
             IRepository<BackUpSchedule, Guid> backUpScheduleRepository,
             IRepository<SourceConfiguation, Guid> sourceConfiguationRepository,
-            IRepository<BackUpFrequency, Guid> backUpFrequencyRepository)
+            IRepository<BackUpFrequency, Guid> backUpFrequencyRepository,
+            IJobSchedulerAppService scheduler
+            )
         {
             _backUpScheduleRepository = backUpScheduleRepository;
             _sourceConfiguationRepository = sourceConfiguationRepository;
             _backUpFrequencyRepository = backUpFrequencyRepository;
+            _scheduler = scheduler;
         }
         public async Task<PagedResultDto<BackUpScheduleDto>> GetAllAsync(GetBackUpScheduleInput input)
         {
@@ -73,6 +78,7 @@ namespace GeekathonAutoSync.BackUpSchedules
                 await CurrentUnitOfWork.SaveChangesAsync();
             }
             var getBackUpSchedule = await GetAsync(backUpScheduleID);
+            _scheduler.ScheduleJobs(getBackUpSchedule);
             return getBackUpSchedule;
         }
         public async Task<BackUpScheduleDto> UpdateAsync(BackUpScheduleUpdateDto input)
@@ -95,6 +101,7 @@ namespace GeekathonAutoSync.BackUpSchedules
                 await CurrentUnitOfWork.SaveChangesAsync();
             }
             var getBackUpScheduleAfterUpdate = await GetAsync(backUpScheduleID);
+            _scheduler.ScheduleJobs(getBackUpScheduleAfterUpdate);
             return getBackUpScheduleAfterUpdate;
         }
         public async Task<BackUpScheduleDto> GetAsync(Guid id)
