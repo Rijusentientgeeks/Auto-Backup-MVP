@@ -169,7 +169,6 @@ export class SourceConfigurationComponent implements OnInit {
       next: (result) => {
         if (result && result.items) {
           this.BackupStorageConfigs = result.items.map((item: any) => ({
-            // name: item.cloudStorage ? item.cloudStorage.name : item.storageMasterType.name,
             name: item.backupName,
             value: item.id,
           }));
@@ -290,7 +289,6 @@ export class SourceConfigurationComponent implements OnInit {
       return;
     }
     if (this.sourceForm.valid) {
-    
       this.isSaving = true;
       const formData = this.prepareFormData();
       if (this.isEdit && this.selectedConfigId) {
@@ -300,7 +298,6 @@ export class SourceConfigurationComponent implements OnInit {
             () => {
               this.closeDialog();
               this.isSaving = false;
-            
 
               this.messageService.add({
                 severity: "success",
@@ -312,7 +309,6 @@ export class SourceConfigurationComponent implements OnInit {
             },
             (error) => {
               this.isSaving = false;
-              
 
               this.messageService.add({
                 severity: "error",
@@ -329,7 +325,6 @@ export class SourceConfigurationComponent implements OnInit {
             () => {
               this.closeDialog();
               this.isSaving = false;
-    
 
               this.messageService.add({
                 severity: "success",
@@ -341,7 +336,6 @@ export class SourceConfigurationComponent implements OnInit {
             },
             (error) => {
               this.isSaving = false;
-  
 
               this.messageService.add({
                 severity: "error",

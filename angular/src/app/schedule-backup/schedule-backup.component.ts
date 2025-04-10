@@ -25,7 +25,6 @@ export class ScheduleBackupComponent implements OnInit {
   showDayOfWeek = false;
   showDayOfMonth: boolean;
   backupConfigs: any[] = [];
-
   daysOfMonth: { label: string; value: number }[] = [];
   frequencies = [];
   daysOfWeek = [
@@ -39,7 +38,6 @@ export class ScheduleBackupComponent implements OnInit {
   ];
   sourceConfigs: SourceConfiguationDto[];
   isSaving: any;
-
   constructor(
     private fb: FormBuilder,
     private sourceConfigService: SourceConfiguationServiceProxy,
@@ -191,15 +189,15 @@ export class ScheduleBackupComponent implements OnInit {
 
     switch (frequency) {
       case "Hourly":
-        return `${minute} * * * *`; // Every hour at the specified minute
+        return `${minute} * * * *`; 
       case "Daily":
-        return `${minute} ${hour} * * *`; // Every day at the specified time
+        return `${minute} ${hour} * * *`;
       case "Weekly":
-        return `${minute} ${hour} * * ${dayOfWeek !== null ? dayOfWeek : "*"}`; // Use dayOfWeek if available
+        return `${minute} ${hour} * * ${dayOfWeek !== null ? dayOfWeek : "*"}`; 
       case "Monthly":
         return `${minute} ${hour} ${
           dayOfMonth !== null ? dayOfMonth : "*"
-        } * *`; // Use dayOfMonth if available
+        } * *`;
       default:
         return "";
     }
