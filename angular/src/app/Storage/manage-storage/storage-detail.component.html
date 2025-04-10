@@ -96,7 +96,7 @@
       <tr>
         <td>{{ log.backUpFileName }}</td>
         <td>{{ log.completedTimeStamp | date: 'yyyy-MM-dd HH:mm' }}</td>
-        <td>
+        <!-- <td>
           <button
             pButton
             icon="pi pi-download"
@@ -104,6 +104,22 @@
             title="Download"
             (click)="downloadBackup(log)"
           ></button>
+        </td> -->
+        <td>
+          <!-- Show download button only if not downloading -->
+          <button
+            *ngIf="!downloadingIds.has(log.id)"
+            pButton
+            [disabled]="log.backupLogStatus !== 2"
+            icon="pi pi-download"
+            class="p-button-icon-only p-button rounded"
+            (click)="downloadBackup(log)"
+          ></button>
+        
+          <!-- Show spinner icon when downloading -->
+          <div *ngIf="downloadingIds.has(log.id)" class="loading-overlay ml-2">
+            <i class="pi pi-hourglass pi-spin" style="font-size: 1.5rem; color: gold"></i>
+          </div>
         </td>
       </tr>
     </ng-template>

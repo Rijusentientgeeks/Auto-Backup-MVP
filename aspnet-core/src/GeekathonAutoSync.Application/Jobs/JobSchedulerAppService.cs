@@ -1,4 +1,5 @@
-﻿using Abp.UI;
+﻿using Abp.Domain.Uow;
+using Abp.UI;
 using GeekathonAutoSync.AutoBackup;
 using GeekathonAutoSync.BackUpSchedules.Dto;
 using Hangfire;
@@ -10,15 +11,16 @@ namespace GeekathonAutoSync.Jobs
     public class JobSchedulerAppService : GeekathonAutoSyncAppServiceBase, IJobSchedulerAppService
     {
         private readonly IAutoBackupAppService _autoBackupAppService;
+        private readonly IUnitOfWorkManager _unitOfWorkManager;
 
-        public JobSchedulerAppService(IAutoBackupAppService autoBackupAppService)
+        public JobSchedulerAppService(IAutoBackupAppService autoBackupAppService, IUnitOfWorkManager unitOfWorkManager)
         {
             _autoBackupAppService = autoBackupAppService;
+            _unitOfWorkManager = unitOfWorkManager;
         }
 
         public async void ScheduleJobs(BackUpScheduleDto backUpSchedule)
         {
-            //Schedule with Cron Expression
             RecurringJob.AddOrUpdate(
                 $"Tenant-{backUpSchedule.TenantId} , Job-{backUpSchedule.Id}",  // BackUpName
                 () => ExecuteBackupJob(backUpSchedule.TenantId, backUpSchedule.SourceConfiguationId.Value),
@@ -26,20 +28,20 @@ namespace GeekathonAutoSync.Jobs
             );
         }
 
-        [AutomaticRetry(Attempts = 0)] // Retry on failure
+        [AutomaticRetry(Attempts = 0)]
         public async Task ExecuteBackupJob(int tenantId, Guid sourceConfigurationId)
         {
-            try
+            using (var uow = _unitOfWorkManager.Begin())
             {
-                var res = await _autoBackupAppService.CreateBackup(sourceConfigurationId.ToString());
-                Console.WriteLine($"✅ Backup completed for Tenant: {tenantId}, {res}");
+                using (_unitOfWorkManager.Current.SetTenantId(tenantId))
+                {
+                    await _autoBackupAppService.CreateBackup(sourceConfigurationId.ToString());
+                    await uow.CompleteAsync();
+                }
             }
-            catch (Exception ex)
-            {
-                //throw new UserFriendlyException();
-                Console.WriteLine($"Backup is not completed for Tenant: {tenantId}, {ex.Message}");
-            }
+
         }
+
 
         public async void RemoveScheduleJobs(int tenantId, Guid backUpScheduleId)
         {
