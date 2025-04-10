@@ -4,12 +4,12 @@
       <h2 class="h4 fw-bold mb-0">Backup Logs</h2>
     </div>
   </div> -->
-  <div class="card shadow-lg p-4 bg-white rounded">
-    <div class="row mb-4">
-      <div class="col">
-        <h2 class="h4 fw-bold mb-0">Backup Logs</h2>
-      </div>
+<div class="card shadow-lg p-4 bg-white rounded">
+  <div class="row mb-4">
+    <div class="col">
+      <h2 class="h4 fw-bold mb-0">Backup Logs</h2>
     </div>
+  </div>
 
   <!-- <div class="row gy-3">
     <div class="col-md-3">
@@ -90,7 +90,9 @@
     <!-- Backup Type Dropdown -->
     <div class="col-md-3 col-6">
       <div class="filter-group">
-        <label for="backupType" class="form-label fw-bold filter-label">Backup Type</label>
+        <label for="backupType" class="form-label fw-bold filter-label"
+          >Backup Type</label
+        >
         <p-dropdown
           inputId="backupType"
           [(ngModel)]="selectedBackupType"
@@ -113,7 +115,9 @@
     <!-- Storage Type Dropdown -->
     <div class="col-md-3 col-6">
       <div class="filter-group">
-        <label for="storageType" class="form-label fw-bold filter-label">Storage Type</label>
+        <label for="storageType" class="form-label fw-bold filter-label"
+          >Storage Type</label
+        >
         <p-dropdown
           inputId="storageType"
           [(ngModel)]="selectedStorageType"
@@ -136,7 +140,9 @@
     <!-- Cloud Storage Dropdown -->
     <div class="col-md-3 col-6">
       <div class="filter-group">
-        <label for="cloudStorage" class="form-label fw-bold filter-label">Cloud Storage</label>
+        <label for="cloudStorage" class="form-label fw-bold filter-label"
+          >Cloud Storage</label
+        >
         <p-dropdown
           inputId="cloudStorage"
           [(ngModel)]="selectedCloudStorage"
@@ -159,7 +165,9 @@
     <!-- Source Config Dropdown -->
     <div class="col-md-3 col-6">
       <div class="filter-group">
-        <label for="sourceConfig" class="form-label fw-bold filter-label">Source Config</label>
+        <label for="sourceConfig" class="form-label fw-bold filter-label"
+          >Source Config</label
+        >
         <p-dropdown
           inputId="sourceConfig"
           [(ngModel)]="selectedSourceConfig"
@@ -182,7 +190,9 @@
     <!-- Keyword Search -->
     <div class="col-md-3 col-6">
       <div class="filter-group">
-        <label for="keyword" class="form-label fw-bold filter-label">Keyword</label>
+        <label for="keyword" class="form-label fw-bold filter-label"
+          >Keyword</label
+        >
         <span class="p-input-icon-left w-100">
           <i class="pi pi-search"></i>
           <input
@@ -212,7 +222,7 @@
       (onLazyLoad)="loadBackupLogsLazy($event)"
       [loading]="loading"
       [scrollable]="true"
-        scrollHeight="500px"
+      scrollHeight="500px"
       styleClass="p-datatable-striped p-datatable-gridlines"
     >
       <ng-template pTemplate="header">
@@ -260,13 +270,21 @@
           <td>
             <button
               pButton
-              [disabled]="log.backupLogStatus !== 2"
-              icon="pi pi-download"
+              [disabled]="log.backupLogStatus !== 2 || isDownloading"
+              [icon]="
+                isDownloading ? 'pi pi-spinner pi-spin' : 'pi pi-download'
+              "
               class="p-button-icon-only p-button rounded"
               (click)="downloadBackup(log)"
-            >
-              <i class="pi pi-download"></i>
-            </button>
+            ></button>
+
+            <div *ngIf="isDownloading" class="loading-overlay">
+              <i
+                class="pi pi-hourglass pi-spin"
+                style="font-size: 1.5rem; color: gold"
+              ></i>
+              <!-- <p class="loading-text text-white">&nbsp;Downloading...</p> -->
+            </div>
           </td>
         </tr>
       </ng-template>
