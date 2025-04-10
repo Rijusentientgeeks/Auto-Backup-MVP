@@ -4,6 +4,7 @@ using GeekathonAutoSync.BackUpStorageConfiguations.Dto;
 using GeekathonAutoSync.BackUPTypes.Dto;
 using GeekathonAutoSync.DBTypes.Dto;
 using System;
+using System.Collections.Generic;
 
 namespace GeekathonAutoSync.SourceConfiguations.Dto
 {
@@ -30,6 +31,7 @@ namespace GeekathonAutoSync.SourceConfiguations.Dto
         public BackUPTypeDto BackUPType { get; set; } = new BackUPTypeDto();
         public DBTypeDto DBType { get; set; } = new DBTypeDto();
         public string BackupName { get; set; }
+        public List<string> ScheduledCronExpression { get; set; }
         public BackUpStorageConfiguationDto BackUpStorageConfiguation { get; set; } = new BackUpStorageConfiguationDto();
         //public List<BackUpScheduleDto> BackUpSchedules { get; set; } = new List<BackUpScheduleDto>();
         //public List<BackUpLogDto> BackUpLogs { get; set; } = new List<BackUpLogDto>();
