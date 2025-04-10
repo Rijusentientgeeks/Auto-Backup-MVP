@@ -3,6 +3,7 @@ using Abp.Authorization;
 using Abp.Domain.Repositories;
 using Abp.UI;
 using GeekathonAutoSync.Authorization;
+using GeekathonAutoSync.BackUpSchedules;
 using GeekathonAutoSync.BackUpStorageConfiguations;
 using GeekathonAutoSync.BackUPTypes;
 using GeekathonAutoSync.DBTypes;
@@ -27,16 +28,21 @@ namespace GeekathonAutoSync.SourceConfiguations
         private readonly IRepository<BackUPType, Guid> _backUPTypeRepository;
         private readonly IRepository<DBType, Guid> _dBTypeRepository;
         private readonly IRepository<BackUpStorageConfiguation, Guid> _backUpStorageConfiguationRepository;
+        private readonly IRepository<BackUpSchedule, Guid> _backupScheduleRepository;
+
         public SourceConfiguationAppService(
             IRepository<SourceConfiguation, Guid> sourceConfiguationRepository,
             IRepository<BackUPType, Guid> backUPTypeRepository,
             IRepository<DBType, Guid> dBTypeRepository,
-            IRepository<BackUpStorageConfiguation, Guid> backUpStorageConfiguationRepository)
+            IRepository<BackUpStorageConfiguation, Guid> backUpStorageConfiguationRepository,
+            IRepository<BackUpSchedule, Guid> backupScheduleRepository)
+            
         {
             _sourceConfiguationRepository = sourceConfiguationRepository;
             _backUPTypeRepository = backUPTypeRepository;
             _dBTypeRepository = dBTypeRepository;
             _backUpStorageConfiguationRepository = backUpStorageConfiguationRepository;
+            _backupScheduleRepository = backupScheduleRepository;
         }
         public async Task<PagedResultDto<SourceConfiguationDto>> GetAllAsync(GetSourceConfiguationInput input)
         {
@@ -50,6 +56,16 @@ namespace GeekathonAutoSync.SourceConfiguations
                         .Skip(input.SkipCount)
                         .Take(input.MaxResultCount)
                         .ToList();
+                foreach(var sourceConfig in pagedSourceConfiguations)
+                {
+                    var schedules = await _backupScheduleRepository.GetAll()
+                        .Where(s => s.SourceConfiguationId == sourceConfig.Id).ToListAsync();
+
+                    var scheduledCronExp = schedules?.Select(s => s.CronExpression).ToList() ?? new List<string>();
+
+                    sourceConfig.ScheduledCronExpression = scheduledCronExp;
+
+                }
                 var sourceConfiguationCount = query.Count();
                 return new PagedResultDto<SourceConfiguationDto>
                 {
