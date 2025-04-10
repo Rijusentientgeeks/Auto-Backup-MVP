@@ -125,8 +125,6 @@ export class StorageDetailComponent implements OnChanges, OnInit {
   openBackupLogDialog(id: string) {
     this.selectedStorageConfigurationId = id;
     this.showBackupLogDialog = true;
-
-    // Manually trigger initial data load
     const initialLazyLoadEvent: LazyLoadEvent = {
       first: 0,
       rows: 10,
@@ -136,10 +134,8 @@ export class StorageDetailComponent implements OnChanges, OnInit {
 
   getSuccessullBackupLogLazy(event: LazyLoadEvent) {
     if (!this.showBackupLogDialog) return;
-
     const skipCount = event.first ?? 0;
     const maxResultCount = event.rows ?? 10;
-
     this.autoBackupService
       .getAllCompletedBackupLogByStorageConfigId(
         this.selectedStorageConfigurationId,
@@ -151,55 +147,64 @@ export class StorageDetailComponent implements OnChanges, OnInit {
           this.successfulBackupLogs = result.items || [];
           this.totalSuccessfulLogs = result.totalCount || 0;
         },
-        error: (err) => {
-          console.error("Error fetching backup logs:", err);
-        },
+        error: (err) => {},
       });
   }
 
   downloadBackup(backupLog: BackUpLogDto) {
     const key = this.getDownloadKey(backupLog);
     this.downloadingIds.add(key);
-  
-    this.backupDownloadService.downloadBackup$({
-      sourceConfigurationId: backupLog.sourceConfiguationId,
-      backUpFileName: backupLog.backUpFileName
-    }).subscribe({
-      next: (response) => {
-        const blob = response.body!;
-        const contentDisposition = response.headers.get('Content-Disposition');
-        const filename = this.getFilenameFromDisposition(contentDisposition, backupLog.backUpFileName);
-  
-        const link = document.createElement('a');
-        link.href = window.URL.createObjectURL(blob);
-        link.download = filename;
-        link.target = '_blank';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(link.href);
-      },
-      error: (err) => {
-        this.downloadingIds.delete(key);
-        console.error('Download failed:', err);
-      },
-      complete: () => {
-        this.downloadingIds.delete(key);
-        this.cdr.detectChanges();
-      }
-    });
+    this.backupDownloadService
+      .downloadBackup$({
+        sourceConfigurationId: backupLog.sourceConfiguationId,
+        backUpFileName: backupLog.backUpFileName,
+      })
+      .subscribe({
+        next: (response) => {
+          const blob = response.body!;
+          const contentDisposition = response.headers.get(
+            "Content-Disposition"
+          );
+          const filename = this.getFilenameFromDisposition(
+            contentDisposition,
+            backupLog.backUpFileName
+          );
+
+          const link = document.createElement("a");
+          link.href = window.URL.createObjectURL(blob);
+          link.download = filename;
+          link.target = "_blank";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(link.href);
+        },
+        error: (err) => {
+          this.downloadingIds.delete(key);
+          console.error("Download failed:", err);
+        },
+        complete: () => {
+          this.downloadingIds.delete(key);
+          this.cdr.detectChanges();
+        },
+      });
   }
-  
+
   private getDownloadKey(backupLog: BackUpLogDto): string {
     return backupLog.id;
   }
-  
-  private getFilenameFromDisposition(contentDisposition: string | null, defaultName: string): string {
+
+  private getFilenameFromDisposition(
+    contentDisposition: string | null,
+    defaultName: string
+  ): string {
     if (!contentDisposition) return defaultName;
-  
-    const match = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
+
+    const match = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(
+      contentDisposition
+    );
     return match && match[1]
-      ? decodeURIComponent(match[1].replace(/['"]/g, ''))
+      ? decodeURIComponent(match[1].replace(/['"]/g, ""))
       : defaultName;
   }
 }

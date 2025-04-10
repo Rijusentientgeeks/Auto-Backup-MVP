@@ -27,14 +27,7 @@
               >
                 <i class="pi pi-pencil"></i>
               </button>
-              <!-- &nbsp;
-              <button
-                class="btn btn-danger btn-sm"
-                (click)="deleteConfig(config.id)"
-                title="Delete Configuration"
-              >
-                <i class="pi pi-trash"></i>
-              </button> -->
+         
             </div>
           </div>
 
@@ -93,11 +86,11 @@
           </div>
 
           <div
-            class="footer mt-3 pt-3 border-top d-flex justify-content-between align-items-center"
+            class="footer mt-3 pt-3 border-top d-flex justify-content-between align-items-end"
           >
             <div style="font-size: 12px; color: green">
               <i class="pi pi-calendar text-danger me-2"></i>&nbsp;
-              <strong>Next Auto Backup: &nbsp;</strong> 26.03.2025 12:00 AM
+              <strong>Next Auto Backup: &nbsp;</strong> {{ nextAutoBackup || 'N/A' }}
             </div>
             <button
               class="btn btn-primary btn-sm"

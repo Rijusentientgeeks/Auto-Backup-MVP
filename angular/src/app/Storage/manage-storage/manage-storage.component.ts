@@ -123,22 +123,19 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     });
   }
   loadDestinationConfiguration(): void {
-    this.backUpStorageConfiguationService.getAll(
-      undefined,
-      undefined,
-      1000,
-      0
-    ).subscribe({
-      next: (result) => {
-        if (result && result.items) {
-          debugger;
-          this.storageEntries = result.items;
-        }
-      },
-      error: (err) => {
-        console.error("Error fetching storage destination:", err);
-      },
-    });
+    this.backUpStorageConfiguationService
+      .getAll(undefined, undefined, 1000, 0)
+      .subscribe({
+        next: (result) => {
+          if (result && result.items) {
+            debugger;
+            this.storageEntries = result.items;
+          }
+        },
+        error: (err) => {
+          console.error("Error fetching storage destination:", err);
+        },
+      });
   }
 
   loadStorageTypes(): void {
@@ -204,34 +201,36 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     }
 
     if (entry.cloudStorageId) {
-      const selectedCloud = this.cloudStorages.find(x => x.value === entry.cloudStorageId);
-  
+      const selectedCloud = this.cloudStorages.find(
+        (x) => x.value === entry.cloudStorageId
+      );
+
       if (selectedCloud) {
         this.onCloudStorageChange({ value: selectedCloud.value });
 
         const name = selectedCloud.name?.toLowerCase();
         this.isCloudStorage = true;
-  
-        if (name === 'amazon s3') {
+
+        if (name === "amazon s3") {
           this.isAWS = true;
           this.setAwsValidators();
-        } else if (name === 'microsoft azure') {
+        } else if (name === "microsoft azure") {
           this.isAzure = true;
           this.setAzureValidators();
         }
       }
-    } else if (entry.storageType === 'NFS') {
+    } else if (entry.storageType === "NFS") {
       this.isNFSStorage = true;
       this.setNfsValidators();
     }
-  
+
     this.showDetail = false;
   }
 
   onStorageTypeChange(event: { value: string }) {
     debugger;
-    const selectedType = this.storageTypes.find(x => x.value === event.value);
-    
+    const selectedType = this.storageTypes.find((x) => x.value === event.value);
+
     this.resetConditionalValidators();
     if (selectedType.name === "Public Cloud") {
       this.isCloudStorage = true;
@@ -250,8 +249,10 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
 
   onCloudStorageChange(event: { value: string }) {
     debugger;
-    
-    const selectedCloud = this.cloudStorages.find(x => x.value === event.value);
+
+    const selectedCloud = this.cloudStorages.find(
+      (x) => x.value === event.value
+    );
     this.resetConditionalValidators();
     if (selectedCloud.name === "Amazon S3") {
       this.isAWS = true;
@@ -297,7 +298,6 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     this.storageForm
       .get("NFS_LocationPath")
       ?.setValidators(Validators.required);
-
     this.updateValidationState();
   }
 
@@ -307,14 +307,12 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     this.storageForm.get("AWS_BucketName")?.setValidators(Validators.required);
     this.storageForm.get("AWS_Region")?.setValidators(Validators.required);
     this.storageForm.get("AWS_backUpPath")?.setValidators(Validators.required);
-
     this.updateValidationState();
   }
 
   setAzureValidators() {
     this.storageForm.get("AZ_AccountName")?.setValidators(Validators.required);
     this.storageForm.get("AZ_AccountKey")?.setValidators(Validators.required);
-
     this.updateValidationState();
   }
 
@@ -327,14 +325,21 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
   mapFormToCreateDto(): BackUpStorageConfiguationCreateDto {
     const formValues = this.storageForm.value;
     const dto = new BackUpStorageConfiguationCreateDto();
-  
     dto.storageMasterTypeId = formValues.StorageTypeId;
-    dto.cloudStorageId = this.isCloudStorage ? formValues.CloudStorageId : undefined;
+    dto.cloudStorageId = this.isCloudStorage
+      ? formValues.CloudStorageId
+      : undefined;
     dto.backupName = formValues.backupName;
     dto.nfS_IP = !this.isCloudStorage ? formValues.NFS_IP : undefined;
-    dto.nfS_AccessUserID = !this.isCloudStorage ? formValues.NFS_AccessUserID : undefined;
-    dto.nfS_Password = !this.isCloudStorage ? formValues.NFS_Password : undefined;
-    dto.nfS_LocationPath = !this.isCloudStorage ? formValues.NFS_LocationPath : undefined;
+    dto.nfS_AccessUserID = !this.isCloudStorage
+      ? formValues.NFS_AccessUserID
+      : undefined;
+    dto.nfS_Password = !this.isCloudStorage
+      ? formValues.NFS_Password
+      : undefined;
+    dto.nfS_LocationPath = !this.isCloudStorage
+      ? formValues.NFS_LocationPath
+      : undefined;
     dto.awS_AccessKey = this.isAWS ? formValues.AWS_AccessKey : undefined;
     dto.awS_SecretKey = this.isAWS ? formValues.AWS_SecretKey : undefined;
     dto.awS_BucketName = this.isAWS ? formValues.AWS_BucketName : undefined;
@@ -342,22 +347,30 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     dto.awS_backUpPath = this.isAWS ? formValues.AWS_backUpPath : undefined;
     dto.aZ_AccountName = this.isAzure ? formValues.AZ_AccountName : undefined;
     dto.aZ_AccountKey = this.isAzure ? formValues.AZ_AccountKey : undefined;
-  
+
     return dto;
   }
-  
+
   mapFormToUpdateDto(): BackUpStorageConfiguationUpdateDto {
     const formValues = this.storageForm.value;
     const dto = new BackUpStorageConfiguationUpdateDto();
-  
+
     dto.id = this.editingStorageId!;
     dto.storageMasterTypeId = formValues.StorageTypeId;
-    dto.cloudStorageId = this.isCloudStorage ? formValues.CloudStorageId : undefined;
+    dto.cloudStorageId = this.isCloudStorage
+      ? formValues.CloudStorageId
+      : undefined;
     dto.backupName = formValues.backupName;
     dto.nfS_IP = !this.isCloudStorage ? formValues.NFS_IP : undefined;
-    dto.nfS_AccessUserID = !this.isCloudStorage ? formValues.NFS_AccessUserID : undefined;
-    dto.nfS_Password = !this.isCloudStorage ? formValues.NFS_Password : undefined;
-    dto.nfS_LocationPath = !this.isCloudStorage ? formValues.NFS_LocationPath : undefined;
+    dto.nfS_AccessUserID = !this.isCloudStorage
+      ? formValues.NFS_AccessUserID
+      : undefined;
+    dto.nfS_Password = !this.isCloudStorage
+      ? formValues.NFS_Password
+      : undefined;
+    dto.nfS_LocationPath = !this.isCloudStorage
+      ? formValues.NFS_LocationPath
+      : undefined;
     dto.awS_AccessKey = this.isAWS ? formValues.AWS_AccessKey : undefined;
     dto.awS_SecretKey = this.isAWS ? formValues.AWS_SecretKey : undefined;
     dto.awS_BucketName = this.isAWS ? formValues.AWS_BucketName : undefined;
@@ -365,76 +378,28 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     dto.awS_backUpPath = this.isAWS ? formValues.AWS_backUpPath : undefined;
     dto.aZ_AccountName = this.isAzure ? formValues.AZ_AccountName : undefined;
     dto.aZ_AccountKey = this.isAzure ? formValues.AZ_AccountKey : undefined;
-  
+
     return dto;
   }
-  
-  // saveStorageDestination() {
-  //   debugger;
-  //   if (this.storageForm.valid) {
-  //     this.isSaving = true;
-  //     const dto = this.editingStorageId
-  //     ? this.mapFormToUpdateDto()
-  //     : this.mapFormToCreateDto();
-  //     const backupDto = this.mapFormToDto();
-      
-  //     this.backUpStorageConfiguationService.create(backupDto).subscribe({
-  //       next: (result) => {
-  //         console.log("Backup Configuration Saved Successfully:", result);
-  //         this.closeDialog();
-  //         this.isSaving = false; // Stop loader
-
-  //         // Swal.fire({
-  //         //   title: "Success!",
-  //         //   text: "Backup Configuration has been saved successfully.",
-  //         //   icon: "success",
-  //         //   confirmButtonText: "OK",
-  //         // }).then(() => {
-  //         //   this.closeDialog(); // Close the dialog after confirmation
-  //         // });
-  //       },
-  //       error: (err) => {
-  //         console.error("Error saving backup configuration:", err);
-  //         // Swal.fire({
-  //         //   title: "Error!",
-  //         //   text: "Failed to save backup configuration. Please try again.",
-  //         //   icon: "error",
-  //         //   confirmButtonText: "OK",
-  //         // });
-  //       },
-  //     });
-  //   } else {
-  //     console.log("Form is invalid. Please fill all required fields.");
-  //     // Swal.fire({
-  //     //   title: "Warning!",
-  //     //   text: "Form is invalid. Please fill all required fields.",
-  //     //   icon: "warning",
-  //     //   confirmButtonText: "OK",
-
-  //     // });
-  //     this.storageForm.markAllAsTouched();
-  //   }
-  // }
   editingStorageId: string | undefined;
 
   saveStorageDestination() {
-     
     if (this.storageForm.valid) {
       this.isSaving = true;
-  
+
       const dto = this.editingStorageId
         ? this.mapFormToUpdateDto()
         : this.mapFormToCreateDto();
 
-        let request$;
-        if (this.editingStorageId) {
-          const updateDto = this.mapFormToUpdateDto();
-          request$ = this.backUpStorageConfiguationService.update(updateDto);
-        } else {
-          const createDto = this.mapFormToCreateDto();
-          request$ = this.backUpStorageConfiguationService.create(createDto);
-        }
-  
+      let request$;
+      if (this.editingStorageId) {
+        const updateDto = this.mapFormToUpdateDto();
+        request$ = this.backUpStorageConfiguationService.update(updateDto);
+      } else {
+        const createDto = this.mapFormToCreateDto();
+        request$ = this.backUpStorageConfiguationService.create(createDto);
+      }
+
       request$.subscribe({
         next: (result) => {
           console.log("Backup configuration saved successfully:", result);
@@ -455,5 +420,4 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
       this.storageForm.markAllAsTouched();
     }
   }
-  
 }
