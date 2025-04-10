@@ -1,6 +1,7 @@
 import { HttpClient, HttpParams, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { AppConsts } from '../AppConsts';
+import { debug } from 'console';
 
 @Injectable({
   providedIn: 'root'
@@ -11,12 +12,17 @@ export class BackupService {
   downloadBackup({
     sourceConfigurationId,
     storageConfigurationId,
-    backUpFileName
+    backUpFileName,
+    onStart,
+    onComplete
   }: {
     sourceConfigurationId?: string,
     storageConfigurationId?: string,
-    backUpFileName: string
+    backUpFileName: string,
+    onStart?: () => void;
+    onComplete?: () => void;
   }) {
+    debugger
     let params = new HttpParams()
       .set('backUpFileName', backUpFileName);
   
@@ -55,6 +61,10 @@ export class BackupService {
       },
       error: err => {
         console.error('Download failed:', err);
+        if (onComplete) onComplete();
+      },
+      complete: () => {
+        if (onComplete) onComplete();
       }
     });
   }
