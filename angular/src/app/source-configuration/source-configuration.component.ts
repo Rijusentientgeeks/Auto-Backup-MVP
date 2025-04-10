@@ -14,6 +14,7 @@ import {
   SourceConfiguationUpdateDto,
 } from "@shared/service-proxies/service-proxies";
 import Swal from "sweetalert2";
+import { formatDate } from '@angular/common';
 
 @Component({
   selector: "app-source-configuration",
@@ -40,6 +41,7 @@ export class SourceConfigurationComponent implements OnInit {
     { label: "Linux", value: "Linux" },
     { label: "MacOS", value: "MacOS" },
   ];
+  nextAutoBackup: string;
 
   constructor(
     private fb: FormBuilder,
@@ -123,15 +125,97 @@ export class SourceConfigurationComponent implements OnInit {
   loadSourceConfigs(): void {
     this.sourceConfigService.getAll(undefined, undefined, 1000, 0).subscribe({
       next: (result) => {
+        debugger
         if (result && result.items) {
           this.sourceConfigs = result.items;
+          const cronArray = result.items[0]?.scheduledCronExpression || [];
+          this.nextAutoBackup = this.getNextScheduledTime(cronArray);
           this.cdr.detectChanges();
         }
       },
       error: (err) => {},
     });
   }
-
+  getNextScheduledTime(cronExpressions: string[]): string | null {
+    const now = new Date();
+    let nextDate: Date | null = null;
+  
+    cronExpressions
+      .filter(expr => expr && expr.trim() !== '')
+      .forEach(expr => {
+        try {
+          const next = this.calculateNextRun(expr, now);
+          if (next && (!nextDate || next < nextDate)) {
+            nextDate = next;
+          }
+        } catch (err) {
+          console.error(`Invalid cron expression: ${expr}`, err);
+        }
+      });
+  
+    return nextDate ? formatDate(nextDate, 'dd.MM.yyyy hh:mm a', 'en-US') : null;
+  }
+  
+  private parseCronPart(part: string, min: number, max: number): number[] {
+    if (part === '*') {
+      return Array.from({ length: max - min + 1 }, (_, i) => i + min);
+    }
+  
+    if (part.includes('/')) {
+      const [range, step] = part.split('/');
+      const stepVal = parseInt(step, 10);
+      const baseRange = range === '*' ? [min, max] : range.split('-').map(Number);
+      const [start, end] = baseRange.length === 2 ? baseRange : [min, max];
+  
+      return Array.from({ length: Math.floor((end - start + 1) / stepVal) }, (_, i) => start + i * stepVal);
+    }
+  
+    return part
+      .split(',')
+      .flatMap(token => {
+        if (token.includes('-')) {
+          const [start, end] = token.split('-').map(Number);
+          return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+        }
+        return [parseInt(token, 10)];
+      });
+  }
+  
+  private calculateNextRun(cron: string, fromDate: Date): Date | null {
+    const [minStr, hourStr, dayStr, monthStr, dayOfWeekStr] = cron.trim().split(/\s+/);
+    const minutes = this.parseCronPart(minStr, 0, 59);
+    const hours = this.parseCronPart(hourStr, 0, 23);
+    const days = this.parseCronPart(dayStr, 1, 31);
+    const months = this.parseCronPart(monthStr, 1, 12);
+    const daysOfWeek = this.parseCronPart(dayOfWeekStr, 0, 6);
+  
+    for (let i = 0; i < 365; i++) {
+      const date = new Date(fromDate);
+      date.setSeconds(0);
+      date.setMilliseconds(0);
+      date.setDate(date.getDate() + i);
+  
+      const month = date.getMonth() + 1;
+      const day = date.getDate();
+      const dow = date.getDay();
+  
+      if (!months.includes(month)) continue;
+      if (!days.includes(day)) continue;
+      if (!daysOfWeek.includes(dow)) continue;
+  
+      for (const hour of hours) {
+        for (const minute of minutes) {
+          const testDate = new Date(date);
+          testDate.setHours(hour, minute, 0, 0);
+          if (testDate > fromDate) return testDate;
+        }
+      }
+    }
+  
+    return null;
+  }
+  
+  
   LoadBackupTypes(): void {
     this.BackUPTypeService.getAll().subscribe({
       next: (result) => {
@@ -309,7 +393,6 @@ export class SourceConfigurationComponent implements OnInit {
             },
             (error) => {
               this.isSaving = false;
-
               this.messageService.add({
                 severity: "error",
                 summary: "Error",
