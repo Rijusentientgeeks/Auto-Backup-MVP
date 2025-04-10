@@ -5,7 +5,6 @@ import {
   BackUPTypeDto,
   BackUPTypeServiceProxy,
   CloudStorageServiceProxy,
-  SourceConfiguationDto,
   SourceConfiguationServiceProxy,
   StorageMasterTypeServiceProxy,
 } from "@shared/service-proxies/service-proxies";
@@ -22,20 +21,18 @@ export class BackupLogsComponent implements OnInit {
   storageTypes: any[] = [];
   cloudStorages: any[] = [];
   backupConfigs: any[] = [];
-
   keyword: string = "";
   selectedStorageType: string = "";
   selectedBackupType: string = "";
   selectedCloudStorage: string = "";
   selectedSourceConfig: string = "";
-
   totalRecords: number = 0;
   loading: boolean = true;
   rows: number = 10;
   first: number = 0;
-
   private searchTimer: any;
   isDownloading: any;
+  downloadingIds: Set<string> = new Set();
 
   constructor(
     private backupService: AutoBackupServiceProxy,
@@ -45,15 +42,13 @@ export class BackupLogsComponent implements OnInit {
     private sourceConfigService: SourceConfiguationServiceProxy,
     private backupDownloadService: BackupService,
     private cdr: ChangeDetectorRef
-  ) {}
+  ) { }
 
-  // Remove the setTimeout and modify ngOnInit like this:
   ngOnInit(): void {
     this.LoadBackupTypes();
     this.loadStorageTypes();
     this.loadCloudStorageTypes();
     this.loadSourceConfigs();
-    // this.loadBackupLogsLazy({ first: 0, rows: 10 });
   }
 
   LoadBackupTypes(): void {
@@ -149,9 +144,9 @@ export class BackupLogsComponent implements OnInit {
           this.backupLogs = result.items || [];
           this.totalRecords = result.totalCount || 0;
           this.loading = false;
-          this.first = first; // Update the first position
-          this.rows = rows; // Update the rows per page
-          this.cdr.detectChanges(); // Ensure change detection runs
+          this.first = first; 
+          this.rows = rows; 
+          this.cdr.detectChanges(); 
         },
         error: (err) => {
           console.error("Error fetching backup logs:", err);
@@ -162,13 +157,50 @@ export class BackupLogsComponent implements OnInit {
   }
 
   downloadBackup(backupLog: BackUpLogDto) {
-    debugger;
-    // this.backupDownloadService.downloadBackup(backupLog.sourceConfiguationId, backupLog.backUpFileName);
-    this.backupDownloadService.downloadBackup({
+    const key = this.getDownloadKey(backupLog);
+    this.downloadingIds.add(key);
+
+    this.backupDownloadService.downloadBackup$({
       sourceConfigurationId: backupLog.sourceConfiguationId,
-      backUpFileName: backupLog.backUpFileName,
-      onStart: () => (this.isDownloading = true),
-      onComplete: () => (this.isDownloading = false),
+      backUpFileName: backupLog.backUpFileName
+    }).subscribe({
+      next: (response) => {
+        const blob = response.body!;
+        const contentDisposition = response.headers.get('Content-Disposition');
+        const filename = this.getFilenameFromDisposition(contentDisposition, backupLog.backUpFileName);
+
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = filename;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(link.href);
+      },
+      error: (err) => {
+        this.downloadingIds.delete(key);
+        console.error('Download failed:', err);
+      },
+      complete: () => {
+        this.cdr.detectChanges();
+        this.downloadingIds.delete(key);
+      }
     });
   }
+
+  private getDownloadKey(backupLog: BackUpLogDto): string {
+    return backupLog.id;
+  }
+
+
+  private getFilenameFromDisposition(contentDisposition: string | null, defaultName: string): string {
+    if (!contentDisposition) return defaultName;
+
+    const match = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
+    return match && match[1]
+      ? decodeURIComponent(match[1].replace(/['"]/g, ''))
+      : defaultName;
+  }
+
 }
