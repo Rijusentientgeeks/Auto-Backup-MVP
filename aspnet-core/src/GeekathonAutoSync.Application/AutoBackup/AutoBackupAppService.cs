@@ -3,6 +3,7 @@ using Abp.Application.Services.Dto;
 using Abp.Authorization;
 using Abp.Collections.Extensions;
 using Abp.Domain.Repositories;
+using Abp.Domain.Uow;
 using Abp.UI;
 using Amazon;
 using Amazon.Runtime;
@@ -63,7 +64,7 @@ namespace GeekathonAutoSync.AutoBackup
         }
         public async Task<string> CreateBackup(string sConfigurationId)
         {
-
+            int tenantId = GetCurrentTenantId();
             var backupFileName = "";
             string downLoadedFileName = "";
             bool fileDownloadflag = false;
@@ -79,7 +80,7 @@ namespace GeekathonAutoSync.AutoBackup
                 .FirstOrDefaultAsync(i => i.Id.ToString().ToLower() == sConfigurationId.ToLower());
 
             //insert to BackLog
-            var backupLogResult = await CreatebackLog(BackUPConfig.Id, DateTime.UtcNow, (Guid)BackUPConfig.BackUpStorageConfiguationId);
+            var backupLogResult = await CreatebackLog(BackUPConfig.Id, DateTime.UtcNow, (Guid)BackUPConfig.BackUpStorageConfiguationId, tenantId);
             try
             {
                 (bool, string) resp = (false, "");
@@ -167,14 +168,31 @@ namespace GeekathonAutoSync.AutoBackup
                 }
                 await UpdatebackLogStatus(backupLogResult.Item2, DateTime.UtcNow, BackupLogStatus.Success, downLoadedFileName, "");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 //throw new UserFriendlyException(ex.Message);
             }
 
-            
+
             return resFromUpload;
         }
+
+        private int GetCurrentTenantId()
+        {
+            if (AbpSession.TenantId.HasValue)
+            {
+                return AbpSession.TenantId.Value;
+            }
+
+            if (UnitOfWorkManager?.Current?.GetTenantId() != null)
+            {
+                return UnitOfWorkManager.Current.GetTenantId().Value;
+            }
+
+            throw new UserFriendlyException("TenantId is not available in the current context.");
+        }
+
+
 
         public async Task<PagedResultDto<BackUpLogDto>> GetAllBackupLogAsync(PagedBackLogRequestDto input)
         {
@@ -702,31 +720,61 @@ namespace GeekathonAutoSync.AutoBackup
 
 
         #region backupLogs
-        private async Task<(bool, Guid)> CreatebackLog(Guid sourceConfiguationId, DateTime startedTimeStamp, Guid backUpStorageConfiguationId)
+        //private async Task<(bool, Guid)> CreatebackLog(Guid sourceConfiguationId, DateTime startedTimeStamp, Guid backUpStorageConfiguationId)
+        //{
+        //    try
+        //    {
+        //         Guid backUpLogId;
+        //         var backUpLog = new BackUpLog
+        //         {
+        //             TenantId = (int)AbpSession.TenantId,
+        //             SourceConfiguationId = sourceConfiguationId,
+        //             StartedTimeStamp = startedTimeStamp,
+        //             BackUpStorageConfiguationId = backUpStorageConfiguationId,
+        //             BackupLogStatus = BackupLogStatus.Initiated,
+        //         };
+        //        using (CurrentUnitOfWork.SetTenantId(backUpLog.TenantId))
+        //        {
+        //           backUpLogId = await _backUpLogsRepository.InsertAndGetIdAsync(backUpLog);
+        //           await CurrentUnitOfWork.SaveChangesAsync();
+        //        }
+        //        return (true, backUpLogId);
+        //    }
+        //    catch (Exception ex) 
+        //    {
+        //        return (false, Guid.Empty);
+        //    }
+        //}
+
+        private async Task<(bool, Guid)> CreatebackLog(Guid sourceConfiguationId, DateTime startedTimeStamp, Guid backUpStorageConfiguationId, int tenantId)
         {
             try
             {
                 Guid backUpLogId;
-                 var backUpLog = new BackUpLog
-                 {
-                    TenantId = (int)AbpSession.TenantId,
-                     SourceConfiguationId = sourceConfiguationId,
-                     StartedTimeStamp = startedTimeStamp,
-                     BackUpStorageConfiguationId = backUpStorageConfiguationId,
-                     BackupLogStatus = BackupLogStatus.Initiated,
-                 };
-                using (CurrentUnitOfWork.SetTenantId(backUpLog.TenantId))
+                var backUpLog = new BackUpLog
                 {
-                   backUpLogId = await _backUpLogsRepository.InsertAndGetIdAsync(backUpLog);
-                   await CurrentUnitOfWork.SaveChangesAsync();
+                    TenantId = tenantId,
+                    SourceConfiguationId = sourceConfiguationId,
+                    StartedTimeStamp = startedTimeStamp,
+                    BackUpStorageConfiguationId = backUpStorageConfiguationId,
+                    BackupLogStatus = BackupLogStatus.Initiated,
+                };
+
+                using (CurrentUnitOfWork.SetTenantId(tenantId))
+                {
+                    backUpLogId = await _backUpLogsRepository.InsertAndGetIdAsync(backUpLog);
+                    await CurrentUnitOfWork.SaveChangesAsync();
                 }
+
                 return (true, backUpLogId);
             }
-            catch (Exception ex) 
+            catch (Exception ex)
             {
+                // You may want to log this
                 return (false, Guid.Empty);
             }
         }
+
 
         private async Task<bool> UpdatebackLogStatus(Guid backUpLogId, DateTime completedTimeStamp, BackupLogStatus status, string bFileName, string bFilePath)
         {

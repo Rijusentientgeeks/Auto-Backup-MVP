@@ -1,91 +1,9 @@
-<!-- <div class="card shadow-lg p-4 bg-white rounded">
-  <div class="row mb-4">
-    <div class="col">
-      <h2 class="h4 fw-bold mb-0">Backup Logs</h2>
-    </div>
-  </div> -->
 <div class="card shadow-lg p-4 bg-white rounded">
   <div class="row mb-4">
     <div class="col">
       <h2 class="h4 fw-bold mb-0">Backup Logs</h2>
     </div>
   </div>
-
-  <!-- <div class="row gy-3">
-    <div class="col-md-3">
-      <label for="backupType" class="form-label fw-bold">Backup Type</label>
-      <p-dropdown
-        inputId="backupType"
-        [(ngModel)]="selectedBackupType"
-        (onChange)="onFilterChange()"
-        [options]="backupTypes"
-        optionLabel="name"
-        optionValue="value"
-        placeholder="Select Storage Type"
-        class="w-100"
-      >
-      </p-dropdown>
-    </div>
-
-    <div class="col-md-3">
-      <label for="storageType" class="form-label fw-bold">Storage Type</label>
-      <p-dropdown
-        inputId="storageType"
-        [(ngModel)]="selectedStorageType"
-        (onChange)="onFilterChange()"
-        [options]="storageTypes"
-        optionLabel="name"
-        optionValue="value"
-        placeholder="Select Storage Type"
-        class="w-100"
-      >
-      </p-dropdown>
-    </div>
-
-    <div class="col-md-3">
-      <label for="cloudStorage" class="form-label fw-bold">Cloud Storage</label>
-      <p-dropdown
-        inputId="cloudStorage"
-        [(ngModel)]="selectedCloudStorage"
-        (onChange)="onFilterChange()"
-        [options]="cloudStorages"
-        optionLabel="name"
-        optionValue="value"
-        placeholder="Select Cloud Storage"
-        class="w-100"
-      >
-      </p-dropdown>
-    </div>
-
-    <div class="col-md-3">
-      <label for="sourceConfig" class="form-label fw-bold">Source Config</label>
-      <p-dropdown
-        inputId="sourceConfig"
-        [(ngModel)]="selectedSourceConfig"
-        (onChange)="onFilterChange()"
-        [options]="backupConfigs"
-        optionLabel="backupName"
-        optionValue="backUpStorageConfiguationId"
-        placeholder="Select Configuration"
-        class="w-100"
-      >
-      </p-dropdown>
-    </div>
-
-    <div class="col-md-3">
-      <label for="keyword" class="form-label fw-bold">Keyword</label>
-      <input
-        type="text"
-        id="keyword"
-        class="form-control"
-        [(ngModel)]="keyword"
-        (input)="onFilterChange()"
-        placeholder="Search..."
-      />
-    </div>
-  </div> -->
-
-  <!-- Filter Section - Improved Structure -->
   <div class="row gy-3 gx-2 align-items-end filter-section">
     <!-- Backup Type Dropdown -->
     <div class="col-md-3 col-6">
@@ -254,7 +172,7 @@
                   ? 'Success'
                   : log.backupLogStatus === 1
                   ? 'Failed'
-                  : 'Pending'
+                  : 'Aborted'
               "
               [severity]="
                 log.backupLogStatus === 2
@@ -268,24 +186,22 @@
           </td>
           <td>{{ log.backUpFileName }}</td>
           <td>
+            <!-- Show download button only if not downloading -->
             <button
+              *ngIf="!downloadingIds.has(log.id)"
               pButton
-              [disabled]="log.backupLogStatus !== 2 || isDownloading"
-              [icon]="
-                isDownloading ? 'pi pi-spinner pi-spin' : 'pi pi-download'
-              "
+              [disabled]="log.backupLogStatus !== 2"
+              icon="pi pi-download"
               class="p-button-icon-only p-button rounded"
               (click)="downloadBackup(log)"
             ></button>
-
-            <div *ngIf="isDownloading" class="loading-overlay">
-              <i
-                class="pi pi-hourglass pi-spin"
-                style="font-size: 1.5rem; color: gold"
-              ></i>
-              <!-- <p class="loading-text text-white">&nbsp;Downloading...</p> -->
+          
+            <!-- Show spinner icon when downloading -->
+            <div *ngIf="downloadingIds.has(log.id)" class="loading-overlay ml-2">
+              <i class="pi pi-hourglass pi-spin" style="font-size: 1.5rem; color: gold"></i>
             </div>
           </td>
+          
         </tr>
       </ng-template>
 

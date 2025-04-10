@@ -1,4 +1,5 @@
 import {
+  ChangeDetectorRef,
   Component,
   EventEmitter,
   Input,
@@ -32,11 +33,13 @@ export class StorageDetailComponent implements OnChanges, OnInit {
   totalSuccessfulLogs: number = 0;
   showBackupLogDialog: boolean = false;
   selectedStorageConfigurationId: string;
+  downloadingIds: Set<string> = new Set();
 
   constructor(
     private backUpStorageConfiguationService: BackUpStorageConfiguationServiceProxy,
     private autoBackupService: AutoBackupServiceProxy,
     private backupDownloadService: BackupService,
+    private cdr: ChangeDetectorRef,
     private router: Router
   ) {}
   ngOnInit(): void {
@@ -154,40 +157,49 @@ export class StorageDetailComponent implements OnChanges, OnInit {
       });
   }
 
-  // getSuccessullBackupLogLazy(event: LazyLoadEvent) {
-  //   this.autoBackupService.getAllCompletedBackupLogByStorageConfigId(this.selectedStorageConfigurationId, event.first, event.rows).subscribe({
-  //     next: (result) => {
-  //       this.successfulBackupLogs = result.items;
-  //     },
-  //     error: (err) => {
-  //       console.error('Error fetching backup logs:', err);
-  //     }
-  //   });
-  // }
-
-  // openBackupLogDialog(id: string) {
-  //   this.selectedStorageConfigurationId = id;
-  //   this.autoBackupService.getAllCompletedBackupLogByStorageConfigId(id, undefined, undefined).subscribe({
-  //     next: (result) => {
-  //       this.successfulBackupLogs = result.items;
-  //       this.showBackupLogDialog = true;
-  //     },
-  //     error: (err) => {
-  //       console.error('Error fetching backup logs:', err);
-  //     }
-  //   });
-  // }
-
-  // openBackupLogDialog(id: string) {
-  //   this.selectedStorageConfigurationId = id;
-  //   this.showBackupLogDialog = true; // open dialog first
-  // }
-
   downloadBackup(backupLog: BackUpLogDto) {
-    // this.backupDownloadService.downloadBackup(backupLog.sourceConfiguationId, backupLog.backUpFileName);
-    this.backupDownloadService.downloadBackup({
-      storageConfigurationId: backupLog.backUpStorageConfiguationId,
-      backUpFileName: backupLog.backUpFileName,
+    const key = this.getDownloadKey(backupLog);
+    this.downloadingIds.add(key);
+  
+    this.backupDownloadService.downloadBackup$({
+      sourceConfigurationId: backupLog.sourceConfiguationId,
+      backUpFileName: backupLog.backUpFileName
+    }).subscribe({
+      next: (response) => {
+        const blob = response.body!;
+        const contentDisposition = response.headers.get('Content-Disposition');
+        const filename = this.getFilenameFromDisposition(contentDisposition, backupLog.backUpFileName);
+  
+        const link = document.createElement('a');
+        link.href = window.URL.createObjectURL(blob);
+        link.download = filename;
+        link.target = '_blank';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(link.href);
+      },
+      error: (err) => {
+        this.downloadingIds.delete(key);
+        console.error('Download failed:', err);
+      },
+      complete: () => {
+        this.downloadingIds.delete(key);
+        this.cdr.detectChanges();
+      }
     });
+  }
+  
+  private getDownloadKey(backupLog: BackUpLogDto): string {
+    return backupLog.id;
+  }
+  
+  private getFilenameFromDisposition(contentDisposition: string | null, defaultName: string): string {
+    if (!contentDisposition) return defaultName;
+  
+    const match = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
+    return match && match[1]
+      ? decodeURIComponent(match[1].replace(/['"]/g, ''))
+      : defaultName;
   }
 }
