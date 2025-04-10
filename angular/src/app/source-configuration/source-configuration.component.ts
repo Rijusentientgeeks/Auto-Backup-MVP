@@ -33,6 +33,8 @@ export class SourceConfigurationComponent implements OnInit {
   base64String: string = null;
   noData: false;
   isSaving: boolean = false;
+  isLoading = false;
+
   osOptions = [
     { label: "Windows", value: "Windows" },
     { label: "Linux", value: "Linux" },
@@ -85,9 +87,11 @@ export class SourceConfigurationComponent implements OnInit {
     }
   }
   triggerOnDemandBackup(id: string): void {
+    this.isSaving = true;
     this.autoBackupService.createBackup(id).subscribe({
       next: (result) => {
         if (result) {
+          this.isSaving = false;
           Swal.fire("Success", "Backup Created Successfully", "success");
         }
       },
@@ -286,6 +290,7 @@ export class SourceConfigurationComponent implements OnInit {
       return;
     }
     if (this.sourceForm.valid) {
+    
       this.isSaving = true;
       const formData = this.prepareFormData();
       if (this.isEdit && this.selectedConfigId) {
@@ -295,6 +300,8 @@ export class SourceConfigurationComponent implements OnInit {
             () => {
               this.closeDialog();
               this.isSaving = false;
+            
+
               this.messageService.add({
                 severity: "success",
                 summary: "success",
@@ -305,6 +312,8 @@ export class SourceConfigurationComponent implements OnInit {
             },
             (error) => {
               this.isSaving = false;
+              
+
               this.messageService.add({
                 severity: "error",
                 summary: "Error",
@@ -320,6 +329,8 @@ export class SourceConfigurationComponent implements OnInit {
             () => {
               this.closeDialog();
               this.isSaving = false;
+    
+
               this.messageService.add({
                 severity: "success",
                 summary: "success",
@@ -330,6 +341,8 @@ export class SourceConfigurationComponent implements OnInit {
             },
             (error) => {
               this.isSaving = false;
+  
+
               this.messageService.add({
                 severity: "error",
                 summary: "Error",
