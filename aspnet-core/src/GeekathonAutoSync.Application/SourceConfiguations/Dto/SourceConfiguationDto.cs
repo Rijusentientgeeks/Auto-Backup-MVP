@@ -31,6 +31,7 @@ namespace GeekathonAutoSync.SourceConfiguations.Dto
         public BackUPTypeDto BackUPType { get; set; } = new BackUPTypeDto();
         public DBTypeDto DBType { get; set; } = new DBTypeDto();
         public string BackupName { get; set; }
+        public bool IsUserLocalSystem { get; set; }
         public List<string> ScheduledCronExpression { get; set; }
         public BackUpStorageConfiguationDto BackUpStorageConfiguation { get; set; } = new BackUpStorageConfiguationDto();
         //public List<BackUpScheduleDto> BackUpSchedules { get; set; } = new List<BackUpScheduleDto>();

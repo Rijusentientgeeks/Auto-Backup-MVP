@@ -3,6 +3,7 @@ using Abp.Localization;
 using Abp.MultiTenancy;
 using GeekathonAutoSync.Authorization.Users;
 using GeekathonAutoSync.BackUpFrequencys;
+using GeekathonAutoSync.BackUpStorageConfiguations;
 using GeekathonAutoSync.BackUPTypes;
 using GeekathonAutoSync.CloudStorages;
 using GeekathonAutoSync.DBTypes;
