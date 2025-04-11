@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using Abp.Application.Services;
 using Abp.Application.Services.Dto;
@@ -12,6 +13,7 @@ using Abp.Runtime.Security;
 using GeekathonAutoSync.Authorization;
 using GeekathonAutoSync.Authorization.Roles;
 using GeekathonAutoSync.Authorization.Users;
+using GeekathonAutoSync.BackUpStorageConfiguations;
 using GeekathonAutoSync.Editions;
 using GeekathonAutoSync.MultiTenancy.Dto;
 using Microsoft.AspNetCore.Identity;
@@ -26,6 +28,7 @@ namespace GeekathonAutoSync.MultiTenancy
         private readonly UserManager _userManager;
         private readonly RoleManager _roleManager;
         private readonly IAbpZeroDbMigrator _abpZeroDbMigrator;
+        private readonly IRepository<BackUpStorageConfiguation, Guid> _backUpStorageConfiguationRepository;
 
         public TenantAppService(
             IRepository<Tenant, int> repository,
@@ -33,7 +36,8 @@ namespace GeekathonAutoSync.MultiTenancy
             EditionManager editionManager,
             UserManager userManager,
             RoleManager roleManager,
-            IAbpZeroDbMigrator abpZeroDbMigrator)
+            IAbpZeroDbMigrator abpZeroDbMigrator,
+            IRepository<BackUpStorageConfiguation, Guid> backUpStorageConfiguationRepository)
             : base(repository)
         {
             _tenantManager = tenantManager;
@@ -41,6 +45,7 @@ namespace GeekathonAutoSync.MultiTenancy
             _userManager = userManager;
             _roleManager = roleManager;
             _abpZeroDbMigrator = abpZeroDbMigrator;
+            _backUpStorageConfiguationRepository = backUpStorageConfiguationRepository;
         }
 
         public override async Task<TenantDto> CreateAsync(CreateTenantDto input)
@@ -87,7 +92,15 @@ namespace GeekathonAutoSync.MultiTenancy
                 CheckErrors(await _userManager.AddToRoleAsync(adminUser, adminRole.Name));
                 await CurrentUnitOfWork.SaveChangesAsync();
             }
-
+            BackUpStorageConfiguation backUpStorage = new BackUpStorageConfiguation
+            {
+                Id = Guid.NewGuid(),
+                TenantId = tenant.Id,
+                BackupName = "User's Local System",
+                IsUserLocalSystem = true,
+            };
+            await _backUpStorageConfiguationRepository.InsertAsync(backUpStorage);
+            await CurrentUnitOfWork.SaveChangesAsync();
             return MapToEntityDto(tenant);
         }
 
