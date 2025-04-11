@@ -30,6 +30,7 @@ namespace GeekathonAutoSync.BackUpStorageConfiguations.Dto
         public string BackupName { get; set; }
         public StorageMasterTypeDto StorageMasterType { get; set; } = new StorageMasterTypeDto();
         public CloudStorageDto CloudStorage { get; set; } = new CloudStorageDto();
+        public bool IsUserLocalSystem { get; set; }
         //public List<SourceConfiguationDto> SourceConfiguations { get; set; } = new List<SourceConfiguationDto>();
         //public List<BackUpLogDto> BackUpLogs { get; set; } = new List<BackUpLogDto>();
     }

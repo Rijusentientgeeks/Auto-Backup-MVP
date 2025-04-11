@@ -93,52 +93,52 @@ export class SourceConfigurationComponent implements OnInit {
 
   triggerOnDemandBackup(id: string): void {
     this.isSaving = true;
-    this.autoBackupService.createBackup(id).subscribe({
-      next: (result) => {
-        this.isSaving = false;
-        if (result) {
-          Swal.fire("Success", "Backup Created Successfully", "success");
+    var selectedSource = this.sourceConfigs.find((s) => s.id === id);
+    if(selectedSource.backUpStorageConfiguation.isUserLocalSystem) {
+      this.localBackupService.takeBackupLocal$(id).subscribe({
+        next: (response) => {
+          this.isSaving = false;
+          const blob = response.body!;
+          const contentDisposition = response.headers.get('Content-Disposition');
+          const filename = this.getFilenameFromDisposition(contentDisposition);
+  
+          const link = document.createElement('a');
+          link.href = window.URL.createObjectURL(blob);
+          link.download = filename;
+          link.target = '_blank';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(link.href);
+        },
+        error: (err) => {
+          this.isSaving = false;
+          this.cdr.detectChanges();
+        },
+        complete: () => {
+          this.isSaving = false;
           this.cdr.detectChanges();
         }
-      },
-      error: () => {
-        this.isSaving = false;
-        Swal.fire("Error", "Something went wrong!", "error");
-      },
-      complete: () => {
-        this.isSaving = false;
-        this.cdr.detectChanges();
-      }
-    });
-    // var selectedSource = this.sourceConfigs.find((s) => s.id === id);
-    // if(selectedSource.isLocalBackup) {
-    //   this.localBackupService.takeBackupLocal$(id).subscribe({
-    //     next: (response) => {
-    //       debugger
-    //       this.isSaving = false;
-    //       const blob = response.body!;
-    //       const contentDisposition = response.headers.get('Content-Disposition');
-    //       const filename = this.getFilenameFromDisposition(contentDisposition);
-  
-    //       const link = document.createElement('a');
-    //       link.href = window.URL.createObjectURL(blob);
-    //       link.download = filename;
-    //       link.target = '_blank';
-    //       document.body.appendChild(link);
-    //       link.click();
-    //       document.body.removeChild(link);
-    //       window.URL.revokeObjectURL(link.href);
-    //     },
-    //     error: (err) => {
-    //       this.isSaving = false;
-    //       this.cdr.detectChanges();
-    //     },
-    //     complete: () => {
-    //       this.isSaving = false;
-    //       this.cdr.detectChanges();
-    //     }
-    //   });
-    // }
+      });
+    }else{
+      this.autoBackupService.createBackup(id).subscribe({
+        next: (result) => {
+          this.isSaving = false;
+          if (result) {
+            Swal.fire("Success", "Backup Created Successfully", "success");
+            this.cdr.detectChanges();
+          }
+        },
+        error: () => {
+          this.isSaving = false;
+          Swal.fire("Error", "Something went wrong!", "error");
+        },
+        complete: () => {
+          this.isSaving = false;
+          this.cdr.detectChanges();
+        }
+      });
+    }
   }
   isInvalid(controlName: string): boolean {
     const control = this.sourceForm.get(controlName);
