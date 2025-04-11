@@ -4,6 +4,7 @@ using GeekathonAutoSync.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GeekathonAutoSync.Migrations
 {
     [DbContext(typeof(GeekathonAutoSyncDbContext))]
-    partial class GeekathonAutoSyncDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250411065852_addIsRemoveFromHangfire_field")]
+    partial class addIsRemoveFromHangfire_field
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1688,7 +1691,7 @@ namespace GeekathonAutoSync.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsRemoveFromHangfire")
+                    b.Property<bool?>("IsRemoveFromHangfire")
                         .HasColumnType("bit");
 
                     b.Property<DateTime?>("LastModificationTime")

@@ -11,6 +11,9 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Linq.Dynamic.Core;
 using GeekathonAutoSync.Jobs;
+using Microsoft.Extensions.Options;
+using CronExpressionDescriptor;
+using Options = CronExpressionDescriptor.Options;
 
 namespace GeekathonAutoSync.BackUpSchedules
 {
@@ -20,6 +23,7 @@ namespace GeekathonAutoSync.BackUpSchedules
         private readonly IRepository<SourceConfiguation, Guid> _sourceConfiguationRepository;
         private readonly IRepository<BackUpFrequency, Guid> _backUpFrequencyRepository;
         private readonly IJobSchedulerAppService _scheduler;
+
         public BackUpScheduleAppService(
             IRepository<BackUpSchedule, Guid> backUpScheduleRepository,
             IRepository<SourceConfiguation, Guid> sourceConfiguationRepository,
@@ -43,6 +47,10 @@ namespace GeekathonAutoSync.BackUpSchedules
                     .Take(input.MaxResultCount)
                     .ToList();
             var backUpScheduleCount = query.Count();
+            foreach (var item in pagedBackUpSchedules)
+            {
+                item.CronExpression = await ConvertCronExpToRegularValue(item.CronExpression);
+            }
             return new PagedResultDto<BackUpScheduleDto>
             {
                 TotalCount = backUpScheduleCount,
@@ -70,7 +78,8 @@ namespace GeekathonAutoSync.BackUpSchedules
                 BackupDate = input.BackupDate,
                 BackupTime = input.BackupTime,
                 BackUpFrequencyId = input.BackUpFrequencyId,
-                CronExpression = input.CronExpression
+                CronExpression = input.CronExpression,
+                IsRemoveFromHangfire = false,
             };
             using (CurrentUnitOfWork.SetTenantId(backUpSchedule.TenantId))
             {
@@ -83,6 +92,10 @@ namespace GeekathonAutoSync.BackUpSchedules
         }
         public async Task<BackUpScheduleDto> UpdateAsync(BackUpScheduleUpdateDto input)
         {
+            if (input.Id == Guid.Empty)
+            {
+                throw new UserFriendlyException("Invalid backup schedule.");
+            }
             var getBackUpSchedule = await _backUpScheduleRepository.FirstOrDefaultAsync(i => i.Id == input.Id);
             if (getBackUpSchedule == null)
             {
@@ -113,6 +126,27 @@ namespace GeekathonAutoSync.BackUpSchedules
             var backUpSchedule = ObjectMapper.Map<BackUpScheduleDto>(query);
             return backUpSchedule;
         }
+        public async Task<bool> RemoveScheduleAsync(Guid backupScheduleId)
+        {
+            bool IsRemove = false;
+            if (backupScheduleId == Guid.Empty)
+            {
+                throw new UserFriendlyException("Invalid backup schedule.");
+            }
+            var getBackUpSchedule = await _backUpScheduleRepository.FirstOrDefaultAsync(i => i.Id == backupScheduleId);
+            if (getBackUpSchedule == null) 
+            {
+                throw new UserFriendlyException("Invalid backup schedule.");
+            }
+            if (getBackUpSchedule.IsRemoveFromHangfire == true)
+            {
+                throw new UserFriendlyException("Already remove this schedule.");
+            }
+            _scheduler.RemoveScheduleJobs(getBackUpSchedule.TenantId, getBackUpSchedule.Id);
+            getBackUpSchedule.IsRemoveFromHangfire = true;
+            IsRemove = true;
+            return IsRemove;
+        }
         private async Task CheckValidation(Guid? sourceConfiguationId, Guid? backUpFrequencyId)
         {
             if (sourceConfiguationId == Guid.Empty || sourceConfiguationId == null)
@@ -139,6 +173,17 @@ namespace GeekathonAutoSync.BackUpSchedules
                     throw new UserFriendlyException("Please choice valid backUp frequency.");
                 }
             }
+        }
+        private async Task<string> ConvertCronExpToRegularValue(string cronExp)
+        {
+            var options = new Options
+            {
+                Locale = "en", // or "fr", "de", etc.
+                Use24HourTimeFormat = false
+            };
+            var description = ExpressionDescriptor.GetDescription(cronExp, options);
+
+            return description;
         }
     }
 }

@@ -15,5 +15,6 @@ namespace GeekathonAutoSync.BackUpSchedules
         Task<BackUpScheduleDto> CreateAsync(BackUpScheduleCreateDto input);
         Task<BackUpScheduleDto> UpdateAsync(BackUpScheduleUpdateDto input);
         Task<BackUpScheduleDto> GetAsync(Guid id);
+        Task<bool> RemoveScheduleAsync(Guid backupScheduleId);
     }
 }
