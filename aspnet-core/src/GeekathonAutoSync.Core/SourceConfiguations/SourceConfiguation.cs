@@ -36,7 +36,7 @@ namespace GeekathonAutoSync.SourceConfiguations
         public string OS { get; set; }
         public Guid? BackUpStorageConfiguationId { get; set; }
         [ForeignKey("BackUpStorageConfiguationId")]
-        public virtual BackUpStorageConfiguation BackUpStorageConfiguation { get; set; }
+        public virtual BackUpStorageConfiguation? BackUpStorageConfiguation { get; set; }
         public string Port { get; set; }
         public string SshUserName { get; set; }
         public string SshPassword { get; set; }

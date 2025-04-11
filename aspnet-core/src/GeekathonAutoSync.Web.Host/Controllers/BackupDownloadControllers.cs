@@ -1,6 +1,7 @@
 ﻿using Abp.AspNetCore.Mvc.Controllers;
 using GeekathonAutoSync.AutoBackup;
 using Microsoft.AspNetCore.Mvc;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace GeekathonAutoSync.Web.Host.Controllers
@@ -36,6 +37,17 @@ namespace GeekathonAutoSync.Web.Host.Controllers
             var result = await _autoBackupAppService.DownloadBackupStreamAsync(sourceConfigurationId, storageConfigurationId, backUpFileName);
 
             return File(result.Item1, result.Item2, result.Item3);
+        }
+
+        [HttpGet("download-local")]
+        public async Task<IActionResult> DownloadFromLocal(string sourceConfigurationId)
+        {
+            var filePath = await _autoBackupAppService.CreateBackupAndDownload(sourceConfigurationId);
+            var fileStream = await _autoBackupAppService.GetBackupFromLocalHost(filePath);
+            var contentType = "application/octet-stream";
+
+            var fileName = Path.GetFileName(filePath);
+            return File(fileStream, contentType, fileName);
         }
 
 
