@@ -4,6 +4,7 @@ using GeekathonAutoSync.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace GeekathonAutoSync.Migrations
 {
     [DbContext(typeof(GeekathonAutoSyncDbContext))]
-    partial class GeekathonAutoSyncDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250411070342_set_notnull_IsRemoveFromHangfire_field")]
+    partial class set_notnull_IsRemoveFromHangfire_field
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -1762,9 +1765,6 @@ namespace GeekathonAutoSync.Migrations
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
 
-                    b.Property<bool>("IsUserLocalSystem")
-                        .HasColumnType("bit");
-
                     b.Property<DateTime?>("LastModificationTime")
                         .HasColumnType("datetime2");
 
@@ -1783,7 +1783,7 @@ namespace GeekathonAutoSync.Migrations
                     b.Property<string>("NFS_Password")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("StorageMasterTypeId")
+                    b.Property<Guid>("StorageMasterTypeId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int?>("TenantId")
@@ -2284,7 +2284,9 @@ namespace GeekathonAutoSync.Migrations
 
                     b.HasOne("GeekathonAutoSync.StorageMasterTypes.StorageMasterType", "StorageMasterType")
                         .WithMany()
-                        .HasForeignKey("StorageMasterTypeId");
+                        .HasForeignKey("StorageMasterTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("GeekathonAutoSync.MultiTenancy.Tenant", "Tenant")
                         .WithMany()

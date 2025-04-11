@@ -16,7 +16,7 @@ namespace GeekathonAutoSync.BackUpStorageConfiguations
         public int? TenantId { get; set; }
         [ForeignKey("TenantId")]
         public virtual Tenant Tenant { get; set; }
-        public Guid StorageMasterTypeId { get; set; }
+        public Guid? StorageMasterTypeId { get; set; }
         [ForeignKey("StorageMasterTypeId")]
         public virtual StorageMasterType StorageMasterType { get; set; }
         public Guid? CloudStorageId { get; set; }
@@ -34,6 +34,7 @@ namespace GeekathonAutoSync.BackUpStorageConfiguations
         public string AZ_AccountName { get; set; }
         public string AZ_AccountKey { get; set; }
         public string BackupName { get; set; }
+        public bool IsUserLocalSystem { get; set; }
         public ICollection<SourceConfiguation> SourceConfiguations { get; set; } = new List<SourceConfiguation>();
         public ICollection<BackUpLog> BackUpLogs { get; set; } = new List<BackUpLog>();
     }

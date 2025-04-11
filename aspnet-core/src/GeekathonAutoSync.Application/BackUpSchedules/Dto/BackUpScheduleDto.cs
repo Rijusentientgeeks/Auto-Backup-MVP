@@ -13,6 +13,7 @@ namespace GeekathonAutoSync.BackUpSchedules.Dto
         public TimeSpan? BackupTime { get; set; }
         public Guid? BackUpFrequencyId { get; set; }
         public string CronExpression { get; set; }
+        public bool IsRemoveFromHangfire { get; set; }
         public SourceConfiguationDto SourceConfiguation { get; set; } = new SourceConfiguationDto();
         public BackUpFrequencyDto BackUpFrequency { get; set; } = new BackUpFrequencyDto();
     }
