@@ -20,6 +20,12 @@ import {
   styleUrl: "./schedule-backup.component.css",
 })
 export class ScheduleBackupComponent implements OnInit {
+deleteScheduledBackup(_t71: any) {
+throw new Error('Method not implemented.');
+}
+editScheduledBackup(_t71: any) {
+throw new Error('Method not implemented.');
+}
   scheduleForm!: FormGroup;
   cronExpression: string = "";
   showDayOfWeek = false;
@@ -215,4 +221,7 @@ export class ScheduleBackupComponent implements OnInit {
     }
   }
 
+
+  
+  
 }

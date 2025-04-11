@@ -142,6 +142,301 @@ export class AccountServiceProxy {
 }
 
 @Injectable()
+export class AutoBackupServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param sConfigurationId (optional) 
+     * @return OK
+     */
+    createBackup(sConfigurationId: string | undefined): Observable<string> {
+        let url_ = this.baseUrl + "/api/services/app/AutoBackup/CreateBackup?";
+        if (sConfigurationId === null)
+            throw new Error("The parameter 'sConfigurationId' cannot be null.");
+        else if (sConfigurationId !== undefined)
+            url_ += "sConfigurationId=" + encodeURIComponent("" + sConfigurationId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processCreateBackup(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processCreateBackup(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<string>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<string>;
+        }));
+    }
+
+    protected processCreateBackup(response: HttpResponseBase): Observable<string> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+                result200 = resultData200 !== undefined ? resultData200 : <any>null;
+    
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param keyword (optional) 
+     * @param sourceConfigId (optional) 
+     * @param backupStorageid (optional) 
+     * @param backupTypeId (optional) 
+     * @param cloudStorageTypeId (optional) 
+     * @param skipCount (optional) 
+     * @param maxResultCount (optional) 
+     * @return OK
+     */
+    getAllBackupLog(keyword: string | undefined, sourceConfigId: string | undefined, backupStorageid: string | undefined, backupTypeId: string | undefined, cloudStorageTypeId: string | undefined, skipCount: number | undefined, maxResultCount: number | undefined): Observable<BackUpLogDtoPagedResultDto> {
+        let url_ = this.baseUrl + "/api/services/app/AutoBackup/GetAllBackupLog?";
+        if (keyword === null)
+            throw new Error("The parameter 'keyword' cannot be null.");
+        else if (keyword !== undefined)
+            url_ += "Keyword=" + encodeURIComponent("" + keyword) + "&";
+        if (sourceConfigId === null)
+            throw new Error("The parameter 'sourceConfigId' cannot be null.");
+        else if (sourceConfigId !== undefined)
+            url_ += "SourceConfigId=" + encodeURIComponent("" + sourceConfigId) + "&";
+        if (backupStorageid === null)
+            throw new Error("The parameter 'backupStorageid' cannot be null.");
+        else if (backupStorageid !== undefined)
+            url_ += "BackupStorageid=" + encodeURIComponent("" + backupStorageid) + "&";
+        if (backupTypeId === null)
+            throw new Error("The parameter 'backupTypeId' cannot be null.");
+        else if (backupTypeId !== undefined)
+            url_ += "BackupTypeId=" + encodeURIComponent("" + backupTypeId) + "&";
+        if (cloudStorageTypeId === null)
+            throw new Error("The parameter 'cloudStorageTypeId' cannot be null.");
+        else if (cloudStorageTypeId !== undefined)
+            url_ += "CloudStorageTypeId=" + encodeURIComponent("" + cloudStorageTypeId) + "&";
+        if (skipCount === null)
+            throw new Error("The parameter 'skipCount' cannot be null.");
+        else if (skipCount !== undefined)
+            url_ += "SkipCount=" + encodeURIComponent("" + skipCount) + "&";
+        if (maxResultCount === null)
+            throw new Error("The parameter 'maxResultCount' cannot be null.");
+        else if (maxResultCount !== undefined)
+            url_ += "MaxResultCount=" + encodeURIComponent("" + maxResultCount) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAllBackupLog(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAllBackupLog(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<BackUpLogDtoPagedResultDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<BackUpLogDtoPagedResultDto>;
+        }));
+    }
+
+    protected processGetAllBackupLog(response: HttpResponseBase): Observable<BackUpLogDtoPagedResultDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BackUpLogDtoPagedResultDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param backupStorageConfigId (optional) 
+     * @param skipCount (optional) 
+     * @param maxResultCount (optional) 
+     * @return OK
+     */
+    getAllCompletedBackupLogByStorageConfigId(backupStorageConfigId: string | undefined, skipCount: number | undefined, maxResultCount: number | undefined): Observable<BackUpLogDtoPagedResultDto> {
+        let url_ = this.baseUrl + "/api/services/app/AutoBackup/GetAllCompletedBackupLogByStorageConfigId?";
+        if (backupStorageConfigId === null)
+            throw new Error("The parameter 'backupStorageConfigId' cannot be null.");
+        else if (backupStorageConfigId !== undefined)
+            url_ += "BackupStorageConfigId=" + encodeURIComponent("" + backupStorageConfigId) + "&";
+        if (skipCount === null)
+            throw new Error("The parameter 'skipCount' cannot be null.");
+        else if (skipCount !== undefined)
+            url_ += "SkipCount=" + encodeURIComponent("" + skipCount) + "&";
+        if (maxResultCount === null)
+            throw new Error("The parameter 'maxResultCount' cannot be null.");
+        else if (maxResultCount !== undefined)
+            url_ += "MaxResultCount=" + encodeURIComponent("" + maxResultCount) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processGetAllCompletedBackupLogByStorageConfigId(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processGetAllCompletedBackupLogByStorageConfigId(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<BackUpLogDtoPagedResultDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<BackUpLogDtoPagedResultDto>;
+        }));
+    }
+
+    protected processGetAllCompletedBackupLogByStorageConfigId(response: HttpResponseBase): Observable<BackUpLogDtoPagedResultDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BackUpLogDtoPagedResultDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
+export class BackupServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param sourceConfigurationId (optional) 
+     * @param storageConfigurationId (optional) 
+     * @param backUpFileName (optional) 
+     * @return OK
+     */
+    download(sourceConfigurationId: string | undefined, storageConfigurationId: string | undefined, backUpFileName: string | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/backup/download?";
+        if (sourceConfigurationId === null)
+            throw new Error("The parameter 'sourceConfigurationId' cannot be null.");
+        else if (sourceConfigurationId !== undefined)
+            url_ += "sourceConfigurationId=" + encodeURIComponent("" + sourceConfigurationId) + "&";
+        if (storageConfigurationId === null)
+            throw new Error("The parameter 'storageConfigurationId' cannot be null.");
+        else if (storageConfigurationId !== undefined)
+            url_ += "storageConfigurationId=" + encodeURIComponent("" + storageConfigurationId) + "&";
+        if (backUpFileName === null)
+            throw new Error("The parameter 'backUpFileName' cannot be null.");
+        else if (backUpFileName !== undefined)
+            url_ += "backUpFileName=" + encodeURIComponent("" + backUpFileName) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("get", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDownload(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDownload(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processDownload(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
 export class BackUpFrequencyServiceProxy {
     private http: HttpClient;
     private baseUrl: string;
@@ -704,6 +999,62 @@ export class BackUpStorageConfiguationServiceProxy {
         }
         return _observableOf(null as any);
     }
+
+    /**
+     * @param id (optional) 
+     * @return OK
+     */
+    delete(id: string | undefined): Observable<BackUpStorageConfiguationDto> {
+        let url_ = this.baseUrl + "/api/services/app/BackUpStorageConfiguation/Delete?";
+        if (id === null)
+            throw new Error("The parameter 'id' cannot be null.");
+        else if (id !== undefined)
+            url_ += "id=" + encodeURIComponent("" + id) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Accept": "text/plain"
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processDelete(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processDelete(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<BackUpStorageConfiguationDto>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<BackUpStorageConfiguationDto>;
+        }));
+    }
+
+    protected processDelete(response: HttpResponseBase): Observable<BackUpStorageConfiguationDto> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            let result200: any = null;
+            let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
+            result200 = BackUpStorageConfiguationDto.fromJS(resultData200);
+            return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
 }
 
 @Injectable()
@@ -949,6 +1300,184 @@ export class DBTypeServiceProxy {
             let resultData200 = _responseText === "" ? null : JSON.parse(_responseText, this.jsonParseReviver);
             result200 = DBTypeDtoPagedResultDto.fromJS(resultData200);
             return _observableOf(result200);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+}
+
+@Injectable()
+export class JobSchedulerServiceProxy {
+    private http: HttpClient;
+    private baseUrl: string;
+    protected jsonParseReviver: ((key: string, value: any) => any) | undefined = undefined;
+
+    constructor(@Inject(HttpClient) http: HttpClient, @Optional() @Inject(API_BASE_URL) baseUrl?: string) {
+        this.http = http;
+        this.baseUrl = baseUrl ?? "";
+    }
+
+    /**
+     * @param body (optional) 
+     * @return OK
+     */
+    scheduleJobs(body: BackUpScheduleDto | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/JobScheduler/ScheduleJobs";
+        url_ = url_.replace(/[?&]$/, "");
+
+        const content_ = JSON.stringify(body);
+
+        let options_ : any = {
+            body: content_,
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+                "Content-Type": "application/json",
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processScheduleJobs(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processScheduleJobs(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processScheduleJobs(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param tenantId (optional) 
+     * @param sourceConfigurationId (optional) 
+     * @return OK
+     */
+    executeBackupJob(tenantId: number | undefined, sourceConfigurationId: string | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/JobScheduler/ExecuteBackupJob?";
+        if (tenantId === null)
+            throw new Error("The parameter 'tenantId' cannot be null.");
+        else if (tenantId !== undefined)
+            url_ += "tenantId=" + encodeURIComponent("" + tenantId) + "&";
+        if (sourceConfigurationId === null)
+            throw new Error("The parameter 'sourceConfigurationId' cannot be null.");
+        else if (sourceConfigurationId !== undefined)
+            url_ += "sourceConfigurationId=" + encodeURIComponent("" + sourceConfigurationId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("post", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processExecuteBackupJob(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processExecuteBackupJob(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processExecuteBackupJob(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
+            }));
+        } else if (status !== 200 && status !== 204) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return throwException("An unexpected server error occurred.", status, _responseText, _headers);
+            }));
+        }
+        return _observableOf(null as any);
+    }
+
+    /**
+     * @param tenantId (optional) 
+     * @param backUpScheduleId (optional) 
+     * @return OK
+     */
+    removeScheduleJobs(tenantId: number | undefined, backUpScheduleId: string | undefined): Observable<void> {
+        let url_ = this.baseUrl + "/api/services/app/JobScheduler/RemoveScheduleJobs?";
+        if (tenantId === null)
+            throw new Error("The parameter 'tenantId' cannot be null.");
+        else if (tenantId !== undefined)
+            url_ += "tenantId=" + encodeURIComponent("" + tenantId) + "&";
+        if (backUpScheduleId === null)
+            throw new Error("The parameter 'backUpScheduleId' cannot be null.");
+        else if (backUpScheduleId !== undefined)
+            url_ += "backUpScheduleId=" + encodeURIComponent("" + backUpScheduleId) + "&";
+        url_ = url_.replace(/[?&]$/, "");
+
+        let options_ : any = {
+            observe: "response",
+            responseType: "blob",
+            headers: new HttpHeaders({
+            })
+        };
+
+        return this.http.request("delete", url_, options_).pipe(_observableMergeMap((response_ : any) => {
+            return this.processRemoveScheduleJobs(response_);
+        })).pipe(_observableCatch((response_: any) => {
+            if (response_ instanceof HttpResponseBase) {
+                try {
+                    return this.processRemoveScheduleJobs(response_ as any);
+                } catch (e) {
+                    return _observableThrow(e) as any as Observable<void>;
+                }
+            } else
+                return _observableThrow(response_) as any as Observable<void>;
+        }));
+    }
+
+    protected processRemoveScheduleJobs(response: HttpResponseBase): Observable<void> {
+        const status = response.status;
+        const responseBlob =
+            response instanceof HttpResponse ? response.body :
+            (response as any).error instanceof Blob ? (response as any).error : undefined;
+
+        let _headers: any = {}; if (response.headers) { for (let key of response.headers.keys()) { _headers[key] = response.headers.get(key); }}
+        if (status === 200) {
+            return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
+            return _observableOf(null as any);
             }));
         } else if (status !== 200 && status !== 204) {
             return blobToText(responseBlob).pipe(_observableMergeMap((_responseText: string) => {
@@ -2971,6 +3500,7 @@ export class BackUPTypeDto implements IBackUPTypeDto {
     deleterUserId: number | undefined;
     deletionTime: moment.Moment | undefined;
     name: string | undefined;
+    backupTypeEnum: BackupTypeEnum;
 
     constructor(data?: IBackUPTypeDto) {
         if (data) {
@@ -2992,6 +3522,7 @@ export class BackUPTypeDto implements IBackUPTypeDto {
             this.deleterUserId = _data["deleterUserId"];
             this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
             this.name = _data["name"];
+            this.backupTypeEnum = _data["backupTypeEnum"];
         }
     }
 
@@ -3013,6 +3544,7 @@ export class BackUPTypeDto implements IBackUPTypeDto {
         data["deleterUserId"] = this.deleterUserId;
         data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
         data["name"] = this.name;
+        data["backupTypeEnum"] = this.backupTypeEnum;
         return data;
     }
 
@@ -3034,6 +3566,7 @@ export interface IBackUPTypeDto {
     deleterUserId: number | undefined;
     deletionTime: moment.Moment | undefined;
     name: string | undefined;
+    backupTypeEnum: BackupTypeEnum;
 }
 
 export class BackUPTypeDtoPagedResultDto implements IBackUPTypeDtoPagedResultDto {
@@ -3221,11 +3754,150 @@ export interface IBackUpFrequencyDtoPagedResultDto {
     totalCount: number;
 }
 
+export class BackUpLogDto implements IBackUpLogDto {
+    id: string;
+    tenantId: number;
+    tenant: Tenant;
+    sourceConfiguationId: string | undefined;
+    sourceConfiguation: SourceConfiguationDto;
+    startedTimeStamp: moment.Moment | undefined;
+    completedTimeStamp: moment.Moment | undefined;
+    backupLogStatus: BackupLogStatus;
+    backUpFileName: string | undefined;
+    backupFilPath: string | undefined;
+    backUpStorageConfiguationId: string | undefined;
+
+    constructor(data?: IBackUpLogDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.tenantId = _data["tenantId"];
+            this.tenant = _data["tenant"] ? Tenant.fromJS(_data["tenant"]) : <any>undefined;
+            this.sourceConfiguationId = _data["sourceConfiguationId"];
+            this.sourceConfiguation = _data["sourceConfiguation"] ? SourceConfiguationDto.fromJS(_data["sourceConfiguation"]) : <any>undefined;
+            this.startedTimeStamp = _data["startedTimeStamp"] ? moment(_data["startedTimeStamp"].toString()) : <any>undefined;
+            this.completedTimeStamp = _data["completedTimeStamp"] ? moment(_data["completedTimeStamp"].toString()) : <any>undefined;
+            this.backupLogStatus = _data["backupLogStatus"];
+            this.backUpFileName = _data["backUpFileName"];
+            this.backupFilPath = _data["backupFilPath"];
+            this.backUpStorageConfiguationId = _data["backUpStorageConfiguationId"];
+        }
+    }
+
+    static fromJS(data: any): BackUpLogDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BackUpLogDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["tenantId"] = this.tenantId;
+        data["tenant"] = this.tenant ? this.tenant.toJSON() : <any>undefined;
+        data["sourceConfiguationId"] = this.sourceConfiguationId;
+        data["sourceConfiguation"] = this.sourceConfiguation ? this.sourceConfiguation.toJSON() : <any>undefined;
+        data["startedTimeStamp"] = this.startedTimeStamp ? this.startedTimeStamp.toISOString() : <any>undefined;
+        data["completedTimeStamp"] = this.completedTimeStamp ? this.completedTimeStamp.toISOString() : <any>undefined;
+        data["backupLogStatus"] = this.backupLogStatus;
+        data["backUpFileName"] = this.backUpFileName;
+        data["backupFilPath"] = this.backupFilPath;
+        data["backUpStorageConfiguationId"] = this.backUpStorageConfiguationId;
+        return data;
+    }
+
+    clone(): BackUpLogDto {
+        const json = this.toJSON();
+        let result = new BackUpLogDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IBackUpLogDto {
+    id: string;
+    tenantId: number;
+    tenant: Tenant;
+    sourceConfiguationId: string | undefined;
+    sourceConfiguation: SourceConfiguationDto;
+    startedTimeStamp: moment.Moment | undefined;
+    completedTimeStamp: moment.Moment | undefined;
+    backupLogStatus: BackupLogStatus;
+    backUpFileName: string | undefined;
+    backupFilPath: string | undefined;
+    backUpStorageConfiguationId: string | undefined;
+}
+
+export class BackUpLogDtoPagedResultDto implements IBackUpLogDtoPagedResultDto {
+    items: BackUpLogDto[] | undefined;
+    totalCount: number;
+
+    constructor(data?: IBackUpLogDtoPagedResultDto) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            if (Array.isArray(_data["items"])) {
+                this.items = [] as any;
+                for (let item of _data["items"])
+                    this.items.push(BackUpLogDto.fromJS(item));
+            }
+            this.totalCount = _data["totalCount"];
+        }
+    }
+
+    static fromJS(data: any): BackUpLogDtoPagedResultDto {
+        data = typeof data === 'object' ? data : {};
+        let result = new BackUpLogDtoPagedResultDto();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        if (Array.isArray(this.items)) {
+            data["items"] = [];
+            for (let item of this.items)
+                data["items"].push(item.toJSON());
+        }
+        data["totalCount"] = this.totalCount;
+        return data;
+    }
+
+    clone(): BackUpLogDtoPagedResultDto {
+        const json = this.toJSON();
+        let result = new BackUpLogDtoPagedResultDto();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IBackUpLogDtoPagedResultDto {
+    items: BackUpLogDto[] | undefined;
+    totalCount: number;
+}
+
 export class BackUpScheduleCreateDto implements IBackUpScheduleCreateDto {
     sourceConfiguationId: string | undefined;
     backupDate: moment.Moment | undefined;
     backupTime: string | undefined;
     backUpFrequencyId: string | undefined;
+    cronExpression: string | undefined;
 
     constructor(data?: IBackUpScheduleCreateDto) {
         if (data) {
@@ -3242,6 +3914,7 @@ export class BackUpScheduleCreateDto implements IBackUpScheduleCreateDto {
             this.backupDate = _data["backupDate"] ? moment(_data["backupDate"].toString()) : <any>undefined;
             this.backupTime = _data["backupTime"];
             this.backUpFrequencyId = _data["backUpFrequencyId"];
+            this.cronExpression = _data["cronExpression"];
         }
     }
 
@@ -3258,6 +3931,7 @@ export class BackUpScheduleCreateDto implements IBackUpScheduleCreateDto {
         data["backupDate"] = this.backupDate ? this.backupDate.toISOString() : <any>undefined;
         data["backupTime"] = this.backupTime;
         data["backUpFrequencyId"] = this.backUpFrequencyId;
+        data["cronExpression"] = this.cronExpression;
         return data;
     }
 
@@ -3274,6 +3948,7 @@ export interface IBackUpScheduleCreateDto {
     backupDate: moment.Moment | undefined;
     backupTime: string | undefined;
     backUpFrequencyId: string | undefined;
+    cronExpression: string | undefined;
 }
 
 export class BackUpScheduleDto implements IBackUpScheduleDto {
@@ -3290,6 +3965,7 @@ export class BackUpScheduleDto implements IBackUpScheduleDto {
     backupDate: moment.Moment | undefined;
     backupTime: string | undefined;
     backUpFrequencyId: string | undefined;
+    cronExpression: string | undefined;
     sourceConfiguation: SourceConfiguationDto;
     backUpFrequency: BackUpFrequencyDto;
 
@@ -3317,6 +3993,7 @@ export class BackUpScheduleDto implements IBackUpScheduleDto {
             this.backupDate = _data["backupDate"] ? moment(_data["backupDate"].toString()) : <any>undefined;
             this.backupTime = _data["backupTime"];
             this.backUpFrequencyId = _data["backUpFrequencyId"];
+            this.cronExpression = _data["cronExpression"];
             this.sourceConfiguation = _data["sourceConfiguation"] ? SourceConfiguationDto.fromJS(_data["sourceConfiguation"]) : <any>undefined;
             this.backUpFrequency = _data["backUpFrequency"] ? BackUpFrequencyDto.fromJS(_data["backUpFrequency"]) : <any>undefined;
         }
@@ -3344,6 +4021,7 @@ export class BackUpScheduleDto implements IBackUpScheduleDto {
         data["backupDate"] = this.backupDate ? this.backupDate.toISOString() : <any>undefined;
         data["backupTime"] = this.backupTime;
         data["backUpFrequencyId"] = this.backUpFrequencyId;
+        data["cronExpression"] = this.cronExpression;
         data["sourceConfiguation"] = this.sourceConfiguation ? this.sourceConfiguation.toJSON() : <any>undefined;
         data["backUpFrequency"] = this.backUpFrequency ? this.backUpFrequency.toJSON() : <any>undefined;
         return data;
@@ -3371,6 +4049,7 @@ export interface IBackUpScheduleDto {
     backupDate: moment.Moment | undefined;
     backupTime: string | undefined;
     backUpFrequencyId: string | undefined;
+    cronExpression: string | undefined;
     sourceConfiguation: SourceConfiguationDto;
     backUpFrequency: BackUpFrequencyDto;
 }
@@ -3435,6 +4114,7 @@ export class BackUpScheduleUpdateDto implements IBackUpScheduleUpdateDto {
     backupDate: moment.Moment | undefined;
     backupTime: string | undefined;
     backUpFrequencyId: string | undefined;
+    cronExpression: string | undefined;
     id: string;
 
     constructor(data?: IBackUpScheduleUpdateDto) {
@@ -3452,6 +4132,7 @@ export class BackUpScheduleUpdateDto implements IBackUpScheduleUpdateDto {
             this.backupDate = _data["backupDate"] ? moment(_data["backupDate"].toString()) : <any>undefined;
             this.backupTime = _data["backupTime"];
             this.backUpFrequencyId = _data["backUpFrequencyId"];
+            this.cronExpression = _data["cronExpression"];
             this.id = _data["id"];
         }
     }
@@ -3469,6 +4150,7 @@ export class BackUpScheduleUpdateDto implements IBackUpScheduleUpdateDto {
         data["backupDate"] = this.backupDate ? this.backupDate.toISOString() : <any>undefined;
         data["backupTime"] = this.backupTime;
         data["backUpFrequencyId"] = this.backUpFrequencyId;
+        data["cronExpression"] = this.cronExpression;
         data["id"] = this.id;
         return data;
     }
@@ -3486,6 +4168,7 @@ export interface IBackUpScheduleUpdateDto {
     backupDate: moment.Moment | undefined;
     backupTime: string | undefined;
     backUpFrequencyId: string | undefined;
+    cronExpression: string | undefined;
     id: string;
 }
 
@@ -3503,6 +4186,7 @@ export class BackUpStorageConfiguationCreateDto implements IBackUpStorageConfigu
     awS_backUpPath: string | undefined;
     aZ_AccountName: string | undefined;
     aZ_AccountKey: string | undefined;
+    backupName: string | undefined;
 
     constructor(data?: IBackUpStorageConfiguationCreateDto) {
         if (data) {
@@ -3528,6 +4212,7 @@ export class BackUpStorageConfiguationCreateDto implements IBackUpStorageConfigu
             this.awS_backUpPath = _data["awS_backUpPath"];
             this.aZ_AccountName = _data["aZ_AccountName"];
             this.aZ_AccountKey = _data["aZ_AccountKey"];
+            this.backupName = _data["backupName"];
         }
     }
 
@@ -3553,6 +4238,7 @@ export class BackUpStorageConfiguationCreateDto implements IBackUpStorageConfigu
         data["awS_backUpPath"] = this.awS_backUpPath;
         data["aZ_AccountName"] = this.aZ_AccountName;
         data["aZ_AccountKey"] = this.aZ_AccountKey;
+        data["backupName"] = this.backupName;
         return data;
     }
 
@@ -3578,6 +4264,7 @@ export interface IBackUpStorageConfiguationCreateDto {
     awS_backUpPath: string | undefined;
     aZ_AccountName: string | undefined;
     aZ_AccountKey: string | undefined;
+    backupName: string | undefined;
 }
 
 export class BackUpStorageConfiguationDto implements IBackUpStorageConfiguationDto {
@@ -3603,6 +4290,7 @@ export class BackUpStorageConfiguationDto implements IBackUpStorageConfiguationD
     awS_backUpPath: string | undefined;
     aZ_AccountName: string | undefined;
     aZ_AccountKey: string | undefined;
+    backupName: string | undefined;
     storageMasterType: StorageMasterTypeDto;
     cloudStorage: CloudStorageDto;
 
@@ -3639,6 +4327,7 @@ export class BackUpStorageConfiguationDto implements IBackUpStorageConfiguationD
             this.awS_backUpPath = _data["awS_backUpPath"];
             this.aZ_AccountName = _data["aZ_AccountName"];
             this.aZ_AccountKey = _data["aZ_AccountKey"];
+            this.backupName = _data["backupName"];
             this.storageMasterType = _data["storageMasterType"] ? StorageMasterTypeDto.fromJS(_data["storageMasterType"]) : <any>undefined;
             this.cloudStorage = _data["cloudStorage"] ? CloudStorageDto.fromJS(_data["cloudStorage"]) : <any>undefined;
         }
@@ -3675,6 +4364,7 @@ export class BackUpStorageConfiguationDto implements IBackUpStorageConfiguationD
         data["awS_backUpPath"] = this.awS_backUpPath;
         data["aZ_AccountName"] = this.aZ_AccountName;
         data["aZ_AccountKey"] = this.aZ_AccountKey;
+        data["backupName"] = this.backupName;
         data["storageMasterType"] = this.storageMasterType ? this.storageMasterType.toJSON() : <any>undefined;
         data["cloudStorage"] = this.cloudStorage ? this.cloudStorage.toJSON() : <any>undefined;
         return data;
@@ -3711,6 +4401,7 @@ export interface IBackUpStorageConfiguationDto {
     awS_backUpPath: string | undefined;
     aZ_AccountName: string | undefined;
     aZ_AccountKey: string | undefined;
+    backupName: string | undefined;
     storageMasterType: StorageMasterTypeDto;
     cloudStorage: CloudStorageDto;
 }
@@ -3784,6 +4475,7 @@ export class BackUpStorageConfiguationUpdateDto implements IBackUpStorageConfigu
     awS_backUpPath: string | undefined;
     aZ_AccountName: string | undefined;
     aZ_AccountKey: string | undefined;
+    backupName: string | undefined;
     id: string;
 
     constructor(data?: IBackUpStorageConfiguationUpdateDto) {
@@ -3810,6 +4502,7 @@ export class BackUpStorageConfiguationUpdateDto implements IBackUpStorageConfigu
             this.awS_backUpPath = _data["awS_backUpPath"];
             this.aZ_AccountName = _data["aZ_AccountName"];
             this.aZ_AccountKey = _data["aZ_AccountKey"];
+            this.backupName = _data["backupName"];
             this.id = _data["id"];
         }
     }
@@ -3836,6 +4529,7 @@ export class BackUpStorageConfiguationUpdateDto implements IBackUpStorageConfigu
         data["awS_backUpPath"] = this.awS_backUpPath;
         data["aZ_AccountName"] = this.aZ_AccountName;
         data["aZ_AccountKey"] = this.aZ_AccountKey;
+        data["backupName"] = this.backupName;
         data["id"] = this.id;
         return data;
     }
@@ -3862,7 +4556,20 @@ export interface IBackUpStorageConfiguationUpdateDto {
     awS_backUpPath: string | undefined;
     aZ_AccountName: string | undefined;
     aZ_AccountKey: string | undefined;
+    backupName: string | undefined;
     id: string;
+}
+
+export enum BackupLogStatus {
+    _0 = 0,
+    _1 = 1,
+    _2 = 2,
+}
+
+export enum BackupTypeEnum {
+    _0 = 0,
+    _1 = 1,
+    _2 = 2,
 }
 
 export class ChangePasswordDto implements IChangePasswordDto {
@@ -4008,6 +4715,7 @@ export class CloudStorageDto implements ICloudStorageDto {
     deleterUserId: number | undefined;
     deletionTime: moment.Moment | undefined;
     name: string | undefined;
+    type: CloudStorageType;
 
     constructor(data?: ICloudStorageDto) {
         if (data) {
@@ -4029,6 +4737,7 @@ export class CloudStorageDto implements ICloudStorageDto {
             this.deleterUserId = _data["deleterUserId"];
             this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
             this.name = _data["name"];
+            this.type = _data["type"];
         }
     }
 
@@ -4050,6 +4759,7 @@ export class CloudStorageDto implements ICloudStorageDto {
         data["deleterUserId"] = this.deleterUserId;
         data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
         data["name"] = this.name;
+        data["type"] = this.type;
         return data;
     }
 
@@ -4071,6 +4781,7 @@ export interface ICloudStorageDto {
     deleterUserId: number | undefined;
     deletionTime: moment.Moment | undefined;
     name: string | undefined;
+    type: CloudStorageType;
 }
 
 export class CloudStorageDtoPagedResultDto implements ICloudStorageDtoPagedResultDto {
@@ -4126,6 +4837,13 @@ export class CloudStorageDtoPagedResultDto implements ICloudStorageDtoPagedResul
 export interface ICloudStorageDtoPagedResultDto {
     items: CloudStorageDto[] | undefined;
     totalCount: number;
+}
+
+export enum CloudStorageType {
+    _0 = 0,
+    _1 = 1,
+    _2 = 2,
+    _3 = 3,
 }
 
 export class CreateRoleDto implements ICreateRoleDto {
@@ -4339,6 +5057,7 @@ export class DBTypeDto implements IDBTypeDto {
     deleterUserId: number | undefined;
     deletionTime: moment.Moment | undefined;
     name: string | undefined;
+    type: DbTypeEnum;
 
     constructor(data?: IDBTypeDto) {
         if (data) {
@@ -4360,6 +5079,7 @@ export class DBTypeDto implements IDBTypeDto {
             this.deleterUserId = _data["deleterUserId"];
             this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
             this.name = _data["name"];
+            this.type = _data["type"];
         }
     }
 
@@ -4381,6 +5101,7 @@ export class DBTypeDto implements IDBTypeDto {
         data["deleterUserId"] = this.deleterUserId;
         data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
         data["name"] = this.name;
+        data["type"] = this.type;
         return data;
     }
 
@@ -4402,6 +5123,7 @@ export interface IDBTypeDto {
     deleterUserId: number | undefined;
     deletionTime: moment.Moment | undefined;
     name: string | undefined;
+    type: DbTypeEnum;
 }
 
 export class DBTypeDtoPagedResultDto implements IDBTypeDtoPagedResultDto {
@@ -4457,6 +5179,93 @@ export class DBTypeDtoPagedResultDto implements IDBTypeDtoPagedResultDto {
 export interface IDBTypeDtoPagedResultDto {
     items: DBTypeDto[] | undefined;
     totalCount: number;
+}
+
+export enum DbTypeEnum {
+    _0 = 0,
+    _1 = 1,
+    _2 = 2,
+    _3 = 3,
+    _4 = 4,
+}
+
+export class Edition implements IEdition {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    name: string;
+    displayName: string;
+
+    constructor(data?: IEdition) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.isDeleted = _data["isDeleted"];
+            this.deleterUserId = _data["deleterUserId"];
+            this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
+            this.name = _data["name"];
+            this.displayName = _data["displayName"];
+        }
+    }
+
+    static fromJS(data: any): Edition {
+        data = typeof data === 'object' ? data : {};
+        let result = new Edition();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["isDeleted"] = this.isDeleted;
+        data["deleterUserId"] = this.deleterUserId;
+        data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
+        data["name"] = this.name;
+        data["displayName"] = this.displayName;
+        return data;
+    }
+
+    clone(): Edition {
+        const json = this.toJSON();
+        let result = new Edition();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IEdition {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    name: string;
+    displayName: string;
 }
 
 export class FlatPermissionDto implements IFlatPermissionDto {
@@ -5374,6 +6183,81 @@ export interface IRoleListDtoListResultDto {
     items: RoleListDto[] | undefined;
 }
 
+export class Setting implements ISetting {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    tenantId: number | undefined;
+    userId: number | undefined;
+    name: string;
+    value: string | undefined;
+
+    constructor(data?: ISetting) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.tenantId = _data["tenantId"];
+            this.userId = _data["userId"];
+            this.name = _data["name"];
+            this.value = _data["value"];
+        }
+    }
+
+    static fromJS(data: any): Setting {
+        data = typeof data === 'object' ? data : {};
+        let result = new Setting();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["tenantId"] = this.tenantId;
+        data["userId"] = this.userId;
+        data["name"] = this.name;
+        data["value"] = this.value;
+        return data;
+    }
+
+    clone(): Setting {
+        const json = this.toJSON();
+        let result = new Setting();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ISetting {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    tenantId: number | undefined;
+    userId: number | undefined;
+    name: string;
+    value: string | undefined;
+}
+
 export class SourceConfiguationCreateDto implements ISourceConfiguationCreateDto {
     backUPTypeId: string;
     dbTypeId: string | undefined;
@@ -5392,6 +6276,7 @@ export class SourceConfiguationCreateDto implements ISourceConfiguationCreateDto
     sourcepath: string | undefined;
     os: string | undefined;
     backUpStorageConfiguationId: string | undefined;
+    backupName: string | undefined;
 
     constructor(data?: ISourceConfiguationCreateDto) {
         if (data) {
@@ -5421,6 +6306,7 @@ export class SourceConfiguationCreateDto implements ISourceConfiguationCreateDto
             this.sourcepath = _data["sourcepath"];
             this.os = _data["os"];
             this.backUpStorageConfiguationId = _data["backUpStorageConfiguationId"];
+            this.backupName = _data["backupName"];
         }
     }
 
@@ -5450,6 +6336,7 @@ export class SourceConfiguationCreateDto implements ISourceConfiguationCreateDto
         data["sourcepath"] = this.sourcepath;
         data["os"] = this.os;
         data["backUpStorageConfiguationId"] = this.backUpStorageConfiguationId;
+        data["backupName"] = this.backupName;
         return data;
     }
 
@@ -5479,6 +6366,7 @@ export interface ISourceConfiguationCreateDto {
     sourcepath: string | undefined;
     os: string | undefined;
     backUpStorageConfiguationId: string | undefined;
+    backupName: string | undefined;
 }
 
 export class SourceConfiguationDto implements ISourceConfiguationDto {
@@ -5510,6 +6398,8 @@ export class SourceConfiguationDto implements ISourceConfiguationDto {
     backUpStorageConfiguationId: string | undefined;
     backUPType: BackUPTypeDto;
     dbType: DBTypeDto;
+    backupName: string | undefined;
+    scheduledCronExpression: string[] | undefined;
     backUpStorageConfiguation: BackUpStorageConfiguationDto;
 
     constructor(data?: ISourceConfiguationDto) {
@@ -5551,6 +6441,12 @@ export class SourceConfiguationDto implements ISourceConfiguationDto {
             this.backUpStorageConfiguationId = _data["backUpStorageConfiguationId"];
             this.backUPType = _data["backUPType"] ? BackUPTypeDto.fromJS(_data["backUPType"]) : <any>undefined;
             this.dbType = _data["dbType"] ? DBTypeDto.fromJS(_data["dbType"]) : <any>undefined;
+            this.backupName = _data["backupName"];
+            if (Array.isArray(_data["scheduledCronExpression"])) {
+                this.scheduledCronExpression = [] as any;
+                for (let item of _data["scheduledCronExpression"])
+                    this.scheduledCronExpression.push(item);
+            }
             this.backUpStorageConfiguation = _data["backUpStorageConfiguation"] ? BackUpStorageConfiguationDto.fromJS(_data["backUpStorageConfiguation"]) : <any>undefined;
         }
     }
@@ -5592,6 +6488,12 @@ export class SourceConfiguationDto implements ISourceConfiguationDto {
         data["backUpStorageConfiguationId"] = this.backUpStorageConfiguationId;
         data["backUPType"] = this.backUPType ? this.backUPType.toJSON() : <any>undefined;
         data["dbType"] = this.dbType ? this.dbType.toJSON() : <any>undefined;
+        data["backupName"] = this.backupName;
+        if (Array.isArray(this.scheduledCronExpression)) {
+            data["scheduledCronExpression"] = [];
+            for (let item of this.scheduledCronExpression)
+                data["scheduledCronExpression"].push(item);
+        }
         data["backUpStorageConfiguation"] = this.backUpStorageConfiguation ? this.backUpStorageConfiguation.toJSON() : <any>undefined;
         return data;
     }
@@ -5633,6 +6535,8 @@ export interface ISourceConfiguationDto {
     backUpStorageConfiguationId: string | undefined;
     backUPType: BackUPTypeDto;
     dbType: DBTypeDto;
+    backupName: string | undefined;
+    scheduledCronExpression: string[] | undefined;
     backUpStorageConfiguation: BackUpStorageConfiguationDto;
 }
 
@@ -5709,6 +6613,7 @@ export class SourceConfiguationUpdateDto implements ISourceConfiguationUpdateDto
     sourcepath: string | undefined;
     os: string | undefined;
     backUpStorageConfiguationId: string | undefined;
+    backupName: string | undefined;
     id: string;
 
     constructor(data?: ISourceConfiguationUpdateDto) {
@@ -5739,6 +6644,7 @@ export class SourceConfiguationUpdateDto implements ISourceConfiguationUpdateDto
             this.sourcepath = _data["sourcepath"];
             this.os = _data["os"];
             this.backUpStorageConfiguationId = _data["backUpStorageConfiguationId"];
+            this.backupName = _data["backupName"];
             this.id = _data["id"];
         }
     }
@@ -5769,6 +6675,7 @@ export class SourceConfiguationUpdateDto implements ISourceConfiguationUpdateDto
         data["sourcepath"] = this.sourcepath;
         data["os"] = this.os;
         data["backUpStorageConfiguationId"] = this.backUpStorageConfiguationId;
+        data["backupName"] = this.backupName;
         data["id"] = this.id;
         return data;
     }
@@ -5799,6 +6706,7 @@ export interface ISourceConfiguationUpdateDto {
     sourcepath: string | undefined;
     os: string | undefined;
     backUpStorageConfiguationId: string | undefined;
+    backupName: string | undefined;
     id: string;
 }
 
@@ -5812,6 +6720,7 @@ export class StorageMasterTypeDto implements IStorageMasterTypeDto {
     deleterUserId: number | undefined;
     deletionTime: moment.Moment | undefined;
     name: string | undefined;
+    type: StorageMasterTypeEnum;
 
     constructor(data?: IStorageMasterTypeDto) {
         if (data) {
@@ -5833,6 +6742,7 @@ export class StorageMasterTypeDto implements IStorageMasterTypeDto {
             this.deleterUserId = _data["deleterUserId"];
             this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
             this.name = _data["name"];
+            this.type = _data["type"];
         }
     }
 
@@ -5854,6 +6764,7 @@ export class StorageMasterTypeDto implements IStorageMasterTypeDto {
         data["deleterUserId"] = this.deleterUserId;
         data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
         data["name"] = this.name;
+        data["type"] = this.type;
         return data;
     }
 
@@ -5875,6 +6786,7 @@ export interface IStorageMasterTypeDto {
     deleterUserId: number | undefined;
     deletionTime: moment.Moment | undefined;
     name: string | undefined;
+    type: StorageMasterTypeEnum;
 }
 
 export class StorageMasterTypeDtoPagedResultDto implements IStorageMasterTypeDtoPagedResultDto {
@@ -5930,6 +6842,119 @@ export class StorageMasterTypeDtoPagedResultDto implements IStorageMasterTypeDto
 export interface IStorageMasterTypeDtoPagedResultDto {
     items: StorageMasterTypeDto[] | undefined;
     totalCount: number;
+}
+
+export enum StorageMasterTypeEnum {
+    _0 = 0,
+    _1 = 1,
+    _2 = 2,
+}
+
+export class Tenant implements ITenant {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenancyName: string;
+    name: string;
+    connectionString: string | undefined;
+    isActive: boolean;
+    edition: Edition;
+    editionId: number | undefined;
+    creatorUser: User;
+    lastModifierUser: User;
+    deleterUser: User;
+
+    constructor(data?: ITenant) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.isDeleted = _data["isDeleted"];
+            this.deleterUserId = _data["deleterUserId"];
+            this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
+            this.tenancyName = _data["tenancyName"];
+            this.name = _data["name"];
+            this.connectionString = _data["connectionString"];
+            this.isActive = _data["isActive"];
+            this.edition = _data["edition"] ? Edition.fromJS(_data["edition"]) : <any>undefined;
+            this.editionId = _data["editionId"];
+            this.creatorUser = _data["creatorUser"] ? User.fromJS(_data["creatorUser"]) : <any>undefined;
+            this.lastModifierUser = _data["lastModifierUser"] ? User.fromJS(_data["lastModifierUser"]) : <any>undefined;
+            this.deleterUser = _data["deleterUser"] ? User.fromJS(_data["deleterUser"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): Tenant {
+        data = typeof data === 'object' ? data : {};
+        let result = new Tenant();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["isDeleted"] = this.isDeleted;
+        data["deleterUserId"] = this.deleterUserId;
+        data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
+        data["tenancyName"] = this.tenancyName;
+        data["name"] = this.name;
+        data["connectionString"] = this.connectionString;
+        data["isActive"] = this.isActive;
+        data["edition"] = this.edition ? this.edition.toJSON() : <any>undefined;
+        data["editionId"] = this.editionId;
+        data["creatorUser"] = this.creatorUser ? this.creatorUser.toJSON() : <any>undefined;
+        data["lastModifierUser"] = this.lastModifierUser ? this.lastModifierUser.toJSON() : <any>undefined;
+        data["deleterUser"] = this.deleterUser ? this.deleterUser.toJSON() : <any>undefined;
+        return data;
+    }
+
+    clone(): Tenant {
+        const json = this.toJSON();
+        let result = new Tenant();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface ITenant {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    tenancyName: string;
+    name: string;
+    connectionString: string | undefined;
+    isActive: boolean;
+    edition: Edition;
+    editionId: number | undefined;
+    creatorUser: User;
+    lastModifierUser: User;
+    deleterUser: User;
 }
 
 export enum TenantAvailabilityState {
@@ -6099,6 +7124,316 @@ export interface ITenantLoginInfoDto {
     name: string | undefined;
 }
 
+export class User implements IUser {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    authenticationSource: string | undefined;
+    userName: string;
+    tenantId: number | undefined;
+    emailAddress: string;
+    name: string;
+    surname: string;
+    readonly fullName: string | undefined;
+    password: string;
+    emailConfirmationCode: string | undefined;
+    passwordResetCode: string | undefined;
+    lockoutEndDateUtc: moment.Moment | undefined;
+    accessFailedCount: number;
+    isLockoutEnabled: boolean;
+    phoneNumber: string | undefined;
+    isPhoneNumberConfirmed: boolean;
+    securityStamp: string | undefined;
+    isTwoFactorEnabled: boolean;
+    logins: UserLogin[] | undefined;
+    roles: UserRole[] | undefined;
+    claims: UserClaim[] | undefined;
+    permissions: UserPermissionSetting[] | undefined;
+    settings: Setting[] | undefined;
+    isEmailConfirmed: boolean;
+    isActive: boolean;
+    normalizedUserName: string;
+    normalizedEmailAddress: string;
+    concurrencyStamp: string | undefined;
+    tokens: UserToken[] | undefined;
+    deleterUser: User;
+    creatorUser: User;
+    lastModifierUser: User;
+
+    constructor(data?: IUser) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.lastModificationTime = _data["lastModificationTime"] ? moment(_data["lastModificationTime"].toString()) : <any>undefined;
+            this.lastModifierUserId = _data["lastModifierUserId"];
+            this.isDeleted = _data["isDeleted"];
+            this.deleterUserId = _data["deleterUserId"];
+            this.deletionTime = _data["deletionTime"] ? moment(_data["deletionTime"].toString()) : <any>undefined;
+            this.authenticationSource = _data["authenticationSource"];
+            this.userName = _data["userName"];
+            this.tenantId = _data["tenantId"];
+            this.emailAddress = _data["emailAddress"];
+            this.name = _data["name"];
+            this.surname = _data["surname"];
+            (<any>this).fullName = _data["fullName"];
+            this.password = _data["password"];
+            this.emailConfirmationCode = _data["emailConfirmationCode"];
+            this.passwordResetCode = _data["passwordResetCode"];
+            this.lockoutEndDateUtc = _data["lockoutEndDateUtc"] ? moment(_data["lockoutEndDateUtc"].toString()) : <any>undefined;
+            this.accessFailedCount = _data["accessFailedCount"];
+            this.isLockoutEnabled = _data["isLockoutEnabled"];
+            this.phoneNumber = _data["phoneNumber"];
+            this.isPhoneNumberConfirmed = _data["isPhoneNumberConfirmed"];
+            this.securityStamp = _data["securityStamp"];
+            this.isTwoFactorEnabled = _data["isTwoFactorEnabled"];
+            if (Array.isArray(_data["logins"])) {
+                this.logins = [] as any;
+                for (let item of _data["logins"])
+                    this.logins.push(UserLogin.fromJS(item));
+            }
+            if (Array.isArray(_data["roles"])) {
+                this.roles = [] as any;
+                for (let item of _data["roles"])
+                    this.roles.push(UserRole.fromJS(item));
+            }
+            if (Array.isArray(_data["claims"])) {
+                this.claims = [] as any;
+                for (let item of _data["claims"])
+                    this.claims.push(UserClaim.fromJS(item));
+            }
+            if (Array.isArray(_data["permissions"])) {
+                this.permissions = [] as any;
+                for (let item of _data["permissions"])
+                    this.permissions.push(UserPermissionSetting.fromJS(item));
+            }
+            if (Array.isArray(_data["settings"])) {
+                this.settings = [] as any;
+                for (let item of _data["settings"])
+                    this.settings.push(Setting.fromJS(item));
+            }
+            this.isEmailConfirmed = _data["isEmailConfirmed"];
+            this.isActive = _data["isActive"];
+            this.normalizedUserName = _data["normalizedUserName"];
+            this.normalizedEmailAddress = _data["normalizedEmailAddress"];
+            this.concurrencyStamp = _data["concurrencyStamp"];
+            if (Array.isArray(_data["tokens"])) {
+                this.tokens = [] as any;
+                for (let item of _data["tokens"])
+                    this.tokens.push(UserToken.fromJS(item));
+            }
+            this.deleterUser = _data["deleterUser"] ? User.fromJS(_data["deleterUser"]) : <any>undefined;
+            this.creatorUser = _data["creatorUser"] ? User.fromJS(_data["creatorUser"]) : <any>undefined;
+            this.lastModifierUser = _data["lastModifierUser"] ? User.fromJS(_data["lastModifierUser"]) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): User {
+        data = typeof data === 'object' ? data : {};
+        let result = new User();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["lastModificationTime"] = this.lastModificationTime ? this.lastModificationTime.toISOString() : <any>undefined;
+        data["lastModifierUserId"] = this.lastModifierUserId;
+        data["isDeleted"] = this.isDeleted;
+        data["deleterUserId"] = this.deleterUserId;
+        data["deletionTime"] = this.deletionTime ? this.deletionTime.toISOString() : <any>undefined;
+        data["authenticationSource"] = this.authenticationSource;
+        data["userName"] = this.userName;
+        data["tenantId"] = this.tenantId;
+        data["emailAddress"] = this.emailAddress;
+        data["name"] = this.name;
+        data["surname"] = this.surname;
+        data["fullName"] = this.fullName;
+        data["password"] = this.password;
+        data["emailConfirmationCode"] = this.emailConfirmationCode;
+        data["passwordResetCode"] = this.passwordResetCode;
+        data["lockoutEndDateUtc"] = this.lockoutEndDateUtc ? this.lockoutEndDateUtc.toISOString() : <any>undefined;
+        data["accessFailedCount"] = this.accessFailedCount;
+        data["isLockoutEnabled"] = this.isLockoutEnabled;
+        data["phoneNumber"] = this.phoneNumber;
+        data["isPhoneNumberConfirmed"] = this.isPhoneNumberConfirmed;
+        data["securityStamp"] = this.securityStamp;
+        data["isTwoFactorEnabled"] = this.isTwoFactorEnabled;
+        if (Array.isArray(this.logins)) {
+            data["logins"] = [];
+            for (let item of this.logins)
+                data["logins"].push(item.toJSON());
+        }
+        if (Array.isArray(this.roles)) {
+            data["roles"] = [];
+            for (let item of this.roles)
+                data["roles"].push(item.toJSON());
+        }
+        if (Array.isArray(this.claims)) {
+            data["claims"] = [];
+            for (let item of this.claims)
+                data["claims"].push(item.toJSON());
+        }
+        if (Array.isArray(this.permissions)) {
+            data["permissions"] = [];
+            for (let item of this.permissions)
+                data["permissions"].push(item.toJSON());
+        }
+        if (Array.isArray(this.settings)) {
+            data["settings"] = [];
+            for (let item of this.settings)
+                data["settings"].push(item.toJSON());
+        }
+        data["isEmailConfirmed"] = this.isEmailConfirmed;
+        data["isActive"] = this.isActive;
+        data["normalizedUserName"] = this.normalizedUserName;
+        data["normalizedEmailAddress"] = this.normalizedEmailAddress;
+        data["concurrencyStamp"] = this.concurrencyStamp;
+        if (Array.isArray(this.tokens)) {
+            data["tokens"] = [];
+            for (let item of this.tokens)
+                data["tokens"].push(item.toJSON());
+        }
+        data["deleterUser"] = this.deleterUser ? this.deleterUser.toJSON() : <any>undefined;
+        data["creatorUser"] = this.creatorUser ? this.creatorUser.toJSON() : <any>undefined;
+        data["lastModifierUser"] = this.lastModifierUser ? this.lastModifierUser.toJSON() : <any>undefined;
+        return data;
+    }
+
+    clone(): User {
+        const json = this.toJSON();
+        let result = new User();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IUser {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    lastModificationTime: moment.Moment | undefined;
+    lastModifierUserId: number | undefined;
+    isDeleted: boolean;
+    deleterUserId: number | undefined;
+    deletionTime: moment.Moment | undefined;
+    authenticationSource: string | undefined;
+    userName: string;
+    tenantId: number | undefined;
+    emailAddress: string;
+    name: string;
+    surname: string;
+    fullName: string | undefined;
+    password: string;
+    emailConfirmationCode: string | undefined;
+    passwordResetCode: string | undefined;
+    lockoutEndDateUtc: moment.Moment | undefined;
+    accessFailedCount: number;
+    isLockoutEnabled: boolean;
+    phoneNumber: string | undefined;
+    isPhoneNumberConfirmed: boolean;
+    securityStamp: string | undefined;
+    isTwoFactorEnabled: boolean;
+    logins: UserLogin[] | undefined;
+    roles: UserRole[] | undefined;
+    claims: UserClaim[] | undefined;
+    permissions: UserPermissionSetting[] | undefined;
+    settings: Setting[] | undefined;
+    isEmailConfirmed: boolean;
+    isActive: boolean;
+    normalizedUserName: string;
+    normalizedEmailAddress: string;
+    concurrencyStamp: string | undefined;
+    tokens: UserToken[] | undefined;
+    deleterUser: User;
+    creatorUser: User;
+    lastModifierUser: User;
+}
+
+export class UserClaim implements IUserClaim {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    tenantId: number | undefined;
+    userId: number;
+    claimType: string | undefined;
+    claimValue: string | undefined;
+
+    constructor(data?: IUserClaim) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.tenantId = _data["tenantId"];
+            this.userId = _data["userId"];
+            this.claimType = _data["claimType"];
+            this.claimValue = _data["claimValue"];
+        }
+    }
+
+    static fromJS(data: any): UserClaim {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserClaim();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["tenantId"] = this.tenantId;
+        data["userId"] = this.userId;
+        data["claimType"] = this.claimType;
+        data["claimValue"] = this.claimValue;
+        return data;
+    }
+
+    clone(): UserClaim {
+        const json = this.toJSON();
+        let result = new UserClaim();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IUserClaim {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    tenantId: number | undefined;
+    userId: number;
+    claimType: string | undefined;
+    claimValue: string | undefined;
+}
+
 export class UserDto implements IUserDto {
     id: number;
     userName: string;
@@ -6241,6 +7576,65 @@ export interface IUserDtoPagedResultDto {
     totalCount: number;
 }
 
+export class UserLogin implements IUserLogin {
+    id: number;
+    tenantId: number | undefined;
+    userId: number;
+    loginProvider: string;
+    providerKey: string;
+
+    constructor(data?: IUserLogin) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.tenantId = _data["tenantId"];
+            this.userId = _data["userId"];
+            this.loginProvider = _data["loginProvider"];
+            this.providerKey = _data["providerKey"];
+        }
+    }
+
+    static fromJS(data: any): UserLogin {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserLogin();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["tenantId"] = this.tenantId;
+        data["userId"] = this.userId;
+        data["loginProvider"] = this.loginProvider;
+        data["providerKey"] = this.providerKey;
+        return data;
+    }
+
+    clone(): UserLogin {
+        const json = this.toJSON();
+        let result = new UserLogin();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IUserLogin {
+    id: number;
+    tenantId: number | undefined;
+    userId: number;
+    loginProvider: string;
+    providerKey: string;
+}
+
 export class UserLoginInfoDto implements IUserLoginInfoDto {
     id: number;
     name: string | undefined;
@@ -6298,6 +7692,203 @@ export interface IUserLoginInfoDto {
     surname: string | undefined;
     userName: string | undefined;
     emailAddress: string | undefined;
+}
+
+export class UserPermissionSetting implements IUserPermissionSetting {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    tenantId: number | undefined;
+    name: string;
+    isGranted: boolean;
+    userId: number;
+
+    constructor(data?: IUserPermissionSetting) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.tenantId = _data["tenantId"];
+            this.name = _data["name"];
+            this.isGranted = _data["isGranted"];
+            this.userId = _data["userId"];
+        }
+    }
+
+    static fromJS(data: any): UserPermissionSetting {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserPermissionSetting();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["tenantId"] = this.tenantId;
+        data["name"] = this.name;
+        data["isGranted"] = this.isGranted;
+        data["userId"] = this.userId;
+        return data;
+    }
+
+    clone(): UserPermissionSetting {
+        const json = this.toJSON();
+        let result = new UserPermissionSetting();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IUserPermissionSetting {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    tenantId: number | undefined;
+    name: string;
+    isGranted: boolean;
+    userId: number;
+}
+
+export class UserRole implements IUserRole {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    tenantId: number | undefined;
+    userId: number;
+    roleId: number;
+
+    constructor(data?: IUserRole) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.creationTime = _data["creationTime"] ? moment(_data["creationTime"].toString()) : <any>undefined;
+            this.creatorUserId = _data["creatorUserId"];
+            this.tenantId = _data["tenantId"];
+            this.userId = _data["userId"];
+            this.roleId = _data["roleId"];
+        }
+    }
+
+    static fromJS(data: any): UserRole {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserRole();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["creationTime"] = this.creationTime ? this.creationTime.toISOString() : <any>undefined;
+        data["creatorUserId"] = this.creatorUserId;
+        data["tenantId"] = this.tenantId;
+        data["userId"] = this.userId;
+        data["roleId"] = this.roleId;
+        return data;
+    }
+
+    clone(): UserRole {
+        const json = this.toJSON();
+        let result = new UserRole();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IUserRole {
+    id: number;
+    creationTime: moment.Moment;
+    creatorUserId: number | undefined;
+    tenantId: number | undefined;
+    userId: number;
+    roleId: number;
+}
+
+export class UserToken implements IUserToken {
+    id: number;
+    tenantId: number | undefined;
+    userId: number;
+    loginProvider: string | undefined;
+    name: string | undefined;
+    value: string | undefined;
+    expireDate: moment.Moment | undefined;
+
+    constructor(data?: IUserToken) {
+        if (data) {
+            for (var property in data) {
+                if (data.hasOwnProperty(property))
+                    (<any>this)[property] = (<any>data)[property];
+            }
+        }
+    }
+
+    init(_data?: any) {
+        if (_data) {
+            this.id = _data["id"];
+            this.tenantId = _data["tenantId"];
+            this.userId = _data["userId"];
+            this.loginProvider = _data["loginProvider"];
+            this.name = _data["name"];
+            this.value = _data["value"];
+            this.expireDate = _data["expireDate"] ? moment(_data["expireDate"].toString()) : <any>undefined;
+        }
+    }
+
+    static fromJS(data: any): UserToken {
+        data = typeof data === 'object' ? data : {};
+        let result = new UserToken();
+        result.init(data);
+        return result;
+    }
+
+    toJSON(data?: any) {
+        data = typeof data === 'object' ? data : {};
+        data["id"] = this.id;
+        data["tenantId"] = this.tenantId;
+        data["userId"] = this.userId;
+        data["loginProvider"] = this.loginProvider;
+        data["name"] = this.name;
+        data["value"] = this.value;
+        data["expireDate"] = this.expireDate ? this.expireDate.toISOString() : <any>undefined;
+        return data;
+    }
+
+    clone(): UserToken {
+        const json = this.toJSON();
+        let result = new UserToken();
+        result.init(json);
+        return result;
+    }
+}
+
+export interface IUserToken {
+    id: number;
+    tenantId: number | undefined;
+    userId: number;
+    loginProvider: string | undefined;
+    name: string | undefined;
+    value: string | undefined;
+    expireDate: moment.Moment | undefined;
 }
 
 export class ApiException extends Error {
