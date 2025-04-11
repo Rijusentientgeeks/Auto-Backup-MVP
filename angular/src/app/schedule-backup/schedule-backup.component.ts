@@ -9,23 +9,30 @@ import {
   BackUpFrequencyDto,
   BackUpFrequencyServiceProxy,
   BackUpScheduleCreateDto,
+  BackUpScheduleDto,
+  BackUpScheduleDtoPagedResultDto,
   BackUpScheduleServiceProxy,
   SourceConfiguationDto,
   SourceConfiguationServiceProxy,
 } from "@shared/service-proxies/service-proxies";
-
+interface ScheduledBackup {
+  id: string;
+  config: string;
+  schedule: string;
+  status: string;
+}
 @Component({
   selector: "app-schedule-backup",
   templateUrl: "./schedule-backup.component.html",
   styleUrl: "./schedule-backup.component.css",
 })
 export class ScheduleBackupComponent implements OnInit {
-deleteScheduledBackup(_t71: any) {
-throw new Error('Method not implemented.');
-}
-editScheduledBackup(_t71: any) {
-throw new Error('Method not implemented.');
-}
+  deleteScheduledBackup(_t71: any) {
+    throw new Error("Method not implemented.");
+  }
+  editScheduledBackup(_t71: any) {
+    throw new Error("Method not implemented.");
+  }
   scheduleForm!: FormGroup;
   cronExpression: string = "";
   showDayOfWeek = false;
@@ -44,6 +51,13 @@ throw new Error('Method not implemented.');
   ];
   sourceConfigs: SourceConfiguationDto[];
   isSaving: any;
+  scheduledBackups: ScheduledBackup[] = [];
+  totalRecords: number = 0;
+  loading: boolean = false;
+  filterText: string = '';
+  sorting: string = '';
+  currentPage: number = 0;
+  rowsPerPage: number = 10;
   constructor(
     private fb: FormBuilder,
     private sourceConfigService: SourceConfiguationServiceProxy,
@@ -56,6 +70,7 @@ throw new Error('Method not implemented.');
   ngOnInit(): void {
     this.loadSourceConfigs();
     this.loadfrequencies();
+    this.loadBackups();
     this.scheduleForm = this.fb.group({
       frequency: ["", Validators.required],
       dayOfWeek: [null],
@@ -98,7 +113,9 @@ throw new Error('Method not implemented.');
               backUPType,
               dbType,
               backUpStorageConfiguationId: config.id,
-              label: dbType ? `${backUPType} - ${dbType}` : `${backUPType} - ${IP}`
+              label: dbType
+                ? `${backUPType} - ${dbType}`
+                : `${backUPType} - ${IP}`,
             };
           });
           this.cdr.detectChanges();
@@ -106,6 +123,92 @@ throw new Error('Method not implemented.');
       },
       error: (err) => {},
     });
+  }
+  loadBackups(page: number = 0) {
+    debugger
+    this.loading = true;
+    const skipCount = page * this.rowsPerPage;
+    this.BackUpScheduleService.getAll(
+      this.filterText || undefined,
+      this.sorting || undefined,
+      this.rowsPerPage,
+      skipCount
+    ).subscribe({
+      next: (result: BackUpScheduleDtoPagedResultDto) => {
+        debugger
+        if (result && result.items) {
+          this.scheduledBackups = this.mapToScheduledBackup(result.items);
+        }
+        this.totalRecords = result.totalCount;
+
+        this.loading = false;
+      },
+      error: (error) => {
+        console.error('Error fetching backups', error);
+        this.loading = false;
+      }
+    });
+  }
+  mapToScheduledBackup(items: BackUpScheduleDto[]): ScheduledBackup[] {
+    return items.map(item => ({
+      id: item.id,
+      config: item.sourceConfiguation?.backupName || 'Unknown',
+      schedule: this.getScheduleText(item),
+      status: item.isDeleted ? 'Inactive' : 'Active'
+    }));
+  }
+  getScheduleText(item: BackUpScheduleDto): string {
+    const frequency = item.backUpFrequency?.name || 'Unknown';
+    const time = item.backupTime || 'N/A';
+    switch (frequency.toLowerCase()) {
+      case 'hourly' :
+        return `Hourly` + (item.cronExpression ? ` - ${item.cronExpression}` : '');
+      case 'daily':
+        return `Daily - `+item.cronExpression;
+      case 'weekly':
+        return `Weekly - `+item.cronExpression;
+      case 'monthly':
+        return `Monthly - `+item.cronExpression;
+      case 'yearly':
+        return `Yearly - `+item.cronExpression;
+      default:
+        return item.cronExpression || `${frequency} at ${time}`;
+    }
+  }
+  deleteBackup(backup: ScheduledBackup) {
+    this.BackUpScheduleService.removeSchedule(backup.id).subscribe({
+      next: () => {
+        this.loadBackups(this.currentPage);
+      },
+      error: (error) => {
+        console.error('Error deleting backup', error);
+      }
+    });
+  }
+  applyFilter(event: Event) {
+    this.filterText = (event.target as HTMLInputElement).value;
+    this.currentPage = 0;
+    this.loadBackups(this.currentPage);
+  }
+
+  onPageChange(event: any) {
+    this.currentPage = event.page;
+    this.loadBackups(this.currentPage);
+  }
+
+  onSort(event: any) {
+    const sortField = event.field;
+    const sortOrder = event.order === 1 ? 'asc' : 'desc';
+    let apiField = sortField;
+    if (sortField === 'config') {
+      apiField = 'sourceConfiguationId';
+    } else if (sortField === 'schedule') {
+      apiField = 'backupTime'; 
+    } else if (sortField === 'status') {
+      apiField = 'isDeleted';
+    }
+    this.sorting = `${apiField} ${sortOrder}`;
+    this.loadBackups(this.currentPage);
   }
   getDaySuffix(day: number): string {
     if (day >= 11 && day <= 13) {
@@ -138,7 +241,7 @@ throw new Error('Method not implemented.');
       );
       const formValue = this.scheduleForm.value;
       const formattedTime = formValue.time
-        ? `${formValue.time}:00` // Append seconds to match "HH:mm:ss"
+        ? `${formValue.time}:00`
         : null;
 
       const payload = BackUpScheduleCreateDto.fromJS({
@@ -162,7 +265,7 @@ throw new Error('Method not implemented.');
           this.scheduleForm.reset();
           this.isSaving = false;
           this.cronExpression = "";
-          this.showDayOfWeek = false; 
+          this.showDayOfWeek = false;
         },
         error: (err) => {
           this.messageService.add({
@@ -195,11 +298,11 @@ throw new Error('Method not implemented.');
 
     switch (frequency) {
       case "Hourly":
-        return `${minute} * * * *`; 
+        return `${minute} * * * *`;
       case "Daily":
         return `${minute} ${hour} * * *`;
       case "Weekly":
-        return `${minute} ${hour} * * ${dayOfWeek !== null ? dayOfWeek : "*"}`; 
+        return `${minute} ${hour} * * ${dayOfWeek !== null ? dayOfWeek : "*"}`;
       case "Monthly":
         return `${minute} ${hour} ${
           dayOfMonth !== null ? dayOfMonth : "*"
@@ -220,8 +323,4 @@ throw new Error('Method not implemented.');
       this.scheduleForm.get("dayOfMonth")?.setValue(null);
     }
   }
-
-
-  
-  
 }

@@ -15,6 +15,7 @@ import {
 } from "@shared/service-proxies/service-proxies";
 import { MessageService } from "primeng/api";
 import { ToastModule } from "primeng/toast";
+import { TableModule } from "primeng/table";
 
 @NgModule({
   declarations: [ScheduleBackupComponent],
@@ -27,6 +28,7 @@ import { ToastModule } from "primeng/toast";
     InputTextModule,
     ButtonModule,
     ToastModule,
+    TableModule
   ],
   exports: [ScheduleBackupComponent],
   providers: [
