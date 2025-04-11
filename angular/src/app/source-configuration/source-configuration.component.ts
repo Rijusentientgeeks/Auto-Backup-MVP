@@ -13,6 +13,7 @@ import {
   SourceConfiguationServiceProxy,
   SourceConfiguationUpdateDto,
 } from "@shared/service-proxies/service-proxies";
+import { LocalBackupService } from "@shared/service-proxies/local-backup.service";
 import Swal from "sweetalert2";
 import { formatDate } from '@angular/common';
 
@@ -50,6 +51,7 @@ export class SourceConfigurationComponent implements OnInit {
     private BackupStorageConfigService: BackUpStorageConfiguationServiceProxy,
     private sourceConfigService: SourceConfiguationServiceProxy,
     private autoBackupService: AutoBackupServiceProxy,
+    private localBackupService: LocalBackupService,
     private cdr: ChangeDetectorRef,
     private messageService: MessageService
   ) {}
@@ -88,21 +90,67 @@ export class SourceConfigurationComponent implements OnInit {
       this.convertToBase64(file);
     }
   }
+
   triggerOnDemandBackup(id: string): void {
     this.isSaving = true;
     this.autoBackupService.createBackup(id).subscribe({
       next: (result) => {
+        this.isSaving = false;
         if (result) {
-          this.isSaving = false;
           Swal.fire("Success", "Backup Created Successfully", "success");
+          this.cdr.detectChanges();
         }
       },
+      error: () => {
+        this.isSaving = false;
+        Swal.fire("Error", "Something went wrong!", "error");
+      },
+      complete: () => {
+        this.isSaving = false;
+        this.cdr.detectChanges();
+      }
     });
+    // var selectedSource = this.sourceConfigs.find((s) => s.id === id);
+    // if(selectedSource.isLocalBackup) {
+    //   this.localBackupService.takeBackupLocal$(id).subscribe({
+    //     next: (response) => {
+    //       debugger
+    //       this.isSaving = false;
+    //       const blob = response.body!;
+    //       const contentDisposition = response.headers.get('Content-Disposition');
+    //       const filename = this.getFilenameFromDisposition(contentDisposition);
+  
+    //       const link = document.createElement('a');
+    //       link.href = window.URL.createObjectURL(blob);
+    //       link.download = filename;
+    //       link.target = '_blank';
+    //       document.body.appendChild(link);
+    //       link.click();
+    //       document.body.removeChild(link);
+    //       window.URL.revokeObjectURL(link.href);
+    //     },
+    //     error: (err) => {
+    //       this.isSaving = false;
+    //       this.cdr.detectChanges();
+    //     },
+    //     complete: () => {
+    //       this.isSaving = false;
+    //       this.cdr.detectChanges();
+    //     }
+    //   });
+    // }
   }
   isInvalid(controlName: string): boolean {
     const control = this.sourceForm.get(controlName);
     return control?.invalid && (control?.dirty || control?.touched);
   }
+
+  private getFilenameFromDisposition(disposition: string | null): string {
+  if (!disposition) return 'backup.zip';
+  
+  const match = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(disposition);
+  return match && match[1] ? match[1].replace(/['"]/g, '') : 'backup.zip';
+}
 
   // Convert PEM file to Base64 string
   convertToBase64(file: File): void {
@@ -244,6 +292,11 @@ export class SourceConfigurationComponent implements OnInit {
     });
   }
   LoadBackupStorageConfigs(): void {
+    const defaultOption = {
+        name: "User's Local System",
+        value: '00000000-0000-0000-0000-000000000000'
+      };
+    this.BackupStorageConfigs = [defaultOption];
     this.BackupStorageConfigService.getAll(
       undefined,
       undefined,
@@ -252,13 +305,18 @@ export class SourceConfigurationComponent implements OnInit {
     ).subscribe({
       next: (result) => {
         if (result && result.items) {
-          this.BackupStorageConfigs = result.items.map((item: any) => ({
+          var backupStorageConfigs = result.items.map((item: any) => ({
             name: item.backupName,
             value: item.id,
           }));
+          this.BackupStorageConfigs = [
+            this.BackupStorageConfigs[0],
+            ...backupStorageConfigs,
+          ];
         }
       },
-      error: (err) => {},
+      error: (err) => {
+      },
     });
   }
   onBackupTypeChange(event: any) {

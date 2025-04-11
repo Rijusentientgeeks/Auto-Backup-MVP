@@ -120,6 +120,7 @@
     [header]="isEdit ? 'Edit Source Configuration' : 'Add Source Configuration'"
     [style]="{ width: '80vw', height: '100vh' }"
     [closable]="true"
+    [draggable]="false"
   >
     <form [formGroup]="sourceForm" (ngSubmit)="saveSourceConfig()">
       <div class="row">

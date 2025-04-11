@@ -29,7 +29,7 @@ import { ProgressSpinnerModule } from 'primeng/progressspinner';
     ToastModule,
     ProgressSpinnerModule
   ],
-  providers: [MessageService,BackUPTypeServiceProxy,DBTypeServiceProxy,BackUpStorageConfiguationServiceProxy,SourceConfiguationServiceProxy,AutoBackupServiceProxy ],
+  providers: [MessageService,BackUPTypeServiceProxy,DBTypeServiceProxy,BackUpStorageConfiguationServiceProxy,SourceConfiguationServiceProxy,AutoBackupServiceProxy, ],
   exports: [SourceConfigurationComponent],
 })
 export class SourceConfigurationModule {}
