@@ -177,6 +177,111 @@ namespace GeekathonAutoSync.AutoBackup
             return resFromUpload;
         }
 
+
+        public async Task<string> CreateBackupAndDownload(string sConfigurationId)
+        {
+            int tenantId = GetCurrentTenantId();
+            var backupFileName = "";
+            string downLoadedFileName = "";
+            bool fileDownloadflag = false;
+            string resFromUpload = "";
+            string localhostPath = string.Empty;
+
+            string serverPath = Path.Combine(_env.ContentRootPath, defaultInitialLocalPath);
+
+            try
+            {
+            var BackUPConfig = await _sourceConfiguationRepository.GetAll()
+                .Include(i => i.BackUPType)
+                .Include(i => i.DBType)
+                .Include(i => i.BackUpStorageConfiguation).ThenInclude(e => e.StorageMasterType)
+                .Include(i => i.BackUpStorageConfiguation).ThenInclude(e => e.CloudStorage)
+                .FirstOrDefaultAsync(i => i.Id.ToString().ToLower() == sConfigurationId.ToLower());
+
+            //insert to BackLog
+            var backupLogResult = await CreatebackLog(BackUPConfig.Id, DateTime.UtcNow, (Guid)BackUPConfig.BackUpStorageConfiguationId, tenantId);
+                (bool, string) resp = (false, "");
+                switch (BackUPConfig.BackUPType.BackupTypeEnum)
+                {
+                    case BackupTypeEnum.DataBase:
+                        switch (BackUPConfig.DBType.Type)
+                        {
+                            case DbTypeEnum.PostgreSQL:
+                                resp = await PostGresDBBackUp(BackUPConfig.BackUpInitiatedPath, BackUPConfig.SshUserName, BackUPConfig.SshPassword, BackUPConfig.ServerIP, BackUPConfig.DbPassword, BackUPConfig.DbUsername, BackUPConfig.DatabaseName);
+                                break;
+                            case DbTypeEnum.MicrosoftSQLServer:
+                                resp = await MSSQLBackUp(BackUPConfig.ServerIP, BackUPConfig.DBInitialCatalog, BackUPConfig.DbUsername, BackUPConfig.DbPassword, BackUPConfig.BackUpInitiatedPath, BackUPConfig.DatabaseName);
+                                break;
+                            case DbTypeEnum.OracleDatabase:
+                                resp = (false, "Work Inprogress.");
+                                break;
+                            case DbTypeEnum.MySQL:
+                                resp = (false, "Work Inprogress.");
+                                break;
+                            case DbTypeEnum.MongoDB:
+                                resp = (false, "Work Inprogress.");
+                                break;
+                            default:
+                                resp = (false, BackUPConfig.DBType.Name + " database type is not valid.");
+                                break;
+                                //backupFileName = res;
+                        }
+                        backupFileName = resp.Item2;
+                        string nameWithoutExtension = Path.GetFileNameWithoutExtension(backupFileName);
+                        string backupZipFileWithPath = Path.Combine(BackUPConfig.BackUpInitiatedPath, $"{nameWithoutExtension}.zip");
+
+                        downLoadedFileName = $"{nameWithoutExtension}.zip";
+                        var response = await ZipAndDownloadBackupSSHToLocal(BackUPConfig.ServerIP, BackUPConfig.SshUserName, BackUPConfig.SshPassword, BackUPConfig.BackUpInitiatedPath, backupZipFileWithPath, Path.Combine(serverPath, downLoadedFileName), backupFileName, BackUPConfig.PrivateKeyPath);
+                        fileDownloadflag = resp.Item1;
+                        break;
+
+                    case BackupTypeEnum.ApplicationFiles:
+
+                        resp = await ApplicationBackup(BackUPConfig.Sourcepath, BackUPConfig.BackUpInitiatedPath, BackUPConfig.PrivateKeyPath, BackUPConfig.SshUserName, BackUPConfig.ServerIP, BackUPConfig.SshPassword, serverPath);
+                        downLoadedFileName = resp.Item2;
+                        fileDownloadflag = resp.Item1;
+                        break;
+
+                    case BackupTypeEnum.SpecificFile:
+                        break;
+                    default:
+                        break;
+                }
+
+                localhostPath = Path.Combine(serverPath, downLoadedFileName);
+                
+                await UpdatebackLogStatus(backupLogResult.Item2, DateTime.UtcNow, BackupLogStatus.Success, downLoadedFileName, "");
+            }
+            catch (Exception ex)
+            {
+                //throw new UserFriendlyException(ex.Message);
+            }
+
+
+            return localhostPath;
+        }
+
+        public async Task<Stream> GetBackupFromLocalHost(string filePath)
+        {
+            var fullPath = Path.Combine(Directory.GetCurrentDirectory(), filePath);
+            var dir = Path.GetDirectoryName(filePath);
+
+            if (!File.Exists(filePath))
+            {
+                throw new FileNotFoundException("Backup file not found.", filePath);
+            }
+
+            var memory = new MemoryStream();
+            using (var stream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            {
+                await stream.CopyToAsync(memory);
+            }
+            
+            memory.Position = 0;
+            return memory;
+        }
+
+
         private int GetCurrentTenantId()
         {
             if (AbpSession.TenantId.HasValue)
@@ -202,17 +307,18 @@ namespace GeekathonAutoSync.AutoBackup
                     .Include(i => i.SourceConfiguation)
                     .Include(i => i.BackUpStorageConfiguation)
                     .Where(i => i.TenantId == AbpSession.TenantId);
+                var c = query.ToList();
 
                 var filteredQuery = query
                     .WhereIf(!string.IsNullOrWhiteSpace(input.Keyword),
-                        u => u.BackUpFileName.ToLower().Contains(input.Keyword.ToLower()) ||
-                             u.SourceConfiguation.BackupName.ToLower().Contains(input.Keyword.ToLower()))
+                        u => !string.IsNullOrEmpty(u.SourceConfiguation?.BackupName) && u.BackUpFileName.ToLower().Contains(input.Keyword.ToLower()) ||
+                             !string.IsNullOrEmpty(u.BackUpFileName) && u.SourceConfiguation.BackupName.ToLower().Contains(input.Keyword.ToLower()))
                     .WhereIf(!string.IsNullOrEmpty(input.SourceConfigId),
                         u => u.SourceConfiguationId.ToString().ToLower() == input.SourceConfigId.ToLower())
                     .WhereIf(!string.IsNullOrEmpty(input.BackupStorageid),
-                        u => u.BackUpStorageConfiguationId.ToString().ToLower() == input.BackupStorageid.ToLower())
+                        u => u.BackUpStorageConfiguation.StorageMasterTypeId.ToString().ToLower() == input.BackupStorageid.ToLower())
                     .WhereIf(!string.IsNullOrEmpty(input.BackupTypeId),
-                        u => u.BackUpStorageConfiguation.StorageMasterTypeId.ToString().ToLower() == input.BackupTypeId.ToLower())
+                        u => u.SourceConfiguation.BackUPTypeId.ToString().ToLower() == input.BackupTypeId.ToLower())
                     .WhereIf(!string.IsNullOrEmpty(input.CloudStorageTypeId),
                         u => u.BackUpStorageConfiguation.CloudStorageId.ToString().ToLower() == input.CloudStorageTypeId.ToLower());
 

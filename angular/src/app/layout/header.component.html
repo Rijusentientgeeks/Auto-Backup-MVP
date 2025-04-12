@@ -1,6 +1,10 @@
 <nav class="main-header navbar navbar-expand navbar-white navbar-light">
   <header-left-navbar></header-left-navbar>
   <ul class="navbar-nav ml-auto">
+    <!-- Microphone Button -->
+    <button (click)="startVoice()" class="mic-button" style="background-color: transparent; border: none;">
+      <i class="fa fa-microphone" aria-hidden="true"></i>
+    </button>
     <header-language-menu></header-language-menu>
     <header-user-menu></header-user-menu>
   </ul>
