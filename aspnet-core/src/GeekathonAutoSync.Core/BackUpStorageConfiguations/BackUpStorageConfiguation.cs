@@ -33,6 +33,9 @@ namespace GeekathonAutoSync.BackUpStorageConfiguations
         public string AWS_backUpPath { get; set; }
         public string AZ_AccountName { get; set; }
         public string AZ_AccountKey { get; set; }
+        public string Endpoint { get; set; }
+        public string ProjectID { get; set; }
+        public string CredentialFile { get; set; }
         public string BackupName { get; set; }
         public bool IsUserLocalSystem { get; set; }
         public ICollection<SourceConfiguation> SourceConfiguations { get; set; } = new List<SourceConfiguation>();
