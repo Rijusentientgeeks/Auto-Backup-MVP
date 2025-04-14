@@ -44,41 +44,83 @@ namespace GeekathonAutoSync.SourceConfiguations
             _backUpStorageConfiguationRepository = backUpStorageConfiguationRepository;
             _backupScheduleRepository = backupScheduleRepository;
         }
+
+        //public async Task<PagedResultDto<SourceConfiguationDto>> GetAllAsync(GetSourceConfiguationInput input)
+        //{
+        //    try
+        //    {
+        //        var query = GetDetails(input);
+        //        var sourceConfiguationList = ObjectMapper.Map<List<SourceConfiguationDto>>(query);
+        //        var pagedSourceConfiguations = sourceConfiguationList
+        //                .AsQueryable()
+        //                .OrderBy(input.Sorting)
+        //                .Skip(input.SkipCount)
+        //                .Take(input.MaxResultCount)
+        //                .ToList();
+        //        foreach(var sourceConfig in pagedSourceConfiguations)
+        //        {
+        //            sourceConfig.IsUserLocalSystem = sourceConfig.BackUpStorageConfiguation.IsUserLocalSystem;
+        //            var schedules = await _backupScheduleRepository.GetAll()
+        //                .Where(s => s.SourceConfiguationId == sourceConfig.Id).ToListAsync();
+
+        //            var scheduledCronExp = schedules?.Select(s => s.CronExpression).ToList() ?? new List<string>();
+
+        //            sourceConfig.ScheduledCronExpression = scheduledCronExp;
+        //        }
+        //        var sourceConfiguationCount = query.Count();
+        //        return new PagedResultDto<SourceConfiguationDto>
+        //        {
+        //            TotalCount = sourceConfiguationCount,
+        //            Items = pagedSourceConfiguations
+        //        };
+        //    }
+        //    catch(Exception ex)
+        //    {
+        //        throw ex;
+        //    }
+        //}
+
         public async Task<PagedResultDto<SourceConfiguationDto>> GetAllAsync(GetSourceConfiguationInput input)
         {
             try
             {
                 var query = GetDetails(input);
-                var sourceConfiguationList = ObjectMapper.Map<List<SourceConfiguationDto>>(query);
-                var pagedSourceConfiguations = sourceConfiguationList
-                        .AsQueryable()
-                        .OrderBy(input.Sorting)
-                        .Skip(input.SkipCount)
-                        .Take(input.MaxResultCount)
-                        .ToList();
-                foreach(var sourceConfig in pagedSourceConfiguations)
+
+                var totalCount = await query.CountAsync();
+
+                var pagedEntities = await query
+                    .OrderBy(input.Sorting)
+                    .Skip(input.SkipCount)
+                    .Take(input.MaxResultCount)
+                    .ToListAsync();
+
+                var sourceConfigDtos = ObjectMapper.Map<List<SourceConfiguationDto>>(pagedEntities);
+
+                var sourceConfigIds = sourceConfigDtos.Select(x => x.Id).ToList();
+
+                var schedules = await _backupScheduleRepository.GetAll()
+                 .Where(s => s.SourceConfiguationId.HasValue && sourceConfigIds.Contains(s.SourceConfiguationId.Value))
+                 .ToListAsync();
+
+                foreach (var config in sourceConfigDtos)
                 {
-                    var schedules = await _backupScheduleRepository.GetAll()
-                        .Where(s => s.SourceConfiguationId == sourceConfig.Id).ToListAsync();
-
-                    var scheduledCronExp = schedules?.Select(s => s.CronExpression).ToList() ?? new List<string>();
-
-                    sourceConfig.ScheduledCronExpression = scheduledCronExp;
-
+                    config.IsUserLocalSystem = config.BackUpStorageConfiguation?.IsUserLocalSystem ?? false;
+                    config.ScheduledCronExpression = schedules
+                        .Where(s => s.SourceConfiguationId == config.Id)
+                        .Select(s => s.CronExpression)
+                        .ToList();
                 }
-                var sourceConfiguationCount = query.Count();
+
                 return new PagedResultDto<SourceConfiguationDto>
                 {
-                    TotalCount = sourceConfiguationCount,
-                    Items = pagedSourceConfiguations
+                    TotalCount = totalCount,
+                    Items = sourceConfigDtos
                 };
             }
-            catch(Exception ex)
+            catch (Exception)
             {
-                throw ex;
+                throw;
             }
-            
-            
         }
         private IQueryable<SourceConfiguation> GetDetails(IGetSourceConfiguationInput input)
         {

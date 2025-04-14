@@ -62,7 +62,7 @@ namespace GeekathonAutoSync.BackUpSchedules
             var query = _backUpScheduleRepository.GetAll()
                 .Include(i => i.BackUpFrequency)
                 .Include(i => i.SourceConfiguation)
-                .Where(i => i.TenantId == AbpSession.TenantId);
+                .Where(i => i.TenantId == AbpSession.TenantId && !i.IsRemoveFromHangfire);
             //.WhereIf(!input.FilterText.IsNullOrWhiteSpace(),
             //u => u.PlatformOrderId.Contains(input.FilterText)).AsQueryable()
             return query;

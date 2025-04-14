@@ -1,66 +1,55 @@
 ﻿using Abp.Application.Services;
 using Abp.Application.Services.Dto;
-using Abp.Authorization;
 using Abp.Collections.Extensions;
 using Abp.Domain.Repositories;
-using Abp.Domain.Uow;
 using Abp.UI;
 using Amazon;
-using Amazon.Runtime;
 using Amazon.S3;
 using Amazon.S3.Model;
 using Amazon.S3.Transfer;
-using Azure;
-using GeekathonAutoSync.Authorization.Users;
+using CronExpressionDescriptor;
 using GeekathonAutoSync.AutoBackup.Dto;
 using GeekathonAutoSync.BackUpLogs;
+using GeekathonAutoSync.BackUpSchedules;
 using GeekathonAutoSync.BackUpStorageConfiguations;
-using GeekathonAutoSync.BackUpStorageConfiguations.Dto;
 using GeekathonAutoSync.BackUPTypes;
 using GeekathonAutoSync.CloudStorages;
 using GeekathonAutoSync.DBTypes;
 using GeekathonAutoSync.SourceConfiguations;
-using GeekathonAutoSync.SourceConfiguations.Dto;
 using GeekathonAutoSync.StorageMasterTypes;
 using Microsoft.AspNetCore.Hosting; 
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Renci.SshNet;
 using Renci.SshNet.Common;
 using System;
 using System.Collections.Generic;
-using System.Data.SqlTypes;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace GeekathonAutoSync.AutoBackup
 {
     public class AutoBackupAppService : GeekathonAutoSyncAppServiceBase, IAutoBackupAppService
     {
         private readonly IRepository<BackUpStorageConfiguation, Guid> _backUpStorageConfiguationRepository;
-        private readonly IRepository<StorageMasterType, Guid> _storageMasterTypeRepository;
-        private readonly IRepository<CloudStorage, Guid> _cloudStorageRepository;
         private readonly IRepository<SourceConfiguation, Guid> _sourceConfiguationRepository;
         private readonly IRepository<BackUpLog, Guid> _backUpLogsRepository; 
         private readonly IWebHostEnvironment _env;
-
+        private readonly IRepository<BackUpSchedule, Guid> _backUpScheduleRepository;
         private string defaultInitialLocalPath = "LocalBackupFiles";
 
         public AutoBackupAppService(IRepository<BackUpStorageConfiguation, Guid> backUpStorageConfiguationRepository,
             IRepository<StorageMasterType, Guid> storageMasterTypeRepository,
             IRepository<CloudStorage, Guid> cloudStorageRepository, IRepository<SourceConfiguation, Guid> sourceConfiguationRepository, IWebHostEnvironment env,
-            IRepository<BackUpLog, Guid> backUpLogsRepository)
+            IRepository<BackUpLog, Guid> backUpLogsRepository,
+            IRepository<BackUpSchedule, Guid> backUpScheduleRepository)
         {
             _backUpStorageConfiguationRepository = backUpStorageConfiguationRepository;
-            _storageMasterTypeRepository = storageMasterTypeRepository;
-            _cloudStorageRepository = cloudStorageRepository;
             _sourceConfiguationRepository = sourceConfiguationRepository;
             _env = env;
             _backUpLogsRepository = backUpLogsRepository;
+            _backUpScheduleRepository = backUpScheduleRepository;
         }
         public async Task<string> CreateBackup(string sConfigurationId)
         {
@@ -250,7 +239,7 @@ namespace GeekathonAutoSync.AutoBackup
 
                 localhostPath = Path.Combine(serverPath, downLoadedFileName);
                 
-                await UpdatebackLogStatus(backupLogResult.Item2, DateTime.UtcNow, BackupLogStatus.Success, downLoadedFileName, "");
+                await UpdatebackLogStatus(backupLogResult.Item2, DateTime.UtcNow, BackupLogStatus.LocalBackup, string.Empty, "");
             }
             catch (Exception ex)
             {
@@ -296,8 +285,6 @@ namespace GeekathonAutoSync.AutoBackup
 
             throw new UserFriendlyException("TenantId is not available in the current context.");
         }
-
-
 
         public async Task<PagedResultDto<BackUpLogDto>> GetAllBackupLogAsync(PagedBackLogRequestDto input)
         {
@@ -405,7 +392,6 @@ namespace GeekathonAutoSync.AutoBackup
             string timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
             string backupFileName = $"PostgresBackup_{timestamp}.backup";
             string remoteBackupPath = $"/{BackUpInitiatedPath}/{backupFileName}";
-            //string localBackupPath = $@"D:\DOT NET\AutoSync-SG\backup\{backupFileName}";
 
             try
             {
@@ -416,7 +402,6 @@ namespace GeekathonAutoSync.AutoBackup
                 };
 
                 using (var client = new SshClient(connectionInfo))
-                //using (var sftp = new SftpClient(connectionInfo))
                 {
                     client.Connect();
 
@@ -429,31 +414,13 @@ namespace GeekathonAutoSync.AutoBackup
                     var cmd = client.CreateCommand(command);
                     var result = cmd.Execute();
 
-                    //sftp.Connect();
-
-                    //if (!sftp.Exists(remoteBackupPath))
-                    //{
-                    //    throw new UserFriendlyException($"Backup file not found on remote server: {remoteBackupPath}");
-                    //}
-
-                    //using (var fileStream = new FileStream(localBackupPath, FileMode.Create, FileAccess.Write))
-                    //{
-                    //    sftp.DownloadFile(remoteBackupPath, fileStream);
-                    //}
-
-                    ////  Delete the remote file after download
-                    //sftp.DeleteFile(remoteBackupPath);
-
-                    //sftp.Disconnect();
                     client.Disconnect();
                 }
-
-                //Console.WriteLine($"Backup file downloaded successfully to {localBackupPath}");
+;
                 return (true,backupFileName);
             }
             catch (Exception ex)
             {
-                //Console.WriteLine($"Error: {ex.Message}");
                 throw new UserFriendlyException($"Error: {ex.Message}");
             }
         }
@@ -465,12 +432,11 @@ namespace GeekathonAutoSync.AutoBackup
             string timestamp = DateTime.UtcNow.ToString("yyyyMMdd_HHmmss");
             string remoteFolderPath = $@"/{Sourcepath}/";
             string remoteZipPath = $"/{BackUpInitiatedPath}/BackupFile_{timestamp}.zip";
-           string fileName = $"BackupAppFile_{timestamp}.zip";
+            string fileName = $"BackupAppFile_{timestamp}.zip";
             string localFilePath = Path.Combine(localPath, fileName);
 
             if (PrivateKeyPath != null)
             {
-                //string localFilePath = $@"D:\DOT NET\AutoSync-SG\backup\BackupFiles_{timestamp}.zip";
                 try
                 {
                     if (!File.Exists(PrivateKeyPath))
@@ -571,7 +537,7 @@ namespace GeekathonAutoSync.AutoBackup
             }
             else
             {
-                //string localFilePath = $@"D:\DOT NET\AutoSync-SG\backup\QuantamoApplicationBackup_{timestamp}.zip";
+
                 try
                 {
                     // Create authentication method using username and password
@@ -590,15 +556,15 @@ namespace GeekathonAutoSync.AutoBackup
                         {
                             throw new Exception("SSH connection failed.");
                         }
-                        //remoteFolderPath = remoteFolderPath.TrimEnd('/');
-                        //string parentFolder = remoteFolderPath.Substring(0, remoteFolderPath.LastIndexOf('/'));
-                        //string targetFolder = remoteFolderPath.Substring(remoteFolderPath.LastIndexOf('/') + 1);
-                        //if (string.IsNullOrEmpty(parentFolder) || string.IsNullOrEmpty(targetFolder))
-                        //{
-                        //    throw new Exception("Invalid remote folder path");
-                        //}
-                        //var command = $"cd {parentFolder} && zip -r {remoteZipPath} {targetFolder}";
-                        var command = $"zip -r {remoteZipPath} {remoteFolderPath}";
+                        remoteFolderPath = remoteFolderPath.TrimEnd('/');
+                        string parentFolder = remoteFolderPath.Substring(0, remoteFolderPath.LastIndexOf('/'));
+                        string targetFolder = remoteFolderPath.Substring(remoteFolderPath.LastIndexOf('/') + 1);
+                        if (string.IsNullOrEmpty(parentFolder) || string.IsNullOrEmpty(targetFolder))
+                        {
+                            throw new Exception("Invalid remote folder path");
+                        }
+                        var command = $"cd {parentFolder} && zip -r {remoteZipPath} {targetFolder}";
+                        //var command = $"zip -r {remoteZipPath} {remoteFolderPath}";
                         var cmd = client.CreateCommand(command);
                         var result = cmd.Execute();
 
@@ -691,7 +657,9 @@ namespace GeekathonAutoSync.AutoBackup
                             throw new Exception("SSH connection failed.");
                         }
 
-                        var command = $"zip -r {remoteZipFileWithPath} {remoteFile}";
+                        //var command = $"zip -r {remoteZipFileWithPath} {remoteFile}";
+                        var outputZipName = Path.GetFileName(remoteZipFileWithPath);
+                        var command = $"cd {remoteFolderPath} && zip {outputZipName} {fileName}";
                         var cmd = client.CreateCommand(command);
                         var result = cmd.Execute();
 
@@ -740,12 +708,12 @@ namespace GeekathonAutoSync.AutoBackup
                         {
                             throw new Exception("SSH connection failed.");
                         }
-
-                        var command = $"zip -r {remoteZipFileWithPath} {remoteFile}";
+                        //var command = $"zip -r {remoteZipFileWithPath} {remoteFile}";
+                        var outputZipName = Path.GetFileName(remoteZipFileWithPath);
+                        var command = $"cd {remoteFolderPath} && zip {outputZipName} {fileName}";
                         var cmd = client.CreateCommand(command);
                         var result = cmd.Execute();
 
-                        // Connect SFTP client
                         sftp.Connect();
 
                         if (!sftp.Exists(remoteZipFileWithPath))
@@ -802,6 +770,7 @@ namespace GeekathonAutoSync.AutoBackup
                 throw new Exception($"An unexpected error occurred: {ex.Message}");
             }
         }
+                        
         private async Task<string> UploadFileToS3(string awsAccessKey, string awsSecretKey, string s3BucketName, string s3Key, string systemLocalPath)
         {
             try
@@ -823,34 +792,6 @@ namespace GeekathonAutoSync.AutoBackup
             }
         }
         #endregion
-
-
-        #region backupLogs
-        //private async Task<(bool, Guid)> CreatebackLog(Guid sourceConfiguationId, DateTime startedTimeStamp, Guid backUpStorageConfiguationId)
-        //{
-        //    try
-        //    {
-        //         Guid backUpLogId;
-        //         var backUpLog = new BackUpLog
-        //         {
-        //             TenantId = (int)AbpSession.TenantId,
-        //             SourceConfiguationId = sourceConfiguationId,
-        //             StartedTimeStamp = startedTimeStamp,
-        //             BackUpStorageConfiguationId = backUpStorageConfiguationId,
-        //             BackupLogStatus = BackupLogStatus.Initiated,
-        //         };
-        //        using (CurrentUnitOfWork.SetTenantId(backUpLog.TenantId))
-        //        {
-        //           backUpLogId = await _backUpLogsRepository.InsertAndGetIdAsync(backUpLog);
-        //           await CurrentUnitOfWork.SaveChangesAsync();
-        //        }
-        //        return (true, backUpLogId);
-        //    }
-        //    catch (Exception ex) 
-        //    {
-        //        return (false, Guid.Empty);
-        //    }
-        //}
 
         private async Task<(bool, Guid)> CreatebackLog(Guid sourceConfiguationId, DateTime startedTimeStamp, Guid backUpStorageConfiguationId, int tenantId)
         {
@@ -1020,8 +961,67 @@ namespace GeekathonAutoSync.AutoBackup
             }
         }
 
+        public async Task<DashBoardItemDto> GetDashBoardItem()
+        {
+            try
+            {
+                int tenantId = GetCurrentTenantId();
+                var sourceBackCount = await _sourceConfiguationRepository.GetAll().Where(x => x.TenantId == tenantId).CountAsync();
+                var configuredBackStorageCount = await _backUpStorageConfiguationRepository.GetAll().Where(x => x.TenantId == tenantId).CountAsync();
+                var totalSchedule = await _backUpScheduleRepository.GetAll().Where(x => x.TenantId == tenantId).CountAsync();
+                var totalBackupTaken = await _backUpLogsRepository.GetAll().Where(x => x.TenantId == tenantId && x.BackupLogStatus == BackupLogStatus.Success).CountAsync();
+                var lastBackUp = await _backUpLogsRepository.GetAllIncluding(e => e.SourceConfiguation).Where(x => x.TenantId == tenantId && x.BackupLogStatus == BackupLogStatus.Success).OrderByDescending(x => x.CompletedTimeStamp).FirstOrDefaultAsync();
 
+                var nextScheduleList = await _backUpScheduleRepository.GetAllIncluding(e => e.SourceConfiguation)
+                    .Where(x => x.TenantId == tenantId).Select(x => new { x.SourceConfiguation, x.CronExpression }).Distinct().ToListAsync();
 
-        #endregion
+                var response = new DashBoardItemDto
+                {
+                    BackupSourceCount = sourceBackCount,
+                    BackupStorageCount = configuredBackStorageCount,
+                    ScheduleBackupCount = totalSchedule,
+                    TotalBackupCount = totalBackupTaken,
+                    LastBackupItem = lastBackUp.SourceConfiguation.BackupName ??
+                        (lastBackUp.SourceConfiguation.BackUPType.BackupTypeEnum == BackupTypeEnum.DataBase ? (lastBackUp.SourceConfiguation.ServerIP + " - " + lastBackUp.SourceConfiguation.DBInitialCatalog)
+                        : lastBackUp.SourceConfiguation.ServerIP + " - Application Files"),
+                    LastBackupStatus = lastBackUp.BackupLogStatus.ToString(),
+                };
+
+                foreach (var item in nextScheduleList)
+                {
+                    var sItem = new Sconfig();
+                    sItem.Name = item.SourceConfiguation.BackupName ??
+                    (item.SourceConfiguation.BackUPType.BackupTypeEnum == BackupTypeEnum.DataBase ? (item.SourceConfiguation.ServerIP + " - " + item.SourceConfiguation.DBInitialCatalog)
+                    : item.SourceConfiguation.ServerIP + " - Application Files");
+                    
+                    if (!String.IsNullOrEmpty(item.CronExpression))
+                    {
+                        sItem.CronExo = await ConvertCronExpToRegularValue(item.CronExpression);
+                    }
+
+                    response.NextScheduleList.Add(sItem);
+                }
+
+                return response;
+            }
+            catch(Exception ex)
+            {
+                return null;
+            }
+        }
+
+        private async Task<string> ConvertCronExpToRegularValue(string cronExp)
+        {
+            var options = new Options
+            {
+                Locale = "en", // or "fr", "de", etc.
+                Use24HourTimeFormat = false
+            };
+
+            var description = ExpressionDescriptor.GetDescription(cronExp, options);
+
+            return description;
+        }
+
     }
 }

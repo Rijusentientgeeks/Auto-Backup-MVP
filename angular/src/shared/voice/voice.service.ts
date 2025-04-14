@@ -27,7 +27,6 @@ export class VoiceService {
   sendCommandToBackend(command: string) {
     //this.speechRecognitionService.receiveCommand(this.commandDetails).subscribe();
     this.http.post('https://localhost:44311/api/services/app/SpeechRecognition/ReceiveCommand', { command }).subscribe((res: any) => {
-        debugger
         if(!res.result){
             this.message.error("Invaild command.");
         }
