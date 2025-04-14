@@ -27,7 +27,6 @@
               >
                 <i class="pi pi-pencil"></i>
               </button>
-         
             </div>
           </div>
 
@@ -44,18 +43,12 @@
               <i class="pi pi-folder text-secondary me-2"></i>
               <strong> DB UserID:</strong> {{ config.dbUsername || "N/A" }}
             </p>
-            <p class="mb-2">
-              <i class="pi pi-folder text-secondary me-2"></i>
-              <strong> DB Password:</strong> {{ config.dbPassword || "N/A" }}
-            </p>
+
             <p class="mb-2">
               <i class="pi pi-user text-secondary me-2"></i>
               <strong> User ID:</strong> {{ config.sshUserName || "N/A" }}
             </p>
-            <p class="mb-2">
-              <i class="pi pi-lock text-secondary me-2"></i>
-              <strong> Password:</strong> ********
-            </p>
+       
             <p class="mb-2">
               <i class="pi pi-desktop text-secondary me-2"></i>
               <strong> OS:</strong> {{ config.os || "N/A" }}
@@ -90,7 +83,8 @@
           >
             <div style="font-size: 12px; color: green">
               <i class="pi pi-calendar text-danger me-2"></i>&nbsp;
-              <strong>Next Auto Backup: &nbsp;</strong> {{ nextAutoBackup || 'N/A' }}
+              <strong>Next Auto Backup: &nbsp;</strong>
+              {{ nextAutoBackup || "N/A" }}
             </div>
             <button
               class="btn btn-primary btn-sm"
@@ -354,6 +348,17 @@
           >
             Backup Storage Configuration is required
           </div>
+        </div>
+        <div class="col-md-3 mb-3">
+          <label for="backupName">Backup Name</label>
+          <input
+            id="backupName"
+            type="text"
+            class="form-control"
+            formControlName="backupName"
+            [ngClass]="{ 'is-invalid': isInvalid('backupName') }"
+            placeholder="Enter Backup Name"
+          />
         </div>
       </div>
 

@@ -23,7 +23,7 @@
             {{ entry?.backupName || entry.cloudStorage?.name || entry.storageMasterType?.name }}
           </h3>
           <div class="icon-actions">
-            <button class="btn btn-primary btn-sm" (click)="openBackupLogDialog(entry.id)" title="Delete Configuration">
+            <button class="btn btn-primary btn-sm" (click)="openBackupLogDialog(entry.id)" title="Show Backup Log Details">
               <i class="pi pi-list"></i>
             </button>
             <button class="btn btn-warning btn-sm me-2" (click)="GetDetailsbyID(entry.id)" title="Edit Configuration">

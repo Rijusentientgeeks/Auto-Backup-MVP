@@ -5,23 +5,14 @@
     </div>
     <div class="col-md-4"></div>
     <div class="col-md-4">
-      <button
-        pButton
-        [label]="l('AddBackupDestination')"
-        icon="pi pi-plus"
-        style="width: 72%"
-        (click)="openDialog()"
-      ></button>
+      <button pButton [label]="l('AddBackupDestination')" icon="pi pi-plus" style="width: 72%"
+        (click)="openDialog()"></button>
     </div>
   </div>
 
   <div class="storage-grid">
-    <div
-      class="storage-box"
-      *ngFor="let storage of storages"
-      [ngStyle]="{ backgroundColor: storage.color }"
-      (click)="selectStorage(storage.type)"
-    >
+    <div class="storage-box" *ngFor="let storage of storages" [ngStyle]="{ backgroundColor: storage.color }"
+      (click)="selectStorage(storage.type)">
       <div class="icon-container">
         <i [class]="storage.icon" class="storage-icon"></i>
       </div>
@@ -29,54 +20,31 @@
       <p class="storage-description">{{ storage.description }}</p>
     </div>
   </div>
-  <p-dialog
-    header="{{l('BackupStorageConfiguration')}}"
-    [(visible)]="displayModal"
-    [modal]="true"
-    [style]="{ width: '90%', height: '100vh' }"
-    (onHide)="closeDialog()"
-    [dismissableMask]="false"
-    [closable]="false"
-    [draggable]="false"
-  >
+  <p-toast></p-toast>
+
+  <p-dialog header="{{l('BackupStorageConfiguration')}}" [(visible)]="displayModal" [modal]="true"
+    [style]="{ width: '90%', height: '100vh' }" (onHide)="closeDialog()" [dismissableMask]="false" [closable]="false"
+    [draggable]="false">
     <form [formGroup]="storageForm" style="text-align: left">
       <div class="row">
         <div class="col-md-2 mb-3">
           <label for="storageType">{{l('StorageType')}}</label> <br />
-          <p-dropdown
-            id="storageType"
-            formControlName="StorageTypeId"
-            [options]="storageTypes"
-            optionLabel="name"
-            [optionValue]="'value'"
-            placeholder="{{l('SelectStorageType')}}"
+          <p-dropdown id="storageType" formControlName="StorageTypeId" [options]="storageTypes" optionLabel="name"
+            [optionValue]="'value'" placeholder="{{l('SelectStorageType')}}"
             [ngClass]="{ 'is-invalid': isInvalid('StorageTypeId') }"
-            (onChange)="onStorageTypeChange($event)"
-          ></p-dropdown>
-          <div
-            *ngIf="isInvalid('StorageTypeId')"
-            class="invalid-feedback d-block"
-          >
-           {{l('StorageTypeisrequired')}}
+            (onChange)="onStorageTypeChange($event)"></p-dropdown>
+          <div *ngIf="isInvalid('StorageTypeId')" class="invalid-feedback d-block">
+            {{l('StorageTypeisrequired')}}
           </div>
         </div>
 
         <div class="col-md-2 mb-3" *ngIf="isCloudStorage">
           <label for="cloudStorage">Cloud Storage</label><br />
-          <p-dropdown
-            id="cloudStorage"
-            formControlName="CloudStorageId"
-            [options]="cloudStorages"
-            optionLabel="name"
-            [optionValue]="'value'"
-            placeholder="Select Cloud Storage"
+          <p-dropdown id="cloudStorage" formControlName="CloudStorageId" [options]="cloudStorages" optionLabel="name"
+            [optionValue]="'value'" placeholder="Select Cloud Storage"
             [ngClass]="{ 'is-invalid': isInvalid('CloudStorageId') }"
-            (onChange)="onCloudStorageChange($event)"
-          ></p-dropdown>
-          <div
-            *ngIf="isInvalid('CloudStorageId')"
-            class="invalid-feedback d-block"
-          >
+            (onChange)="onCloudStorageChange($event)"></p-dropdown>
+          <div *ngIf="isInvalid('CloudStorageId')" class="invalid-feedback d-block">
             Cloud Storage is required.
           </div>
         </div>
@@ -86,9 +54,9 @@
           <label for="description">Storage Destination Name</label>
           <input id="description" type="text" class="form-control" formControlName="backupName"
             placeholder="Enter destination name" />
-            <div *ngIf="isInvalid('backupName')" class="invalid-feedback d-block">
-              Destination Name is required.
-            </div>
+          <div *ngIf="isInvalid('backupName')" class="invalid-feedback d-block">
+            Destination Name is required.
+          </div>
         </div>
       </div>
       <hr class="text-danger">
@@ -100,14 +68,8 @@
         <ng-container *ngIf="isNFSStorage">
           <div class="col-md-4 mb-3">
             <label for="nfsIp">NFS IP</label>
-            <input
-              class="form-control"
-              id="nfsIp"
-              formControlName="NFS_IP"
-              type="text"
-              placeholder="Enter NFS IP"
-              [ngClass]="{ 'is-invalid': isInvalid('NFS_IP') }"
-            />
+            <input class="form-control" id="nfsIp" formControlName="NFS_IP" type="text" placeholder="Enter NFS IP"
+              [ngClass]="{ 'is-invalid': isInvalid('NFS_IP') }" />
             <div *ngIf="isInvalid('NFS_IP')" class="invalid-feedback d-block">
               NFS IP is required.
             </div>
@@ -115,54 +77,27 @@
 
           <div class="col-md-4 mb-3">
             <label for="nfsUser">NFS Access User ID</label>
-            <input
-              class="form-control"
-              id="nfsUser"
-              formControlName="NFS_AccessUserID"
-              type="text"
-              placeholder="Enter User ID"
-              [ngClass]="{ 'is-invalid': isInvalid('NFS_AccessUserID') }"
-            />
-            <div
-              *ngIf="isInvalid('NFS_AccessUserID')"
-              class="invalid-feedback d-block"
-            >
+            <input class="form-control" id="nfsUser" formControlName="NFS_AccessUserID" type="text"
+              placeholder="Enter User ID" [ngClass]="{ 'is-invalid': isInvalid('NFS_AccessUserID') }" />
+            <div *ngIf="isInvalid('NFS_AccessUserID')" class="invalid-feedback d-block">
               User ID is required.
             </div>
           </div>
 
           <div class="col-md-4 mb-3">
             <label for="nfsPassword">NFS Password</label>
-            <input
-              class="form-control"
-              id="nfsPassword"
-              formControlName="NFS_Password"
-              type="password"
-              placeholder="Enter Password"
-              [ngClass]="{ 'is-invalid': isInvalid('NFS_Password') }"
-            />
-            <div
-              *ngIf="isInvalid('NFS_Password')"
-              class="invalid-feedback d-block"
-            >
+            <input class="form-control" id="nfsPassword" formControlName="NFS_Password" type="password"
+              placeholder="Enter Password" [ngClass]="{ 'is-invalid': isInvalid('NFS_Password') }" />
+            <div *ngIf="isInvalid('NFS_Password')" class="invalid-feedback d-block">
               Password is required.
             </div>
           </div>
 
           <div class="col-md-4 mb-3">
             <label for="nfsLocationPath">NFS Location Path</label>
-            <input
-              class="form-control"
-              id="nfsLocationPath"
-              formControlName="NFS_LocationPath"
-              type="text"
-              placeholder="Enter Path"
-              [ngClass]="{ 'is-invalid': isInvalid('NFS_LocationPath') }"
-            />
-            <div
-              *ngIf="isInvalid('NFS_LocationPath')"
-              class="invalid-feedback d-block"
-            >
+            <input class="form-control" id="nfsLocationPath" formControlName="NFS_LocationPath" type="text"
+              placeholder="Enter Path" [ngClass]="{ 'is-invalid': isInvalid('NFS_LocationPath') }" />
+            <div *ngIf="isInvalid('NFS_LocationPath')" class="invalid-feedback d-block">
               Location Path is required.
             </div>
           </div>
@@ -171,90 +106,45 @@
         <ng-container *ngIf="isAWS">
           <div class="col-md-4 mb-3">
             <label for="awsAccessKey">AWS Access Key</label>
-            <input
-              class="form-control"
-              id="awsAccessKey"
-              formControlName="AWS_AccessKey"
-              type="text"
-              placeholder="Enter AWS Access Key"
-              [ngClass]="{ 'is-invalid': isInvalid('AWS_AccessKey') }"
-            />
-            <div
-              *ngIf="isInvalid('AWS_AccessKey')"
-              class="invalid-feedback d-block"
-            >
+            <input class="form-control" id="awsAccessKey" formControlName="AWS_AccessKey" type="text"
+              placeholder="Enter AWS Access Key" [ngClass]="{ 'is-invalid': isInvalid('AWS_AccessKey') }" />
+            <div *ngIf="isInvalid('AWS_AccessKey')" class="invalid-feedback d-block">
               AWS Access Key is required.
             </div>
           </div>
 
           <div class="col-md-4 mb-3">
             <label for="awsSecretKey">AWS Secret Key</label>
-            <input
-              class="form-control"
-              id="awsSecretKey"
-              formControlName="AWS_SecretKey"
-              type="password"
-              placeholder="Enter AWS Secret Key"
-              [ngClass]="{ 'is-invalid': isInvalid('AWS_SecretKey') }"
-            />
-            <div
-              *ngIf="isInvalid('AWS_SecretKey')"
-              class="invalid-feedback d-block"
-            >
+            <input class="form-control" id="awsSecretKey" formControlName="AWS_SecretKey" type="password"
+              placeholder="Enter AWS Secret Key" [ngClass]="{ 'is-invalid': isInvalid('AWS_SecretKey') }" />
+            <div *ngIf="isInvalid('AWS_SecretKey')" class="invalid-feedback d-block">
               AWS Secret Key is required.
             </div>
           </div>
 
           <div class="col-md-4 mb-3">
             <label for="awsBucket">AWS Bucket Name</label>
-            <input
-              class="form-control"
-              id="awsBucket"
-              formControlName="AWS_BucketName"
-              type="text"
-              placeholder="Enter AWS Bucket Name"
-              [ngClass]="{ 'is-invalid': isInvalid('AWS_BucketName') }"
-            />
-            <div
-              *ngIf="isInvalid('AWS_BucketName')"
-              class="invalid-feedback d-block"
-            >
+            <input class="form-control" id="awsBucket" formControlName="AWS_BucketName" type="text"
+              placeholder="Enter AWS Bucket Name" [ngClass]="{ 'is-invalid': isInvalid('AWS_BucketName') }" />
+            <div *ngIf="isInvalid('AWS_BucketName')" class="invalid-feedback d-block">
               AWS Bucket Name is required.
             </div>
           </div>
 
           <div class="col-md-4 mb-3">
             <label for="awsRegion">AWS Region</label>
-            <input
-              class="form-control"
-              id="awsRegion"
-              formControlName="AWS_Region"
-              type="text"
-              placeholder="Enter AWS Region"
-              [ngClass]="{ 'is-invalid': isInvalid('AWS_Region') }"
-            />
-            <div
-              *ngIf="isInvalid('AWS_Region')"
-              class="invalid-feedback d-block"
-            >
+            <input class="form-control" id="awsRegion" formControlName="AWS_Region" type="text"
+              placeholder="Enter AWS Region" [ngClass]="{ 'is-invalid': isInvalid('AWS_Region') }" />
+            <div *ngIf="isInvalid('AWS_Region')" class="invalid-feedback d-block">
               AWS Region is required.
             </div>
           </div>
 
           <div class="col-md-4 mb-3">
             <label for="awsBackupPath">AWS Backup Path</label>
-            <input
-              class="form-control"
-              id="awsBackupPath"
-              formControlName="AWS_backUpPath"
-              type="text"
-              placeholder="Enter Backup Path"
-              [ngClass]="{ 'is-invalid': isInvalid('AWS_backUpPath') }"
-            />
-            <div
-              *ngIf="isInvalid('AWS_backUpPath')"
-              class="invalid-feedback d-block"
-            >
+            <input class="form-control" id="awsBackupPath" formControlName="AWS_backUpPath" type="text"
+              placeholder="Enter Backup Path" [ngClass]="{ 'is-invalid': isInvalid('AWS_backUpPath') }" />
+            <div *ngIf="isInvalid('AWS_backUpPath')" class="invalid-feedback d-block">
               Backup Path is required.
             </div>
           </div>
@@ -263,73 +153,124 @@
         <ng-container *ngIf="isAzure">
           <div class="col-md-4 mb-3">
             <label for="azAccountName">AZ Account Name</label>
-            <input
-              class="form-control"
-              id="azAccountName"
-              formControlName="AZ_AccountName"
-              type="text"
-              placeholder="Enter Account Name"
-              [ngClass]="{ 'is-invalid': isInvalid('AZ_AccountName') }"
-            />
-            <div
-              *ngIf="isInvalid('AZ_AccountName')"
-              class="invalid-feedback d-block"
-            >
+            <input class="form-control" id="azAccountName" formControlName="AZ_AccountName" type="text"
+              placeholder="Enter Account Name" [ngClass]="{ 'is-invalid': isInvalid('AZ_AccountName') }" />
+            <div *ngIf="isInvalid('AZ_AccountName')" class="invalid-feedback d-block">
               AZ Account Name is required.
             </div>
           </div>
 
           <div class="col-md-4 mb-3">
             <label for="azKey">AZ Account Key</label>
-            <input
-              class="form-control"
-              id="azKey"
-              formControlName="AZ_AccountKey"
-              type="text"
-              placeholder="Enter Key"
-              [ngClass]="{ 'is-invalid': isInvalid('AZ_AccountKey') }"
-            />
-            <div
-              *ngIf="isInvalid('AZ_AccountKey')"
-              class="invalid-feedback d-block"
-            >
+            <input class="form-control" id="azKey" formControlName="AZ_AccountKey" type="text" placeholder="Enter Key"
+              [ngClass]="{ 'is-invalid': isInvalid('AZ_AccountKey') }" />
+            <div *ngIf="isInvalid('AZ_AccountKey')" class="invalid-feedback d-block">
               AZ Account Key is required.
             </div>
           </div>
+          <div class="col-md-4 mb-3">
+            <label for="Endpoint">Endpoint</label>
+            <input class="form-control" id="Endpoint" formControlName="Endpoint" type="text"
+              placeholder="Enter Endpoint" [ngClass]="{ 'is-invalid': isInvalid('Endpoint') }" />
+            <div *ngIf="isInvalid('Endpoint')" class="invalid-feedback d-block">
+              Endpoint is required.
+            </div>
+          </div>
         </ng-container>
-      </div>
-    </form>
+        <ng-container *ngIf="isAlibaba">
+          <div class="col-md-4 mb-3">
+            <label for="AccessKey">Access Key</label>
+            <input class="form-control" id="AccessKey" formControlName="AWS_AccessKey" type="text"
+              placeholder="Enter Access Key" [ngClass]="{ 'is-invalid': isInvalid('AWS_AccessKey') }" />
+            <div *ngIf="isInvalid('AWS_AccessKey')" class="invalid-feedback d-block">
+              Access Key is required.
+            </div>
+          </div>
 
-    <ng-template pTemplate="footer">
-      <div class="row">
-        <div class="col-md-6 mb-3"></div>
-        <div class="col-md-3 mb-3">
-          <button
-            class="btn btn-success"
-            type="button"
-            [disabled]="storageForm.invalid"
-            (click)="saveStorageDestination()"
-          >
-            Save
-          </button>
+          <div class="col-md-4 mb-3">
+            <label for="SecretKey"> Secret Key</label>
+            <input class="form-control" id="SecretKey" formControlName="AWS_SecretKey" type="password"
+              placeholder="Enter Secret Key" [ngClass]="{ 'is-invalid': isInvalid('AWS_SecretKey') }" />
+            <div *ngIf="isInvalid('AWS_SecretKey')" class="invalid-feedback d-block">
+              Secret Key is required.
+            </div>
+          </div>
+
+          <div class="col-md-4 mb-3">
+            <label for="Bucket">Bucket Name</label>
+            <input class="form-control" id="Bucket" formControlName="AWS_BucketName" type="text"
+              placeholder="Enter Bucket Name" [ngClass]="{ 'is-invalid': isInvalid('AWS_BucketName') }" />
+            <div *ngIf="isInvalid('AWS_BucketName')" class="invalid-feedback d-block">
+              Bucket Name is required.
+            </div>
+          </div>
+
+          <div class="col-md-4 mb-3">
+            <label for="Endpoint">Endpoint</label>
+            <input class="form-control" id="Endpoint" formControlName="Endpoint" type="text"
+              placeholder="Enter Endpoint" [ngClass]="{ 'is-invalid': isInvalid('Endpoint') }" />
+            <div *ngIf="isInvalid('Endpoint')" class="invalid-feedback d-block">
+              Endpoint is required.
+            </div>
+          </div>
+
+
+      </ng-container>
+
+      <ng-container *ngIf="isGoogle">
+        <div class="col-md-4 mb-3">
+          <label for="ProjectID">Project ID</label>
+          <input class="form-control" id="ProjectID" formControlName="ProjectID" type="text"
+            placeholder="Enter Project ID" [ngClass]="{ 'is-invalid': isInvalid('ProjectID') }" />
+          <div *ngIf="isInvalid('ProjectID')" class="invalid-feedback d-block">
+            ProjectID is required.
+          </div>
         </div>
-        <div class="col-md-3 mb-3">
-          <button class="btn btn-danger" type="button" (click)="closeDialog()">
-            Cancel
-          </button>
+
+
+        <div class="col-md-4 mb-3">
+          <label for="BucketName">Bucket Name</label>
+          <input class="form-control" id="BucketName" formControlName="AWS_BucketName" type="text"
+            placeholder="Enter Bucket Name" [ngClass]="{ 'is-invalid': isInvalid('AWS_BucketName') }" />
+          <div *ngIf="isInvalid('AWS_BucketName')" class="invalid-feedback d-block">
+            Bucket Name is required.
+          </div>
         </div>
-      </div>
-    </ng-template>
-  </p-dialog>
+
+        <div class="col-md-4 mb-3">
+          <label for="CredentialFile">Credential File</label>
+          <input class="form-control" id="CredentialFile" formControlName="CredentialFile" type="text"
+            placeholder="Enter Credential File path" [ngClass]="{ 'is-invalid': isInvalid('CredentialFile') }" />
+          <div *ngIf="isInvalid('CredentialFile')" class="invalid-feedback d-block">
+            Credential File is required.
+          </div>
+        </div>
+
+
+    </ng-container>
+</div>
+</form>
+
+<ng-template pTemplate="footer">
+  <div class="row">
+    <div class="col-md-6 mb-3"></div>
+    <div class="col-md-3 mb-3">
+      <button class="btn btn-success" type="button" [disabled]="storageForm.invalid" (click)="saveStorageDestination()">
+        Save
+      </button>
+    </div>
+    <div class="col-md-3 mb-3">
+      <button class="btn btn-danger" type="button" (click)="closeDialog()">
+        Cancel
+      </button>
+    </div>
+  </div>
+</ng-template>
+</p-dialog>
 </div>
 <div *ngIf="isSaving" class="loading-overlay">
   <i class="pi pi-spin pi-spinner loader-icon"></i>
   <p class="loading-text text-white">Saving data, please wait...</p>
 </div>
-<app-storage-detail
-  *ngIf="showDetail"
-  [entries]="storageEntries"
-  [selectedStorage]="selectedStorage"
-  (back)="goBack()"
-  (editEntry)="onEditStorage($event)"
-></app-storage-detail>
+<app-storage-detail *ngIf="showDetail" [entries]="storageEntries" [selectedStorage]="selectedStorage" (back)="goBack()"
+  (editEntry)="onEditStorage($event)"></app-storage-detail>
