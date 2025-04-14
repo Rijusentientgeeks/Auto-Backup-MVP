@@ -42,7 +42,7 @@ export class BackupLogsComponent implements OnInit {
     private sourceConfigService: SourceConfiguationServiceProxy,
     private backupDownloadService: BackupService,
     private cdr: ChangeDetectorRef
-  ) { }
+  ) {}
 
   ngOnInit(): void {
     this.LoadBackupTypes();
@@ -61,9 +61,7 @@ export class BackupLogsComponent implements OnInit {
           }));
         }
       },
-      error: (err) => {
-        console.error("Error fetching Details:", err);
-      },
+      error: (err) => {},
     });
   }
 
@@ -76,8 +74,7 @@ export class BackupLogsComponent implements OnInit {
             value: item.id,
           }));
         }
-      },
-      error: (err) => console.error("Error fetching storage types:", err),
+      },     
     });
   }
 
@@ -91,7 +88,6 @@ export class BackupLogsComponent implements OnInit {
           }));
         }
       },
-      error: (err) => console.error("Error fetching cloud storage types:", err),
     });
   }
 
@@ -106,8 +102,6 @@ export class BackupLogsComponent implements OnInit {
           this.cdr.detectChanges();
         }
       },
-      error: (err) =>
-        console.error("Error fetching Source Configurations:", err),
     });
   }
 
@@ -144,12 +138,12 @@ export class BackupLogsComponent implements OnInit {
           this.backupLogs = result.items || [];
           this.totalRecords = result.totalCount || 0;
           this.loading = false;
-          this.first = first; 
-          this.rows = rows; 
-          this.cdr.detectChanges(); 
+          this.first = first;
+          this.rows = rows;
+          this.cdr.detectChanges();
         },
         error: (err) => {
-          console.error("Error fetching backup logs:", err);
+     
           this.loading = false;
           this.cdr.detectChanges();
         },
@@ -160,47 +154,57 @@ export class BackupLogsComponent implements OnInit {
     const key = this.getDownloadKey(backupLog);
     this.downloadingIds.add(key);
 
-    this.backupDownloadService.downloadBackup$({
-      sourceConfigurationId: backupLog.sourceConfiguationId,
-      backUpFileName: backupLog.backUpFileName
-    }).subscribe({
-      next: (response) => {
-        const blob = response.body!;
-        const contentDisposition = response.headers.get('Content-Disposition');
-        const filename = this.getFilenameFromDisposition(contentDisposition, backupLog.backUpFileName);
+    this.backupDownloadService
+      .downloadBackup$({
+        sourceConfigurationId: backupLog.sourceConfiguationId,
+        backUpFileName: backupLog.backUpFileName,
+      })
+      .subscribe({
+        next: (response) => {
+          const blob = response.body!;
+          const contentDisposition = response.headers.get(
+            "Content-Disposition"
+          );
+          const filename = this.getFilenameFromDisposition(
+            contentDisposition,
+            backupLog.backUpFileName
+          );
 
-        const link = document.createElement('a');
-        link.href = window.URL.createObjectURL(blob);
-        link.download = filename;
-        link.target = '_blank';
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        window.URL.revokeObjectURL(link.href);
-      },
-      error: (err) => {
-        this.downloadingIds.delete(key);
-        this.cdr.detectChanges();
-      },
-      complete: () => {
-        this.downloadingIds.delete(key);
-        this.cdr.detectChanges();
-      }
-    });
+          const link = document.createElement("a");
+          link.href = window.URL.createObjectURL(blob);
+          link.download = filename;
+          link.target = "_blank";
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(link.href);
+        },
+        error: (err) => {
+          this.downloadingIds.delete(key);
+          this.cdr.detectChanges();
+        },
+        complete: () => {
+          this.downloadingIds.delete(key);
+          this.cdr.detectChanges();
+        },
+      });
   }
 
   private getDownloadKey(backupLog: BackUpLogDto): string {
     return backupLog.id;
   }
 
-
-  private getFilenameFromDisposition(contentDisposition: string | null, defaultName: string): string {
+  private getFilenameFromDisposition(
+    contentDisposition: string | null,
+    defaultName: string
+  ): string {
     if (!contentDisposition) return defaultName;
 
-    const match = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(contentDisposition);
+    const match = /filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/.exec(
+      contentDisposition
+    );
     return match && match[1]
-      ? decodeURIComponent(match[1].replace(/['"]/g, ''))
+      ? decodeURIComponent(match[1].replace(/['"]/g, ""))
       : defaultName;
   }
-
 }

@@ -196,7 +196,6 @@ export class SourceConfigurationComponent implements OnInit {
             nextDate = next;
           }
         } catch (err) {
-          console.error(`Invalid cron expression: ${expr}`, err);
         }
       });
   

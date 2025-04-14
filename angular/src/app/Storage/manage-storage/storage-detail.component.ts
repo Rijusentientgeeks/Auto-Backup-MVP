@@ -50,7 +50,6 @@ export class StorageDetailComponent implements OnChanges, OnInit {
     this.filterData();
   }
   filterData(): void {
-    debugger;
     this.filteredEntries = this.entries.filter(
       (entry) =>
         entry.storageMasterType?.name.toLowerCase() ===
@@ -167,7 +166,6 @@ export class StorageDetailComponent implements OnChanges, OnInit {
       )
       .subscribe({
         next: (result) => {
-          debugger;
           this.successfulBackupLogs = result.items || [];
           this.totalSuccessfulLogs = result.totalCount || 0;
         },
@@ -205,7 +203,6 @@ export class StorageDetailComponent implements OnChanges, OnInit {
         },
         error: (err) => {
           this.downloadingIds.delete(key);
-          console.error("Download failed:", err);
         },
         complete: () => {
           this.downloadingIds.delete(key);

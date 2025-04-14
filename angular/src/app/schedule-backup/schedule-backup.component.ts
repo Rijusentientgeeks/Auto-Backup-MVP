@@ -113,7 +113,6 @@ export class ScheduleBackupComponent implements OnInit {
     });
   }
   loadBackups(page: number = 0) {
-    debugger;
     const skipCount = page * this.rowsPerPage;
     this.BackUpScheduleService.getAll(
       this.filterText || undefined,
@@ -122,12 +121,13 @@ export class ScheduleBackupComponent implements OnInit {
       skipCount
     ).subscribe({
       next: (result: BackUpScheduleDtoPagedResultDto) => {
-        debugger;
         this.scheduledBackups = this.mapToScheduledBackup(result?.items || []);
         this.totalRecords = result?.totalCount || 0;
+        this.cdr.detectChanges(); // Force table to re-render
+
       },
       error: (error) => {
-        console.error("Error fetching backups", error);
+    
       },
     });
   }
@@ -176,7 +176,6 @@ export class ScheduleBackupComponent implements OnInit {
             this.loadBackups(this.currentPage);
           },
           error: (error) => {
-            debugger
             Swal.fire("Error!", "Something Wrong!", "error");
           },
         });
@@ -195,7 +194,6 @@ export class ScheduleBackupComponent implements OnInit {
   }
 
   onSort(event: any) {
-    debugger;
     const sortField = event.field;
     const sortOrder = event.order === 1 ? "asc" : "desc";
     let apiField = sortField;

@@ -140,7 +140,6 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
           }
         },
         error: (err) => {
-          console.error("Error fetching storage destination:", err);
         },
       });
   }
@@ -158,7 +157,6 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
         }
       },
       error: (err) => {
-        console.error("Error fetching storage types:", err);
       },
     });
   }
@@ -173,7 +171,6 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
         }
       },
       error: (err) => {
-        console.error("Error fetching storage types:", err);
       },
     });
   }
@@ -220,7 +217,6 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
 
         const name = selectedCloud.name?.toLowerCase();
         this.isCloudStorage = true;
-        debugger;
 
         if (name === "amazon s3") {
           this.isAWS = true;
@@ -417,7 +413,6 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     dto.aZ_AccountKey = this.isAzure ? formValues.AZ_AccountKey : undefined;
     dto.endpoint = this.isAlibaba || this.isAzure ? formValues.Endpoint : undefined;
     dto.projectID = this.isGoogle ? formValues.ProjectID : undefined;
-    debugger
     dto.credentialFile = this.isGoogle ? formValues.CredentialFile : undefined;
     return dto;
   }
@@ -489,7 +484,6 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
           this.loadDestinationConfiguration();
         },
         error: (err) => {
-          console.error("Error saving backup configuration:", err);
           this.messageService.add({
             severity: "error",
             summary: "Error",
