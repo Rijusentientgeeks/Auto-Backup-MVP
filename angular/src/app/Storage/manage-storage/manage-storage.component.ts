@@ -128,7 +128,6 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
       .subscribe({
         next: (result) => {
           if (result && result.items) {
-            debugger;
             this.storageEntries = result.items;
           }
         },
@@ -171,7 +170,6 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     });
   }
   onEditStorage(entry: any): void {
-    debugger;
     this.editingStorageId = entry.id;
 
     this.displayModal = true;
@@ -228,7 +226,6 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
   }
 
   onStorageTypeChange(event: { value: string }) {
-    debugger;
     const selectedType = this.storageTypes.find((x) => x.value === event.value);
 
     this.resetConditionalValidators();
@@ -248,8 +245,6 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
   }
 
   onCloudStorageChange(event: { value: string }) {
-    debugger;
-
     const selectedCloud = this.cloudStorages.find(
       (x) => x.value === event.value
     );

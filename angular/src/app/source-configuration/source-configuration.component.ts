@@ -173,7 +173,6 @@ export class SourceConfigurationComponent implements OnInit {
   loadSourceConfigs(): void {
     this.sourceConfigService.getAll(undefined, undefined, 1000, 0).subscribe({
       next: (result) => {
-        debugger
         if (result && result.items) {
           this.sourceConfigs = result.items;
           const cronArray = result.items[0]?.scheduledCronExpression || [];
@@ -292,11 +291,11 @@ export class SourceConfigurationComponent implements OnInit {
     });
   }
   LoadBackupStorageConfigs(): void {
-    const defaultOption = {
-        name: "User's Local System",
-        value: '00000000-0000-0000-0000-000000000000'
-      };
-    this.BackupStorageConfigs = [defaultOption];
+    // const defaultOption = {
+    //     name: "User's Local System",
+    //     value: '00000000-0000-0000-0000-000000000000'
+    //   };
+    // this.BackupStorageConfigs = [defaultOption];
     this.BackupStorageConfigService.getAll(
       undefined,
       undefined,
@@ -309,10 +308,11 @@ export class SourceConfigurationComponent implements OnInit {
             name: item.backupName,
             value: item.id,
           }));
-          this.BackupStorageConfigs = [
-            this.BackupStorageConfigs[0],
-            ...backupStorageConfigs,
-          ];
+          // this.BackupStorageConfigs = [
+          //   this.BackupStorageConfigs[0],
+          //   ...backupStorageConfigs,
+          // ];
+          this.BackupStorageConfigs = backupStorageConfigs;
         }
       },
       error: (err) => {

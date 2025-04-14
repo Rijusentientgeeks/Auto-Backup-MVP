@@ -84,18 +84,7 @@ export class ScheduleBackupComponent implements OnInit {
     this.sourceConfigService.getAll(undefined, undefined, 1000, 0).subscribe({
       next: (result) => {
         if (result && result.items) {
-          this.backupConfigs = result.items.map((config: any) => {
-            const backUPType = config.backUPType?.name || "";
-            const dbType = config.dbType?.name || "";
-            const IP = config.serverIP || "";
-            return {
-              backUPType,
-              dbType,
-              backUpStorageConfiguationId: config.id,
-              label: dbType ? `${backUPType} - ${dbType}` : `${backUPType} - ${IP}`
-            };
-          });
-          this.cdr.detectChanges();
+          this.backupConfigs = result.items.filter(item => item.isUserLocalSystem === false);
         }
       },
       error: (err) => {},

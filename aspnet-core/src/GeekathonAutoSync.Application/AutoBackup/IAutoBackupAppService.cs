@@ -21,5 +21,6 @@ namespace GeekathonAutoSync.AutoBackup
         //Task<Tuple<Stream, string, string>> DownloadBackupStreamAsync(string sourceConfigurationId, string backUpFileName);
         Task<Stream> GetBackupFromLocalHost(string filePath);
         Task<Tuple<Stream, string, string>> DownloadBackupStreamAsync(string? sourceConfigurationId, string? storageCongigurationId, string backUpFileName);
+        Task<DashBoardItemDto> GetDashBoardItem();
     }
 }
