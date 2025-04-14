@@ -178,10 +178,22 @@ export class ScheduleBackupComponent implements OnInit {
   deleteBackup(backup: ScheduledBackup) {
     this.BackUpScheduleService.removeSchedule(backup.id).subscribe({
       next: () => {
+        this.messageService.add({
+          severity: "success",
+          summary: "success",
+          detail: "Deleted successfully!",
+          life: 2000,
+        });
         this.loadBackups(this.currentPage);
       },
       error: (error) => {
         console.error('Error deleting backup', error);
+        this.messageService.add({
+          severity: "error",
+          summary: "error",
+          detail: "Somwthing wrong!",
+          life: 2000,
+        });
       }
     });
   }

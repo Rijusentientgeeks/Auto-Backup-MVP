@@ -49,10 +49,10 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     },
 
     {
-      name: "Database Backup",
+      name: "GeekSync Cluster",
       icon: "pi pi-database",
       color: "#FFC107",
-      description: "Ensure your database is safely stored and recoverable.",
+      description: "Ensure your Files are safely stored and recoverable.",
       type: "DATABASE",
     },
   ];
@@ -63,6 +63,7 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
   isNFSStorage = false;
   isAWS = false;
   isAzure = false;
+  isAlibaba = false;
   storageTypes = [];
   cloudStorages = [];
   selectedStorage: string | null = null;
@@ -120,6 +121,9 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
       AWS_backUpPath: [null],
       AZ_AccountName: [null],
       AZ_AccountKey: [null],
+      Endpoint:[null],
+      ProjectID:[null],
+      CredentialFile:[null],
     });
   }
   loadDestinationConfiguration(): void {
@@ -210,6 +214,7 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
 
         const name = selectedCloud.name?.toLowerCase();
         this.isCloudStorage = true;
+        debugger
 
         if (name === "amazon s3") {
           this.isAWS = true;
@@ -217,6 +222,10 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
         } else if (name === "microsoft azure") {
           this.isAzure = true;
           this.setAzureValidators();
+        }
+        else if (name === "Alibaba Cloud") {
+          this.isAlibaba = true;
+          this.setAlibabaValidators();
         }
       }
     } else if (entry.storageType === "NFS") {
@@ -260,6 +269,10 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     } else if (selectedCloud.name === "Microsoft Azure") {
       this.isAzure = true;
       this.setAzureValidators();
+    }
+     else if (selectedCloud.name === "Alibaba Cloud") {
+      this.isAlibaba = true;
+      this.setAlibabaValidators();
     }
   }
   resetConditionalValidators() {
@@ -310,9 +323,18 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     this.updateValidationState();
   }
 
+  setAlibabaValidators() {
+    this.storageForm.get("AWS_AccessKey")?.setValidators(Validators.required);
+    this.storageForm.get("AWS_SecretKey")?.setValidators(Validators.required);
+    this.storageForm.get("AWS_BucketName")?.setValidators(Validators.required);
+    this.storageForm.get("Endpoint")?.setValidators(Validators.required);
+    this.updateValidationState();
+  }
   setAzureValidators() {
     this.storageForm.get("AZ_AccountName")?.setValidators(Validators.required);
     this.storageForm.get("AZ_AccountKey")?.setValidators(Validators.required);
+    this.storageForm.get("Endpoint")?.setValidators(Validators.required);
+
     this.updateValidationState();
   }
 

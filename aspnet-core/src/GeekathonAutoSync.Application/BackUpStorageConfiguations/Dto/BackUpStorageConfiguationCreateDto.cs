@@ -22,5 +22,8 @@ namespace GeekathonAutoSync.BackUpStorageConfiguations.Dto
         public string AZ_AccountName { get; set; }
         public string AZ_AccountKey { get; set; }
         public string BackupName { get; set; }
+        public string Endpoint { get; set; }
+        public string ProjectID { get; set; }
+        public string CredentialFile { get; set; }
     }
 }

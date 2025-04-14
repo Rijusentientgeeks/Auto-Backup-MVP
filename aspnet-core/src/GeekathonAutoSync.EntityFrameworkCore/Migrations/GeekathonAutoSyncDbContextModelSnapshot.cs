@@ -1753,11 +1753,17 @@ namespace GeekathonAutoSync.Migrations
                     b.Property<long?>("CreatorUserId")
                         .HasColumnType("bigint");
 
+                    b.Property<string>("CredentialFile")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<long?>("DeleterUserId")
                         .HasColumnType("bigint");
 
                     b.Property<DateTime?>("DeletionTime")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("Endpoint")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<bool>("IsDeleted")
                         .HasColumnType("bit");
@@ -1781,6 +1787,9 @@ namespace GeekathonAutoSync.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("NFS_Password")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ProjectID")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("StorageMasterTypeId")
