@@ -43,23 +43,27 @@
     </div>
     <div class="col-md-6">
       <p-card header="Upcoming Scheduled Backups" class="shadow-md">
-        <div class="overflow-auto">
-          <table class="w-full text-sm border border-gray-200">
-            <thead>
-              <tr class="bg-gray-100">
-                <th class="text-left p-2 border">Name</th>
-                <th class="text-left p-2 border">Next Schedule</th>
+        <div style="max-height: 300px; overflow-y: auto; border: 1px solid #e5e7eb; border-radius: 6px;">
+          <table style="width: 100%; font-size: 14px; border-collapse: collapse;">
+            <thead style="position: sticky; top: 0; background-color: #f3f4f6; z-index: 1;">
+              <tr>
+                <th style="text-align: left; padding: 8px; border-bottom: 1px solid #d1d5db; font-weight: 500; color: #6b7280;">Name</th>
+                <th style="text-align: left; padding: 8px; border-bottom: 1px solid #d1d5db; font-weight: 500; color: #6b7280;">Next Schedule</th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let schedule of nextSchedules">
-                <td class="p-2 border">{{ schedule.name }}</td>
-                <td class="p-2 border">{{ schedule.cronExo || "Not Defined" }}</td>
+              <tr *ngFor="let schedule of nextSchedules" style="transition: background-color 0.2s;" 
+                  onmouseover="this.style.backgroundColor='#f9fafb'" 
+                  onmouseout="this.style.backgroundColor='transparent'">
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{ schedule.name }}</td>
+                <td style="padding: 8px; border-bottom: 1px solid #e5e7eb;">{{ schedule.cronExo || 'Not Defined' }}</td>
               </tr>
             </tbody>
           </table>
         </div>
       </p-card>
+      
+      
     </div>
    </div>
 
