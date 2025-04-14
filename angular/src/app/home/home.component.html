@@ -1,10 +1,15 @@
 ﻿<div class="grid gap-6 p-4">
+  <!-- Metrics Grid -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
     <div class="row">
-      <div class="col-md-4 mb-4" *ngFor="let metric of metrics">
+      <div class="col-md-3 mb-4" *ngFor="let metric of metrics">
         <p-card class="shadow-md">
           <div class="flex items-center gap-4">
-            <i [class]="metric.icon" [style.color]="metric.color" class="text-2xl"></i>
+            <i
+              [class]="metric.icon"
+              [style.color]="metric.color"
+              class="text-2xl"
+            ></i>
             <div>
               <div class="text-sm text-gray-500">{{ metric.label }}</div>
               <div class="text-xl font-semibold">{{ metric.value }}</div>
@@ -15,19 +20,50 @@
     </div>
   </div>
 
-  <p-card header="Recent Backup Logs" class="shadow-md">
-    <ul class="list-none p-0">
-      <li *ngFor="let log of logs" class="py-2 border-b last:border-none">
-        <div class="flex justify-between items-center text-sm">
-          <span><strong>{{ log.type }}</strong> - {{ log.trigger }}</span>
-          <span [ngClass]="{
-              'text-green-600 font-semibold': log.status === 'Success',
-              'text-red-500 font-semibold': log.status === 'Failed',
-              'text-yellow-600 font-semibold': log.status === 'Pending'
-            }">
-            {{ log.status }} ({{ log.time }})
-          </span>
+  <!-- Last Backup Info -->
+   <div class="row">
+    <div class="col-md-6">
+      <p-card header="Last Backup Summary" class="shadow-md">
+        <div class="text-sm">
+          <p>
+            <strong>Status:</strong>
+            <span
+              [ngClass]="{
+                'text-green-600 font-semibold': lastBackup.status === 'Success',
+                'text-red-500 font-semibold': lastBackup.status === 'Failed',
+                'text-yellow-600 font-semibold': lastBackup.status === 'Pending'
+              }"
+            >
+              {{ lastBackup.status }}
+            </span>
+          </p>
+          <p><strong>Item:</strong> {{ lastBackup.item }}</p>
         </div>
-      </li>
-    </ul>
-  </p-card>
+      </p-card>
+    </div>
+    <div class="col-md-6">
+      <p-card header="Upcoming Scheduled Backups" class="shadow-md">
+        <div class="overflow-auto">
+          <table class="w-full text-sm border border-gray-200">
+            <thead>
+              <tr class="bg-gray-100">
+                <th class="text-left p-2 border">Name</th>
+                <th class="text-left p-2 border">Next Schedule</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let schedule of nextSchedules">
+                <td class="p-2 border">{{ schedule.name }}</td>
+                <td class="p-2 border">{{ schedule.cronExo || "Not Defined" }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </p-card>
+    </div>
+   </div>
+
+
+  <!-- Upcoming Schedule Table -->
+
+</div>

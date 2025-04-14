@@ -15,6 +15,7 @@ import {
   SourceConfiguationDto,
   SourceConfiguationServiceProxy,
 } from "@shared/service-proxies/service-proxies";
+import Swal from "sweetalert2";
 interface ScheduledBackup {
   id: string;
   config: string;
@@ -54,8 +55,8 @@ export class ScheduleBackupComponent implements OnInit {
   scheduledBackups: ScheduledBackup[] = [];
   totalRecords: number = 0;
   loading: boolean = false;
-  filterText: string = '';
-  sorting: string = '';
+  filterText: string = "";
+  sorting: string = "";
   currentPage: number = 0;
   rowsPerPage: number = 10;
   constructor(
@@ -70,7 +71,7 @@ export class ScheduleBackupComponent implements OnInit {
   ngOnInit(): void {
     this.loadSourceConfigs();
     this.loadfrequencies();
-    this.loadBackups();
+    this.loadBackups(this.currentPage);
     this.scheduleForm = this.fb.group({
       frequency: ["", Validators.required],
       dayOfWeek: [null],
@@ -125,8 +126,7 @@ export class ScheduleBackupComponent implements OnInit {
     });
   }
   loadBackups(page: number = 0) {
-    debugger
-    this.loading = true;
+    debugger;
     const skipCount = page * this.rowsPerPage;
     this.BackUpScheduleService.getAll(
       this.filterText || undefined,
@@ -135,64 +135,63 @@ export class ScheduleBackupComponent implements OnInit {
       skipCount
     ).subscribe({
       next: (result: BackUpScheduleDtoPagedResultDto) => {
-        debugger
-        if (result && result.items) {
-          this.scheduledBackups = this.mapToScheduledBackup(result.items);
-        }
-        this.totalRecords = result.totalCount;
-
-        this.loading = false;
+        debugger;
+        this.scheduledBackups = this.mapToScheduledBackup(result?.items || []);
+        this.totalRecords = result?.totalCount || 0;
       },
       error: (error) => {
-        console.error('Error fetching backups', error);
-        this.loading = false;
-      }
+        console.error("Error fetching backups", error);
+      },
     });
   }
   mapToScheduledBackup(items: BackUpScheduleDto[]): ScheduledBackup[] {
-    return items.map(item => ({
+    return items.map((item) => ({
       id: item.id,
-      config: item.sourceConfiguation?.backupName || 'Unknown',
+      config: item.sourceConfiguation?.backupName || "Unknown",
       schedule: this.getScheduleText(item),
-      status: item.isDeleted ? 'Inactive' : 'Active'
+      status: item.isDeleted ? "Inactive" : "Active",
     }));
   }
   getScheduleText(item: BackUpScheduleDto): string {
-    const frequency = item.backUpFrequency?.name || 'Unknown';
-    const time = item.backupTime || 'N/A';
+    const frequency = item.backUpFrequency?.name || "Unknown";
+    const time = item.backupTime || "N/A";
     switch (frequency.toLowerCase()) {
-      case 'hourly' :
-        return `Hourly` + (item.cronExpression ? ` - ${item.cronExpression}` : '');
-      case 'daily':
-        return `Daily - `+item.cronExpression;
-      case 'weekly':
-        return `Weekly - `+item.cronExpression;
-      case 'monthly':
-        return `Monthly - `+item.cronExpression;
-      case 'yearly':
-        return `Yearly - `+item.cronExpression;
+      case "hourly":
+        return (
+          `Hourly` + (item.cronExpression ? ` - ${item.cronExpression}` : "")
+        );
+      case "daily":
+        return `Daily - ` + item.cronExpression;
+      case "weekly":
+        return `Weekly - ` + item.cronExpression;
+      case "monthly":
+        return `Monthly - ` + item.cronExpression;
+      case "yearly":
+        return `Yearly - ` + item.cronExpression;
       default:
         return item.cronExpression || `${frequency} at ${time}`;
     }
   }
   deleteBackup(backup: ScheduledBackup) {
-    this.BackUpScheduleService.removeSchedule(backup.id).subscribe({
-      next: () => {
-        this.messageService.add({
-          severity: "success",
-          summary: "success",
-          detail: "Deleted successfully!",
-          life: 2000,
-        });
-        this.loadBackups(this.currentPage);
-      },
-      error: (error) => {
-        console.error('Error deleting backup', error);
-        this.messageService.add({
-          severity: "error",
-          summary: "error",
-          detail: "Somwthing wrong!",
-          life: 2000,
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This will permanently delete the configuration!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.BackUpScheduleService.removeSchedule(backup.id).subscribe({
+          next: () => {
+            Swal.fire("Deleted!", "Deleted Successfully", "success");
+            this.loadBackups(this.currentPage);
+          },
+          error: (error) => {
+            debugger
+            Swal.fire("Error!", "Something Wrong!", "error");
+          },
         });
       }
     });
@@ -209,15 +208,16 @@ export class ScheduleBackupComponent implements OnInit {
   }
 
   onSort(event: any) {
+    debugger;
     const sortField = event.field;
-    const sortOrder = event.order === 1 ? 'asc' : 'desc';
+    const sortOrder = event.order === 1 ? "asc" : "desc";
     let apiField = sortField;
-    if (sortField === 'config') {
-      apiField = 'sourceConfiguationId';
-    } else if (sortField === 'schedule') {
-      apiField = 'backupTime'; 
-    } else if (sortField === 'status') {
-      apiField = 'isDeleted';
+    if (sortField === "config") {
+      apiField = "sourceConfiguationId";
+    } else if (sortField === "schedule") {
+      apiField = "backupTime";
+    } else if (sortField === "status") {
+      apiField = "isDeleted";
     }
     this.sorting = `${apiField} ${sortOrder}`;
     this.loadBackups(this.currentPage);
@@ -252,9 +252,7 @@ export class ScheduleBackupComponent implements OnInit {
         dayOfMonthValue
       );
       const formValue = this.scheduleForm.value;
-      const formattedTime = formValue.time
-        ? `${formValue.time}:00`
-        : null;
+      const formattedTime = formValue.time ? `${formValue.time}:00` : null;
 
       const payload = BackUpScheduleCreateDto.fromJS({
         sourceConfiguationId: formValue.sourceConfiguationId,
@@ -274,6 +272,7 @@ export class ScheduleBackupComponent implements OnInit {
           });
           this.loadSourceConfigs();
           this.loadfrequencies();
+          this.loadBackups();
           this.scheduleForm.reset();
           this.isSaving = false;
           this.cronExpression = "";

@@ -20,6 +20,8 @@
       <p class="storage-description">{{ storage.description }}</p>
     </div>
   </div>
+  <p-toast></p-toast>
+
   <p-dialog header="{{l('BackupStorageConfiguration')}}" [(visible)]="displayModal" [modal]="true"
     [style]="{ width: '90%', height: '100vh' }" (onHide)="closeDialog()" [dismissableMask]="false" [closable]="false"
     [draggable]="false">
@@ -214,6 +216,38 @@
 
 
       </ng-container>
+
+      <ng-container *ngIf="isGoogle">
+        <div class="col-md-4 mb-3">
+          <label for="ProjectID">Project ID</label>
+          <input class="form-control" id="ProjectID" formControlName="ProjectID" type="text"
+            placeholder="Enter Project ID" [ngClass]="{ 'is-invalid': isInvalid('ProjectID') }" />
+          <div *ngIf="isInvalid('ProjectID')" class="invalid-feedback d-block">
+            ProjectID is required.
+          </div>
+        </div>
+
+
+        <div class="col-md-4 mb-3">
+          <label for="BucketName">Bucket Name</label>
+          <input class="form-control" id="BucketName" formControlName="AWS_BucketName" type="text"
+            placeholder="Enter Bucket Name" [ngClass]="{ 'is-invalid': isInvalid('AWS_BucketName') }" />
+          <div *ngIf="isInvalid('AWS_BucketName')" class="invalid-feedback d-block">
+            Bucket Name is required.
+          </div>
+        </div>
+
+        <div class="col-md-4 mb-3">
+          <label for="CredentialFile">Credential File</label>
+          <input class="form-control" id="CredentialFile" formControlName="CredentialFile" type="text"
+            placeholder="Enter Credential File path" [ngClass]="{ 'is-invalid': isInvalid('CredentialFile') }" />
+          <div *ngIf="isInvalid('CredentialFile')" class="invalid-feedback d-block">
+            Credential File is required.
+          </div>
+        </div>
+
+
+    </ng-container>
 </div>
 </form>
 

@@ -39,7 +39,7 @@
           ></p-dropdown>
         </div>
 
-        <div class="col-md-3" *ngIf="showDayOfMonth">
+        <div class="col-md-2" *ngIf="showDayOfMonth">
           <label for="dayOfMonth" class="form-label fw-bold">
             <i class="pi pi-calendar-plus text-primary"></i> Day of the Month
             <span class="text-danger">*</span> </label
@@ -54,7 +54,7 @@
           ></p-dropdown>
         </div>
 
-        <div class="col-md-3" *ngIf="showDayOfWeek">
+        <div class="col-md-2" *ngIf="showDayOfWeek">
           <label for="dayOfWeek" class="form-label fw-bold">
             <i class="pi pi-calendar text-primary"></i> Day of the Week
             <span class="text-danger">*</span> </label
@@ -69,7 +69,7 @@
           ></p-dropdown>
         </div>
 
-        <div class="col-md-3">
+        <div class="col-md-2">
           <label for="time" class="form-label fw-bold">
             <i class="pi pi-clock text-primary"></i> Time
             <span class="text-danger">*</span>
@@ -82,19 +82,15 @@
             required
           />
         </div>
-      </div>
-
-      <div class="text-end mt-4">
-        <button type="submit" class="btn btn-primary px-4">
-          <i class="pi pi-check-circle"></i> Schedule Task
-        </button>
+        <div class="col-md-2">
+          <label></label><br>
+          <button type="submit" class="btn btn-success btn-md">
+            <i class="pi pi-check-circle"></i> Schedule Task
+          </button>
+        </div>
       </div>
     </form>
-   
-    <div class="mb-3" style="text-align: end;">
-      <input pInputText type="text" (input)="applyFilter($event)" placeholder="Search backup schedules..." class="w-full" />
-    </div>
-    
+
     <p-table
       [value]="scheduledBackups"
       [paginator]="true"
@@ -102,8 +98,7 @@
       [totalRecords]="totalRecords"
       (onPage)="onPageChange($event)"
       (onSort)="onSort($event)"
-      [loading]="loading"
-    >
+>
       <ng-template pTemplate="header">
         <tr>
           <th pSortableColumn="config">
@@ -121,7 +116,7 @@
           <td>{{ backup.config }}</td>
           <td>{{ backup.schedule }}</td>
           <td>
-            <button pButton type="button"class="p-button-danger" (click)="deleteBackup(backup)"><i class="text-white fa fa-trash"></i></button>
+            <button pButton type="button"class="p-button-danger btn-md" (click)="deleteBackup(backup)"><i class="text-white fa fa-trash"></i></button>
           </td>
         </tr>
       </ng-template>

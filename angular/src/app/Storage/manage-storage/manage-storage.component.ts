@@ -4,6 +4,7 @@ import {
   FormGroup,
   Validators,
 } from "@node_modules/@angular/forms";
+import { MessageService } from "primeng/api";
 import { AppComponentBase } from "@shared/app-component-base";
 import {
   BackUpStorageConfiguationCreateDto,
@@ -26,7 +27,9 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     injector: Injector,
     private storageMasterTypeService: StorageMasterTypeServiceProxy,
     private cloudStorageService: CloudStorageServiceProxy,
-    private backUpStorageConfiguationService: BackUpStorageConfiguationServiceProxy
+    private backUpStorageConfiguationService: BackUpStorageConfiguationServiceProxy,
+        private messageService: MessageService
+    
   ) {
     super(injector);
     this.initForm();
@@ -64,6 +67,7 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
   isAWS = false;
   isAzure = false;
   isAlibaba = false;
+  isGoogle = false;
   storageTypes = [];
   cloudStorages = [];
   selectedStorage: string | null = null;
@@ -121,9 +125,9 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
       AWS_backUpPath: [null],
       AZ_AccountName: [null],
       AZ_AccountKey: [null],
-      Endpoint:[null],
-      ProjectID:[null],
-      CredentialFile:[null],
+      Endpoint: [null],
+      ProjectID: [null],
+      CredentialFile: [null],
     });
   }
   loadDestinationConfiguration(): void {
@@ -195,6 +199,10 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
       NFS_AccessUserID: entry.nfS_AccessUserID,
       NFS_Password: entry.nfS_Password,
       NFS_LocationPath: entry.nfS_LocationPath,
+      Endpoint: entry.endpoint,
+      ProjectID: entry.projectID,
+      CredentialFile: entry.credentialFile,
+
     });
 
     const selectedType = this.storageTypes.find(
@@ -214,7 +222,7 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
 
         const name = selectedCloud.name?.toLowerCase();
         this.isCloudStorage = true;
-        debugger
+        debugger;
 
         if (name === "amazon s3") {
           this.isAWS = true;
@@ -222,10 +230,13 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
         } else if (name === "microsoft azure") {
           this.isAzure = true;
           this.setAzureValidators();
-        }
-        else if (name === "Alibaba Cloud") {
+        } else if (name === "Alibaba Cloud") {
           this.isAlibaba = true;
           this.setAlibabaValidators();
+        }
+         else if (name === "Google Cloud") {
+          this.isGoogle = true;
+          this.setGCValidators();
         }
       }
     } else if (entry.storageType === "NFS") {
@@ -244,15 +255,25 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     if (selectedType.name === "Public Cloud") {
       this.isCloudStorage = true;
       this.isNFSStorage = false;
+      this.isAWS = false;
+      this.isAzure = false;
+      this.isAlibaba = false;
     } else if (selectedType.name === "Network File System") {
       this.isNFSStorage = true;
       this.isCloudStorage = false;
+      this.isAWS = false;
+      this.isAzure = false;
+      this.isAlibaba = false;
       this.setNfsValidators();
       this.storageForm.get("CloudStorageId")?.clearValidators();
       this.storageForm.get("CloudStorageId")?.updateValueAndValidity();
-    } else {
+    }   
+     else {
       this.isCloudStorage = false;
       this.isNFSStorage = false;
+      this.isAWS = false;
+      this.isAzure = false;
+      this.isAlibaba = false;
     }
   }
 
@@ -265,14 +286,31 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     this.resetConditionalValidators();
     if (selectedCloud.name === "Amazon S3") {
       this.isAWS = true;
+      this.isAzure = false;
+      this.isAlibaba = false;
       this.setAwsValidators();
     } else if (selectedCloud.name === "Microsoft Azure") {
       this.isAzure = true;
+      this.isAWS = false;
+      this.isAlibaba = false;
       this.setAzureValidators();
-    }
-     else if (selectedCloud.name === "Alibaba Cloud") {
+    } else if (selectedCloud.name === "Alibaba Cloud") {
       this.isAlibaba = true;
+      this.isAWS = false;
+      this.isAzure = false;
       this.setAlibabaValidators();
+    }
+    else if (selectedCloud.name === "Google Cloud") {
+      this.isGoogle = true;
+      this.isAWS = false;
+      this.isAzure = false;
+      this.isAlibaba = false;
+      this.setGCValidators();
+    } else {
+      this.isAWS = false;
+      this.isAzure = false;
+      this.isAlibaba = false;
+      this.isGoogle = false;
     }
   }
   resetConditionalValidators() {
@@ -288,6 +326,11 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
       "AWS_backUpPath",
       "AZ_AccountName",
       "AZ_AccountKey",
+      "Endpoint",
+      "ProjectID",
+      "CredentialFile",
+
+
     ].forEach((field) => {
       this.storageForm.get(field)?.clearValidators();
       this.storageForm.get(field)?.updateValueAndValidity();
@@ -295,6 +338,9 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
 
     this.isAWS = false;
     this.isAzure = false;
+    this.isAlibaba = false;
+    this.isGoogle = false;
+
   }
 
   isInvalid(controlName: string): boolean {
@@ -330,11 +376,16 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     this.storageForm.get("Endpoint")?.setValidators(Validators.required);
     this.updateValidationState();
   }
+  setGCValidators() {
+    this.storageForm.get("ProjectID")?.setValidators(Validators.required);
+    this.storageForm.get("CredentialFile")?.setValidators(Validators.required);
+    this.storageForm.get("AWS_BucketName")?.setValidators(Validators.required);
+    this.updateValidationState();
+  }
   setAzureValidators() {
     this.storageForm.get("AZ_AccountName")?.setValidators(Validators.required);
     this.storageForm.get("AZ_AccountKey")?.setValidators(Validators.required);
     this.storageForm.get("Endpoint")?.setValidators(Validators.required);
-
     this.updateValidationState();
   }
 
@@ -362,14 +413,17 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     dto.nfS_LocationPath = !this.isCloudStorage
       ? formValues.NFS_LocationPath
       : undefined;
-    dto.awS_AccessKey = this.isAWS ? formValues.AWS_AccessKey : undefined;
-    dto.awS_SecretKey = this.isAWS ? formValues.AWS_SecretKey : undefined;
-    dto.awS_BucketName = this.isAWS ? formValues.AWS_BucketName : undefined;
+    dto.awS_AccessKey = this.isAWS || this.isAlibaba ? formValues.AWS_AccessKey : undefined;
+    dto.awS_SecretKey = this.isAWS || this.isAlibaba? formValues.AWS_SecretKey : undefined;
+    dto.awS_BucketName = this.isAWS || this.isAlibaba || this.isGoogle? formValues.AWS_BucketName : undefined;
     dto.awS_Region = this.isAWS ? formValues.AWS_Region : undefined;
     dto.awS_backUpPath = this.isAWS ? formValues.AWS_backUpPath : undefined;
     dto.aZ_AccountName = this.isAzure ? formValues.AZ_AccountName : undefined;
     dto.aZ_AccountKey = this.isAzure ? formValues.AZ_AccountKey : undefined;
-
+    dto.endpoint = this.isAlibaba || this.isAzure ? formValues.Endpoint : undefined;
+    dto.projectID = this.isGoogle ? formValues.ProjectID : undefined;
+    debugger
+    dto.credentialFile = this.isGoogle ? formValues.CredentialFile : undefined;
     return dto;
   }
 
@@ -393,14 +447,16 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
     dto.nfS_LocationPath = !this.isCloudStorage
       ? formValues.NFS_LocationPath
       : undefined;
-    dto.awS_AccessKey = this.isAWS ? formValues.AWS_AccessKey : undefined;
-    dto.awS_SecretKey = this.isAWS ? formValues.AWS_SecretKey : undefined;
-    dto.awS_BucketName = this.isAWS ? formValues.AWS_BucketName : undefined;
+    dto.awS_AccessKey = this.isAWS || this.isAlibaba? formValues.AWS_AccessKey : undefined;
+    dto.awS_SecretKey = this.isAWS|| this.isAlibaba ? formValues.AWS_SecretKey : undefined;
+    dto.awS_BucketName = this.isAWS|| this.isAlibaba || this.isGoogle ? formValues.AWS_BucketName : undefined;
     dto.awS_Region = this.isAWS ? formValues.AWS_Region : undefined;
     dto.awS_backUpPath = this.isAWS ? formValues.AWS_backUpPath : undefined;
     dto.aZ_AccountName = this.isAzure ? formValues.AZ_AccountName : undefined;
     dto.aZ_AccountKey = this.isAzure ? formValues.AZ_AccountKey : undefined;
-
+    dto.projectID = this.isGoogle ? formValues.ProjectID : undefined;
+    dto.credentialFile = this.isGoogle ? formValues.CredentialFile : undefined;
+    dto.endpoint = this.isAlibaba || this.isAzure ? formValues.Endpoint : undefined;
     return dto;
   }
   editingStorageId: string | undefined;
@@ -424,7 +480,12 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
 
       request$.subscribe({
         next: (result) => {
-          console.log("Backup configuration saved successfully:", result);
+          this.messageService.add({
+            severity: "success",
+            summary: "success",
+            detail: "Backup Configuration Saved successfully!",
+            life: 2000,
+          });
           this.closeDialog();
           this.isSaving = false;
           this.loadStorageTypes();
@@ -434,12 +495,24 @@ export class ManageStorageComponent extends AppComponentBase implements OnInit {
         },
         error: (err) => {
           console.error("Error saving backup configuration:", err);
+          this.messageService.add({
+            severity: "error",
+            summary: "Error",
+            detail: "Failed to save Backup Configuration!",
+            life: 2000,
+          });
           this.isSaving = false;
         },
       });
     } else {
-      console.log("Form is invalid. Please fill all required fields.");
       this.storageForm.markAllAsTouched();
+      this.messageService.add({
+        severity: "error",
+        summary: "Error",
+        detail: "Please fill all required fields.",
+        life: 2000,
+      });
+      this.isSaving = false;
     }
   }
 }

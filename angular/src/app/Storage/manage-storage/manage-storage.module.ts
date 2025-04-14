@@ -13,6 +13,8 @@ import { ManageStorageComponent } from './manage-storage.component';
 import { StorageDetailComponent } from './storage-detail.component';
 import { StorageMasterTypeServiceProxy, CloudStorageServiceProxy, BackUpStorageConfiguationServiceProxy, AutoBackupServiceProxy } from '@shared/service-proxies/service-proxies';
 import { TableModule } from 'primeng/table';
+import { ToastModule } from 'primeng/toast';
+import { MessageService } from 'primeng/api';
 
 
 @NgModule({
@@ -28,11 +30,12 @@ import { TableModule } from 'primeng/table';
         ButtonModule,
         PasswordModule,
         DialogModule,
-        TableModule
+        TableModule,
+         ToastModule,
     
   ],
   exports:[ManageStorageComponent],
-  providers: [StorageMasterTypeServiceProxy, CloudStorageServiceProxy,BackUpStorageConfiguationServiceProxy, AutoBackupServiceProxy],
+  providers: [MessageService,StorageMasterTypeServiceProxy, CloudStorageServiceProxy,BackUpStorageConfiguationServiceProxy, AutoBackupServiceProxy],
 
 })
 export class ManageStorageModule { }
