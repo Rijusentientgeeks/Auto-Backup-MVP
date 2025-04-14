@@ -8,21 +8,10 @@
     <!-- Backup Type Dropdown -->
     <div class="col-md-3 col-6">
       <div class="filter-group">
-        <label for="backupType" class="form-label fw-bold filter-label"
-          >Backup Type</label
-        >
-        <p-dropdown
-          inputId="backupType"
-          [(ngModel)]="selectedBackupType"
-          (onChange)="onFilterChange()"
-          [options]="backupTypes"
-          optionLabel="name"
-          optionValue="value"
-          placeholder="Select Backup Type"
-          [filter]="true"
-          filterPlaceholder="Search..."
-          class="filter-dropdown w-100"
-        >
+        <label for="backupType" class="form-label fw-bold filter-label">Backup Type</label>
+        <p-dropdown inputId="backupType" [(ngModel)]="selectedBackupType" (onChange)="onFilterChange()"
+          [options]="backupTypes" optionLabel="name" optionValue="value" placeholder="Select Backup Type"
+          [filter]="true" filterPlaceholder="Search..." class="filter-dropdown w-100">
           <ng-template pTemplate="dropdownicon">
             <i class="pi pi-chevron-down"></i>
           </ng-template>
@@ -33,21 +22,10 @@
     <!-- Storage Type Dropdown -->
     <div class="col-md-3 col-6">
       <div class="filter-group">
-        <label for="storageType" class="form-label fw-bold filter-label"
-          >Storage Type</label
-        >
-        <p-dropdown
-          inputId="storageType"
-          [(ngModel)]="selectedStorageType"
-          (onChange)="onFilterChange()"
-          [options]="storageTypes"
-          optionLabel="name"
-          optionValue="value"
-          placeholder="Select Storage Type"
-          [filter]="true"
-          filterPlaceholder="Search..."
-          class="filter-dropdown w-100"
-        >
+        <label for="storageType" class="form-label fw-bold filter-label">Storage Type</label>
+        <p-dropdown inputId="storageType" [(ngModel)]="selectedStorageType" (onChange)="onFilterChange()"
+          [options]="storageTypes" optionLabel="name" optionValue="value" placeholder="Select Storage Type"
+          [filter]="true" filterPlaceholder="Search..." class="filter-dropdown w-100">
           <ng-template pTemplate="dropdownicon">
             <i class="pi pi-chevron-down"></i>
           </ng-template>
@@ -58,21 +36,10 @@
     <!-- Cloud Storage Dropdown -->
     <div class="col-md-3 col-6">
       <div class="filter-group">
-        <label for="cloudStorage" class="form-label fw-bold filter-label"
-          >Cloud Storage</label
-        >
-        <p-dropdown
-          inputId="cloudStorage"
-          [(ngModel)]="selectedCloudStorage"
-          (onChange)="onFilterChange()"
-          [options]="cloudStorages"
-          optionLabel="name"
-          optionValue="value"
-          placeholder="Select Cloud Storage"
-          [filter]="true"
-          filterPlaceholder="Search..."
-          class="filter-dropdown w-100"
-        >
+        <label for="cloudStorage" class="form-label fw-bold filter-label">Cloud Storage</label>
+        <p-dropdown inputId="cloudStorage" [(ngModel)]="selectedCloudStorage" (onChange)="onFilterChange()"
+          [options]="cloudStorages" optionLabel="name" optionValue="value" placeholder="Select Cloud Storage"
+          [filter]="true" filterPlaceholder="Search..." class="filter-dropdown w-100">
           <ng-template pTemplate="dropdownicon">
             <i class="pi pi-chevron-down"></i>
           </ng-template>
@@ -83,21 +50,11 @@
     <!-- Source Config Dropdown -->
     <div class="col-md-3 col-6">
       <div class="filter-group">
-        <label for="sourceConfig" class="form-label fw-bold filter-label"
-          >Source Config</label
-        >
-        <p-dropdown
-          inputId="sourceConfig"
-          [(ngModel)]="selectedSourceConfig"
-          (onChange)="onFilterChange()"
-          [options]="backupConfigs"
-          optionLabel="backupName"
-          optionValue="backUpStorageConfiguationId"
-          placeholder="Select Configuration"
-          [filter]="true"
-          filterPlaceholder="Search..."
-          class="filter-dropdown w-100"
-        >
+        <label for="sourceConfig" class="form-label fw-bold filter-label">Source Config</label>
+        <p-dropdown inputId="sourceConfig" [(ngModel)]="selectedSourceConfig" (onChange)="onFilterChange()"
+          [options]="backupConfigs" optionLabel="backupName" optionValue="backUpStorageConfiguationId"
+          placeholder="Select Configuration" [filter]="true" filterPlaceholder="Search..."
+          class="filter-dropdown w-100">
           <ng-template pTemplate="dropdownicon">
             <i class="pi pi-chevron-down"></i>
           </ng-template>
@@ -108,41 +65,22 @@
     <!-- Keyword Search -->
     <div class="col-md-3 col-6">
       <div class="filter-group">
-        <label for="keyword" class="form-label fw-bold filter-label"
-          >Keyword</label
-        >
+        <label for="keyword" class="form-label fw-bold filter-label">Keyword</label>
         <span class="p-input-icon-left w-100">
           <i class="pi pi-search"></i>
-          <input
-            type="text"
-            id="keyword"
-            class="form-control filter-input"
-            [(ngModel)]="keyword"
-            (input)="onFilterChange()"
-            placeholder="Search..."
-          />
+          <input type="text" id="keyword" class="form-control filter-input" [(ngModel)]="keyword"
+            (input)="onFilterChange()" placeholder="Search..." />
         </span>
       </div>
     </div>
   </div>
 
   <div class="mt-4">
-    <p-table
-      [value]="backupLogs"
-      [lazy]="true"
-      [paginator]="true"
-      [rows]="rows"
-      [first]="first"
-      [rowsPerPageOptions]="[10, 25, 50]"
-      [totalRecords]="totalRecords"
-      [showCurrentPageReport]="true"
+    <p-table [value]="backupLogs" [lazy]="true" [paginator]="true" [rows]="rows" [first]="first"
+      [rowsPerPageOptions]="[10, 25, 50]" [totalRecords]="totalRecords" [showCurrentPageReport]="true"
       currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-      (onLazyLoad)="loadBackupLogsLazy($event)"
-      [loading]="loading"
-      [scrollable]="true"
-      scrollHeight="500px"
-      styleClass="p-datatable-striped p-datatable-gridlines"
-    >
+      (onLazyLoad)="loadBackupLogsLazy($event)" [loading]="loading" [scrollable]="true" scrollHeight="500px"
+      styleClass="p-datatable-striped p-datatable-gridlines">
       <ng-template pTemplate="header">
         <tr>
           <th pSortableColumn="sourceConfiguation.name">
@@ -166,7 +104,7 @@
           <td>{{ log.startedTimeStamp | date : "yyyy-MM-dd HH:mm" }}</td>
           <td>{{ log.completedTimeStamp | date : "yyyy-MM-dd HH:mm" }}</td>
           <td>
-            <p-tag
+            <!-- <p-tag
               [value]="
                 log.backupLogStatus === 2
                   ? 'Success'
@@ -182,26 +120,39 @@
                   : 'warning'
               "
             >
+            </p-tag> -->
+            <p-tag [value]="
+              log.backupLogStatus === 2
+                ? 'Success'
+                : log.backupLogStatus === 1
+                ? 'Failed'
+                : log.backupLogStatus === 3
+                ? 'Local Backup'
+                : 'Aborted'
+            " [severity]="
+              log.backupLogStatus === 2
+                ? 'success'
+                : log.backupLogStatus === 1
+                ? 'danger'
+                : log.backupLogStatus === 3
+                ? 'info'
+                : 'warning'
+            ">
             </p-tag>
+
           </td>
           <td>{{ log.backUpFileName }}</td>
           <td>
             <!-- Show download button only if not downloading -->
-            <button
-              *ngIf="!downloadingIds.has(log.id)"
-              pButton
-              [disabled]="log.backupLogStatus !== 2"
-              icon="pi pi-download"
-              class="p-button-icon-only p-button rounded"
-              (click)="downloadBackup(log)"
-            ></button>
-          
+            <button *ngIf="!downloadingIds.has(log.id)" pButton [disabled]="log.backupLogStatus !== 2"
+              icon="pi pi-download" class="p-button-icon-only p-button rounded" (click)="downloadBackup(log)"></button>
+
             <!-- Show spinner icon when downloading -->
             <div *ngIf="downloadingIds.has(log.id)" class="loading-overlay ml-2">
               <i class="pi pi-hourglass pi-spin" style="font-size: 1.5rem; color: gold"></i>
             </div>
           </td>
-          
+
         </tr>
       </ng-template>
 
