@@ -180,11 +180,11 @@ export class BackupLogsComponent implements OnInit {
       },
       error: (err) => {
         this.downloadingIds.delete(key);
-        console.error('Download failed:', err);
+        this.cdr.detectChanges();
       },
       complete: () => {
-        this.cdr.detectChanges();
         this.downloadingIds.delete(key);
+        this.cdr.detectChanges();
       }
     });
   }

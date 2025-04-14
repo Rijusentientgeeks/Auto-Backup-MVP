@@ -10,6 +10,7 @@ namespace GeekathonAutoSync.BackUpLogs
     {
         Initiated = 0,
         Failure = 1,
-        Success = 2
+        Success = 2,
+        LocalBackup = 3
     }
 }
