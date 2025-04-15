@@ -30,9 +30,10 @@ namespace GeekathonAutoSync.SpeechRecognitions
             _backupTypeRepository = backupTypeRepository;
             _autoBackupService = autoBackupService;
         }
-        public async Task<bool> ReceiveCommandAsync([FromBody] CommandDto model)
+        public async Task<CommandResultDto> ReceiveCommandAsync([FromBody] CommandDto model)
         {
             bool IsValidCommand = false;
+            string resultDetails = string.Empty;
             var command = model.Command.ToLower();
             Console.WriteLine($"Received command: {command}");
 
@@ -74,7 +75,7 @@ namespace GeekathonAutoSync.SpeechRecognitions
                         var getSourceConfiguration = _sourceConfiguationRepository.GetAll().FirstOrDefault(i => i.BackUPTypeId == backupType.Id && i.ServerIP == serverIP);
                         if (getSourceConfiguration != null)
                         {
-                            var res = await _autoBackupService.CreateBackup(getSourceConfiguration.Id.ToString());
+                            resultDetails = await _autoBackupService.CreateBackup(getSourceConfiguration.Id.ToString());
                             IsValidCommand = true;
                         }
                         else
@@ -103,7 +104,7 @@ namespace GeekathonAutoSync.SpeechRecognitions
                         var getSourceConfiguration = _sourceConfiguationRepository.GetAll().FirstOrDefault(i => i.BackUPTypeId == backupType.Id && i.ServerIP == serverIP);
                         if (getSourceConfiguration != null)
                         {
-                            var res = await _autoBackupService.CreateBackup(getSourceConfiguration.Id.ToString());
+                            resultDetails = await _autoBackupService.CreateBackup(getSourceConfiguration.Id.ToString());
                             IsValidCommand = true;
                         }
                         else
@@ -122,7 +123,10 @@ namespace GeekathonAutoSync.SpeechRecognitions
                 }
                 
             }
-            return IsValidCommand;
+            var resultDto = new CommandResultDto();
+            resultDto.Result = resultDetails;
+            resultDto.IsValidCommand = IsValidCommand;
+            return resultDto;
         }
     }
 }
