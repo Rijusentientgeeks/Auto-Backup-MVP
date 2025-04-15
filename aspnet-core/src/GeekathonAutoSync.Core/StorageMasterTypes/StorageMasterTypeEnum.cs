@@ -11,7 +11,7 @@ namespace GeekathonAutoSync.StorageMasterTypes
     {
         [Description("Public Cloud")]
         PublicCloud = 0,
-        [Description("GeekSync Infrastructure Cluste")]
+        [Description("GeekSync Infrastructure Cluster")]
         GeekSyncInfrastructureCluste = 1,
         [Description("Network File System")]
         NFS = 2,

@@ -97,7 +97,7 @@ export class BackupLogsComponent implements OnInit {
         if (result && result.items) {
           this.backupConfigs = result.items.map((config) => ({
             backupName: config.backupName,
-            backUpStorageConfiguationId: config.backUpStorageConfiguationId,
+            backUpStorageConfiguationId: config.id,
           }));
           this.cdr.detectChanges();
         }
@@ -119,7 +119,6 @@ export class BackupLogsComponent implements OnInit {
   loadBackupLogsLazy(event: LazyLoadEvent): void {
     this.loading = true;
 
-    // Ensure we have proper pagination values
     const first = event.first || 0;
     const rows = event.rows || 10;
 

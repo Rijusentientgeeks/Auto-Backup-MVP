@@ -5,6 +5,7 @@ import {
   AutoBackupServiceProxy,
   BackUpStorageConfiguationServiceProxy,
   BackUPTypeDto,
+  BackupTypeEnum,
   BackUPTypeServiceProxy,
   DBTypeDto,
   DBTypeServiceProxy,
@@ -36,7 +37,7 @@ export class SourceConfigurationComponent implements OnInit {
   noData: false;
   isSaving: boolean = false;
   isLoading = false;
-
+  backupTypeEnum = BackupTypeEnum;
   osOptions = [
     { label: "Windows", value: "Windows" },
     { label: "Linux", value: "Linux" },

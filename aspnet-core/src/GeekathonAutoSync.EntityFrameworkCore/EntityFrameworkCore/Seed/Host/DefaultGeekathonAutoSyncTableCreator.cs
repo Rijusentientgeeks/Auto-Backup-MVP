@@ -63,7 +63,7 @@ namespace GeekathonAutoSync.EntityFrameworkCore.Seed.Host
             return new List<StorageMasterType>
             {
                 new StorageMasterType(Guid.NewGuid(), "Public Cloud", StorageMasterTypeEnum.PublicCloud),
-                new StorageMasterType(Guid.NewGuid(), "GeekSync Infrastructure Cluste", StorageMasterTypeEnum.GeekSyncInfrastructureCluste),
+                new StorageMasterType(Guid.NewGuid(), "GeekSync Infrastructure Cluster", StorageMasterTypeEnum.GeekSyncInfrastructureCluste),
                 new StorageMasterType(Guid.NewGuid(), "Network File System", StorageMasterTypeEnum.NFS)
             };
         }
