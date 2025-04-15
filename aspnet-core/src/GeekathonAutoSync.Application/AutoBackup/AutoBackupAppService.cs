@@ -298,8 +298,8 @@ namespace GeekathonAutoSync.AutoBackup
 
                 var filteredQuery = query
                     .WhereIf(!string.IsNullOrWhiteSpace(input.Keyword),
-                        u => !string.IsNullOrEmpty(u.SourceConfiguation?.BackupName) && u.BackUpFileName.ToLower().Contains(input.Keyword.ToLower()) ||
-                             !string.IsNullOrEmpty(u.BackUpFileName) && u.SourceConfiguation.BackupName.ToLower().Contains(input.Keyword.ToLower()))
+                        u => !string.IsNullOrEmpty(u.SourceConfiguation?.BackupName) && u.SourceConfiguation.BackupName.ToLower().Contains(input.Keyword.ToLower()) ||
+                             !string.IsNullOrEmpty(u.BackUpFileName) && u.BackUpFileName.ToLower().Contains(input.Keyword.ToLower()))
                     .WhereIf(!string.IsNullOrEmpty(input.SourceConfigId),
                         u => u.SourceConfiguationId.ToString().ToLower() == input.SourceConfigId.ToLower())
                     .WhereIf(!string.IsNullOrEmpty(input.BackupStorageid),
@@ -973,7 +973,7 @@ namespace GeekathonAutoSync.AutoBackup
                 var lastBackUp = await _backUpLogsRepository.GetAllIncluding(e => e.SourceConfiguation).Where(x => x.TenantId == tenantId && x.BackupLogStatus == BackupLogStatus.Success).OrderByDescending(x => x.CompletedTimeStamp).FirstOrDefaultAsync();
 
                 var nextScheduleList = await _backUpScheduleRepository.GetAllIncluding(e => e.SourceConfiguation)
-                    .Where(x => x.TenantId == tenantId).Select(x => new { x.SourceConfiguation, x.CronExpression }).Distinct().ToListAsync();
+                    .Where(x => x.TenantId == tenantId && !x.IsRemoveFromHangfire).Select(x => new { x.SourceConfiguation, x.CronExpression }).Distinct().ToListAsync();
 
                 var response = new DashBoardItemDto
                 {
