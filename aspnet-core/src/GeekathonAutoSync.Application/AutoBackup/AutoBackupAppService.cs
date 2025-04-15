@@ -159,7 +159,7 @@ namespace GeekathonAutoSync.AutoBackup
             }
             catch (Exception ex)
             {
-                //throw new UserFriendlyException(ex.Message);
+                throw new UserFriendlyException(ex.Message);
             }
 
 
@@ -967,7 +967,7 @@ namespace GeekathonAutoSync.AutoBackup
             {
                 int tenantId = GetCurrentTenantId();
                 var sourceBackCount = await _sourceConfiguationRepository.GetAll().Where(x => x.TenantId == tenantId).CountAsync();
-                var configuredBackStorageCount = await _backUpStorageConfiguationRepository.GetAll().Where(x => x.TenantId == tenantId).CountAsync();
+                var configuredBackStorageCount = await _backUpStorageConfiguationRepository.GetAll().Where(x => x.TenantId == tenantId && !x.IsDeleted && !x.IsUserLocalSystem).CountAsync();
                 var totalSchedule = await _backUpScheduleRepository.GetAll().Where(x => x.TenantId == tenantId).CountAsync();
                 var totalBackupTaken = await _backUpLogsRepository.GetAll().Where(x => x.TenantId == tenantId && x.BackupLogStatus == BackupLogStatus.Success).CountAsync();
                 var lastBackUp = await _backUpLogsRepository.GetAllIncluding(e => e.SourceConfiguation).Where(x => x.TenantId == tenantId && x.BackupLogStatus == BackupLogStatus.Success).OrderByDescending(x => x.CompletedTimeStamp).FirstOrDefaultAsync();
@@ -1006,7 +1006,7 @@ namespace GeekathonAutoSync.AutoBackup
             }
             catch(Exception ex)
             {
-                return null;
+                throw new UserFriendlyException(ex.Message);
             }
         }
 
