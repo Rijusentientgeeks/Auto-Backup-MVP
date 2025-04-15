@@ -21,10 +21,12 @@ namespace GeekathonAutoSync.Jobs
 
         public async void ScheduleJobs(BackUpScheduleDto backUpSchedule)
         {
+            //var option = new RecurringJobOptions { TimeZone = TimeZoneInfo.Local };
+            var option = new RecurringJobOptions { TimeZone = TimeZoneInfo.FindSystemTimeZoneById("India Standard Time") };
             RecurringJob.AddOrUpdate(
-                $"Tenant-{backUpSchedule.TenantId} , Job-{backUpSchedule.Id}",  // BackUpName
+                $"Tenant-{backUpSchedule.TenantId} , Job-{backUpSchedule.Id}",  
                 () => ExecuteBackupJob(backUpSchedule.TenantId, backUpSchedule.SourceConfiguationId.Value),
-                backUpSchedule.CronExpression
+                backUpSchedule.CronExpression, option
             );
         }
 

@@ -133,6 +133,7 @@ export class SourceConfigurationComponent implements OnInit {
         error: () => {
           this.isSaving = false;
           Swal.fire("Error", "Something went wrong!", "error");
+          this.cdr.detectChanges();
         },
         complete: () => {
           this.isSaving = false;
