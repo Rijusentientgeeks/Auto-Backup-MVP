@@ -29,19 +29,17 @@ export class VoiceService {
   }
 
   sendCommandToBackend(command: string) {
-    //this.speechRecognitionService.receiveCommand(this.commandDetails).subscribe();
     this.http.post<CommandResultDto>(AppConsts.remoteServiceBaseUrl + '/api/services/app/SpeechRecognition/ReceiveCommand', { command }).subscribe({
-      next: (res) => {
+      next: (res: any) => {
         //this.isSaving = false;
-        debugger
-        //this.commandResultDetails = JSON.parse(res.result);
-        //this.commandResultDetails = res.result;
-        // Parse the JSON string inside res.result
-        this.commandResultDetails = JSON.parse(res.result) as CommandResultDto;
+        const commandResult = res.result;
+        this.commandResultDetails = new CommandResultDto();
+        this.commandResultDetails.isValidCommand = commandResult.isValidCommand;
+        this.commandResultDetails.result = commandResult.result;
         if (this.commandResultDetails.isValidCommand) {
-          Swal.fire("Success", `Backup Created Successfully, ${this.commandResultDetails.result}`, "success");
-        }else{
-          Swal.fire("Error", `Invalid command`, "error");
+          Swal.fire("Success", `${this.commandResultDetails.result}`, "success");
+        } else {
+          Swal.fire("Error", `${this.commandResultDetails.result}`, "error");
         }
       },
       error: () => {

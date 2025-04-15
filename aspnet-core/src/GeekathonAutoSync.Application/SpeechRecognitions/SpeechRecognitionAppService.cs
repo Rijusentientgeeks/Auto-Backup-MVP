@@ -44,17 +44,20 @@ namespace GeekathonAutoSync.SpeechRecognitions
                     FileName = "https://www.google.com",
                     UseShellExecute = true
                 });
+                resultDetails = "Your command is '" + command + "', it's successfully executed.";
                 IsValidCommand = true;
             }
             else if (command.Contains("open files"))
             {
                 Process.Start("explorer.exe");
+                resultDetails = "Your command is '" + command + "', it's successfully executed.";
                 IsValidCommand = true;
             }
             else if (command.Contains("open downloads"))
             {
                 var downloads = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.UserProfile), "Downloads");
                 Process.Start("explorer.exe", downloads);
+                resultDetails = "Your command is '" + command + "', it's successfully executed.";
                 IsValidCommand = true;
             }
             else
@@ -76,15 +79,18 @@ namespace GeekathonAutoSync.SpeechRecognitions
                         if (getSourceConfiguration != null)
                         {
                             resultDetails = await _autoBackupService.CreateBackup(getSourceConfiguration.Id.ToString());
+                            resultDetails = "Your command is '" + command + "', it's successfully executed and backup created successfully";
                             IsValidCommand = true;
                         }
                         else
                         {
+                            resultDetails = "Your command is '" + command + "', it's a invalid command, so we cann't execute it.";
                             IsValidCommand = false;
                         }
                     }
                     else
                     {
+                        resultDetails = "Your command is '" + command + "', it's a invalid command, so we cann't execute it.";
                         IsValidCommand = false;
                     }
                 }
@@ -109,16 +115,19 @@ namespace GeekathonAutoSync.SpeechRecognitions
                         }
                         else
                         {
+                            resultDetails = "Your command is '" + command + "', it's a invalid command, so we cann't execute it.";
                             IsValidCommand = false;
                         }
                     }
                     else
                     {
+                        resultDetails = "Your command is '" + command + "', it's a invalid command, so we cann't execute it.";
                         IsValidCommand = false;
                     }
                 }
                 else
                 {
+                    resultDetails = "Your command is '" + command + "', it's a invalid command, so we cann't execute it.";
                     IsValidCommand = false;
                 }
                 
