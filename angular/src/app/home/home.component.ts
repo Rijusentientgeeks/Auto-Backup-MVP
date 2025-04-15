@@ -37,7 +37,7 @@ export class HomeComponent extends AppComponentBase implements OnInit {
           const data = response;  
           this.metrics = [
             { label: 'Backup Sources', value: data.backupSourceCount, icon: 'pi pi-home', color: '#3B82F6' },
-            { label: 'Backup Storages', value: data.backupStorageCount, icon: 'pi pi-database', color: '#10B981' },
+            { label: 'Backup Storage Destinations', value: data.backupStorageCount, icon: 'pi pi-database', color: '#10B981' },
             { label: 'Scheduled Backups', value: data.scheduleBackupCount, icon: 'pi pi-clock', color: '#F59E0B' },
             { label: 'Total Backups', value: data.totalBackupCount, icon: 'pi pi-check-circle', color: '#8B5CF6' },
           ];  

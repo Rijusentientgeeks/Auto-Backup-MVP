@@ -965,10 +965,18 @@ namespace GeekathonAutoSync.AutoBackup
         {
             try
             {
-                int tenantId = GetCurrentTenantId();
+                int tenantId = 0;
+                if (AbpSession.TenantId.HasValue)
+                {
+                    tenantId = AbpSession.TenantId.Value;
+                }
+                if(tenantId == 0)
+                {
+                    return new DashBoardItemDto();
+                }
                 var sourceBackCount = await _sourceConfiguationRepository.GetAll().Where(x => x.TenantId == tenantId).CountAsync();
                 var configuredBackStorageCount = await _backUpStorageConfiguationRepository.GetAll().Where(x => x.TenantId == tenantId && !x.IsDeleted && !x.IsUserLocalSystem).CountAsync();
-                var totalSchedule = await _backUpScheduleRepository.GetAll().Where(x => x.TenantId == tenantId).CountAsync();
+                var totalSchedule = await _backUpScheduleRepository.GetAll().Where(x => x.TenantId == tenantId && !x.IsRemoveFromHangfire).CountAsync();
                 var totalBackupTaken = await _backUpLogsRepository.GetAll().Where(x => x.TenantId == tenantId && x.BackupLogStatus == BackupLogStatus.Success).CountAsync();
                 var lastBackUp = await _backUpLogsRepository.GetAllIncluding(e => e.SourceConfiguation).Where(x => x.TenantId == tenantId && x.BackupLogStatus == BackupLogStatus.Success).OrderByDescending(x => x.CompletedTimeStamp).FirstOrDefaultAsync();
 

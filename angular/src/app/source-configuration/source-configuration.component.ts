@@ -292,11 +292,6 @@ export class SourceConfigurationComponent implements OnInit {
     });
   }
   LoadBackupStorageConfigs(): void {
-    // const defaultOption = {
-    //     name: "User's Local System",
-    //     value: '00000000-0000-0000-0000-000000000000'
-    //   };
-    // this.BackupStorageConfigs = [defaultOption];
     this.BackupStorageConfigService.getAll(
       undefined,
       undefined,
@@ -309,10 +304,6 @@ export class SourceConfigurationComponent implements OnInit {
             name: item.backupName,
             value: item.id,
           }));
-          // this.BackupStorageConfigs = [
-          //   this.BackupStorageConfigs[0],
-          //   ...backupStorageConfigs,
-          // ];
           this.BackupStorageConfigs = backupStorageConfigs;
         }
       },
@@ -325,7 +316,6 @@ export class SourceConfigurationComponent implements OnInit {
     if (this.showDatabaseFields) {
       this.sourceForm.controls["dbType"].setValidators(Validators.required);
       this.sourceForm.controls["serverIP"].setValidators(Validators.required);
-      // this.sourceForm.controls["dbInitialCatalog"].setValidators(Validators.required);
       this.sourceForm.controls["sshUserName"].setValidators(
         Validators.required
       );
