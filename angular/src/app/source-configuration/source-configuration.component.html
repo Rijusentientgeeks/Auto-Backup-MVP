@@ -35,11 +35,11 @@
               <i class="pi pi-globe text-secondary me-2"></i>
               <strong> Server IP:</strong> {{ config.serverIP || "N/A" }}
             </p>
-            <p class="mb-2">
+            <p class="mb-2" *ngIf="config.backUPType?.backupTypeEnum === backupTypeEnum._0">
               <i class="pi pi-folder text-secondary me-2"></i>
-              <strong> DB Name:</strong> {{ config.dbInitialCatalog || "N/A" }}
+              <strong> DB Name:</strong> {{ config.databaseName || "N/A" }}
             </p>
-            <p class="mb-2">
+            <p class="mb-2" *ngIf="config.backUPType?.backupTypeEnum === backupTypeEnum._0">
               <i class="pi pi-folder text-secondary me-2"></i>
               <strong> DB UserID:</strong> {{ config.dbUsername || "N/A" }}
             </p>
@@ -69,7 +69,7 @@
             </p>
             <p class="mb-2">
               <i class="pi pi-folder-open text-secondary me-2"></i>
-              <strong> Source Path:</strong> {{ config.sourcePath || "N/A" }}
+              <strong> Source Path:</strong> {{ config.sourcepath || "N/A" }}
             </p>
             <p class="mb-2">
               <i class="pi pi-database text-secondary me-2"></i>
