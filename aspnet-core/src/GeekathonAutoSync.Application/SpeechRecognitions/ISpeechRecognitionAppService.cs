@@ -11,6 +11,6 @@ namespace GeekathonAutoSync.SpeechRecognitions
 {
     public interface ISpeechRecognitionAppService : IApplicationService
     {
-        Task<bool> ReceiveCommandAsync([FromBody] CommandDto model);
+        Task<CommandResultDto> ReceiveCommandAsync([FromBody] CommandDto model);
     }
 }
