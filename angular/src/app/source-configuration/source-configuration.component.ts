@@ -196,7 +196,6 @@ export class SourceConfigurationComponent implements OnInit {
             nextDate = next;
           }
         } catch (err) {
-          console.error(`Invalid cron expression: ${expr}`, err);
         }
       });
   
@@ -342,6 +341,7 @@ export class SourceConfigurationComponent implements OnInit {
       this.sourceForm.controls["sourcePath"].clearValidators();
       this.sourceForm.controls["privateKeyPath"].clearValidators();
       this.sourceForm.controls["backUpInitiatedPath"].clearValidators();
+      this.sourceForm.controls["backupName"].clearValidators();
     } else {
       this.sourceForm.controls["dbType"].clearValidators();
       this.sourceForm.controls["serverIP"].setValidators(Validators.required);
@@ -361,6 +361,8 @@ export class SourceConfigurationComponent implements OnInit {
       this.sourceForm.controls["backUpStorageConfiguationId"].setValidators(
         Validators.required
       );
+      this.sourceForm.controls["backupName"].clearValidators();
+
     }
 
     this.sourceForm.controls["dbType"].updateValueAndValidity();
@@ -376,6 +378,7 @@ export class SourceConfigurationComponent implements OnInit {
     this.sourceForm.controls["backUpInitiatedPath"].updateValueAndValidity();
     this.sourceForm.controls["privateKeyPath"].updateValueAndValidity();
     this.sourceForm.controls["backUPType"].updateValueAndValidity();
+    this.sourceForm.controls["backupName"].updateValueAndValidity();
     this.sourceForm.controls[
       "backUpStorageConfiguationId"
     ].updateValueAndValidity();
@@ -495,11 +498,13 @@ export class SourceConfigurationComponent implements OnInit {
   prepareFormData(): SourceConfiguationCreateDto | SourceConfiguationUpdateDto {
     const formData = this.sourceForm.value;
     let description = formData.backupName?.trim();
+
     if (!description) {
-      description = `${formData.backupName || "Backup"} - ${
-        formData.backUPType?.name || "Type"
-      } - ${formData.serverIP || "Server"}`;
+      description = `Backup - ${formData.backUPType?.name || "Type"} - ${formData.serverIP || "Server"}`;
+    } else {
+      description = formData.backupName;
     }
+    
     if (this.isEdit && this.selectedConfigId) {
       return new SourceConfiguationUpdateDto({
         id: this.selectedConfigId,

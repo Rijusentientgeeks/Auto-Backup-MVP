@@ -9,17 +9,31 @@ import {
   BackUpFrequencyDto,
   BackUpFrequencyServiceProxy,
   BackUpScheduleCreateDto,
+  BackUpScheduleDto,
+  BackUpScheduleDtoPagedResultDto,
   BackUpScheduleServiceProxy,
   SourceConfiguationDto,
   SourceConfiguationServiceProxy,
 } from "@shared/service-proxies/service-proxies";
-
+import Swal from "sweetalert2";
+interface ScheduledBackup {
+  id: string;
+  config: string;
+  schedule: string;
+  status: string;
+}
 @Component({
   selector: "app-schedule-backup",
   templateUrl: "./schedule-backup.component.html",
   styleUrl: "./schedule-backup.component.css",
 })
 export class ScheduleBackupComponent implements OnInit {
+  deleteScheduledBackup(_t71: any) {
+    throw new Error("Method not implemented.");
+  }
+  editScheduledBackup(_t71: any) {
+    throw new Error("Method not implemented.");
+  }
   scheduleForm!: FormGroup;
   cronExpression: string = "";
   showDayOfWeek = false;
@@ -38,6 +52,13 @@ export class ScheduleBackupComponent implements OnInit {
   ];
   sourceConfigs: SourceConfiguationDto[];
   isSaving: any;
+  scheduledBackups: ScheduledBackup[] = [];
+  totalRecords: number = 0;
+  loading: boolean = false;
+  filterText: string = "";
+  sorting: string = "";
+  currentPage: number = 0;
+  rowsPerPage: number = 10;
   constructor(
     private fb: FormBuilder,
     private sourceConfigService: SourceConfiguationServiceProxy,
@@ -50,6 +71,7 @@ export class ScheduleBackupComponent implements OnInit {
   ngOnInit(): void {
     this.loadSourceConfigs();
     this.loadfrequencies();
+    this.loadBackups(this.currentPage);
     this.scheduleForm = this.fb.group({
       frequency: ["", Validators.required],
       dayOfWeek: [null],
@@ -90,6 +112,101 @@ export class ScheduleBackupComponent implements OnInit {
       error: (err) => {},
     });
   }
+  loadBackups(page: number = 0) {
+    const skipCount = page * this.rowsPerPage;
+    this.BackUpScheduleService.getAll(
+      this.filterText || undefined,
+      this.sorting || undefined,
+      this.rowsPerPage,
+      skipCount
+    ).subscribe({
+      next: (result: BackUpScheduleDtoPagedResultDto) => {
+        this.scheduledBackups = this.mapToScheduledBackup(result?.items || []);
+        this.totalRecords = result?.totalCount || 0;
+        this.cdr.detectChanges(); // Force table to re-render
+
+      },
+      error: (error) => {
+    
+      },
+    });
+  }
+  mapToScheduledBackup(items: BackUpScheduleDto[]): ScheduledBackup[] {
+    return items.map((item) => ({
+      id: item.id,
+      config: item.sourceConfiguation?.backupName || "Unknown",
+      schedule: this.getScheduleText(item),
+      status: item.isDeleted ? "Inactive" : "Active",
+    }));
+  }
+  getScheduleText(item: BackUpScheduleDto): string {
+    const frequency = item.backUpFrequency?.name || "Unknown";
+    const time = item.backupTime || "N/A";
+    switch (frequency.toLowerCase()) {
+      case "hourly":
+        return (
+          `Hourly` + (item.cronExpression ? ` - ${item.cronExpression}` : "")
+        );
+      case "daily":
+        return `Daily - ` + item.cronExpression;
+      case "weekly":
+        return `Weekly - ` + item.cronExpression;
+      case "monthly":
+        return `Monthly - ` + item.cronExpression;
+      case "yearly":
+        return `Yearly - ` + item.cronExpression;
+      default:
+        return item.cronExpression || `${frequency} at ${time}`;
+    }
+  }
+  deleteBackup(backup: ScheduledBackup) {
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This will permanently delete the configuration!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.BackUpScheduleService.removeSchedule(backup.id).subscribe({
+          next: () => {
+            Swal.fire("Deleted!", "Deleted Successfully", "success");
+            this.loadBackups(this.currentPage);
+          },
+          error: (error) => {
+            Swal.fire("Error!", "Something Wrong!", "error");
+          },
+        });
+      }
+    });
+  }
+  applyFilter(event: Event) {
+    this.filterText = (event.target as HTMLInputElement).value;
+    this.currentPage = 0;
+    this.loadBackups(this.currentPage);
+  }
+
+  onPageChange(event: any) {
+    this.currentPage = event.page;
+    this.loadBackups(this.currentPage);
+  }
+
+  onSort(event: any) {
+    const sortField = event.field;
+    const sortOrder = event.order === 1 ? "asc" : "desc";
+    let apiField = sortField;
+    if (sortField === "config") {
+      apiField = "sourceConfiguationId";
+    } else if (sortField === "schedule") {
+      apiField = "backupTime";
+    } else if (sortField === "status") {
+      apiField = "isDeleted";
+    }
+    this.sorting = `${apiField} ${sortOrder}`;
+    this.loadBackups(this.currentPage);
+  }
   getDaySuffix(day: number): string {
     if (day >= 11 && day <= 13) {
       return "th";
@@ -120,9 +237,7 @@ export class ScheduleBackupComponent implements OnInit {
         dayOfMonthValue
       );
       const formValue = this.scheduleForm.value;
-      const formattedTime = formValue.time
-        ? `${formValue.time}:00` // Append seconds to match "HH:mm:ss"
-        : null;
+      const formattedTime = formValue.time ? `${formValue.time}:00` : null;
 
       const payload = BackUpScheduleCreateDto.fromJS({
         sourceConfiguationId: formValue.sourceConfiguationId,
@@ -142,10 +257,11 @@ export class ScheduleBackupComponent implements OnInit {
           });
           this.loadSourceConfigs();
           this.loadfrequencies();
+          this.loadBackups();
           this.scheduleForm.reset();
           this.isSaving = false;
           this.cronExpression = "";
-          this.showDayOfWeek = false; 
+          this.showDayOfWeek = false;
         },
         error: (err) => {
           this.messageService.add({
@@ -178,11 +294,11 @@ export class ScheduleBackupComponent implements OnInit {
 
     switch (frequency) {
       case "Hourly":
-        return `${minute} * * * *`; 
+        return `${minute} * * * *`;
       case "Daily":
         return `${minute} ${hour} * * *`;
       case "Weekly":
-        return `${minute} ${hour} * * ${dayOfWeek !== null ? dayOfWeek : "*"}`; 
+        return `${minute} ${hour} * * ${dayOfWeek !== null ? dayOfWeek : "*"}`;
       case "Monthly":
         return `${minute} ${hour} ${
           dayOfMonth !== null ? dayOfMonth : "*"
@@ -203,5 +319,4 @@ export class ScheduleBackupComponent implements OnInit {
       this.scheduleForm.get("dayOfMonth")?.setValue(null);
     }
   }
-
 }

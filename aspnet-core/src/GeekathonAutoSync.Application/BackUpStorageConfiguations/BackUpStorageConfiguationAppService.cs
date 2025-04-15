@@ -83,6 +83,9 @@ namespace GeekathonAutoSync.BackUpStorageConfiguations
                 AZ_AccountName = input.AZ_AccountName,
                 AZ_AccountKey = input.AZ_AccountKey,
                 BackupName = input.BackupName,
+                Endpoint=input.Endpoint,
+                ProjectID=input.ProjectID,
+                CredentialFile=input.CredentialFile
             };
             using (CurrentUnitOfWork.SetTenantId(backUpStorageConfiguation.TenantId))
             {
@@ -118,6 +121,10 @@ namespace GeekathonAutoSync.BackUpStorageConfiguations
             getBackupStorageConfiguration.AZ_AccountName = input.AZ_AccountName;
             getBackupStorageConfiguration.AZ_AccountKey = input.AZ_AccountKey;
             getBackupStorageConfiguration.BackupName = input.BackupName;
+            getBackupStorageConfiguration.Endpoint = input.Endpoint;
+            getBackupStorageConfiguration.CredentialFile = input.CredentialFile;
+            getBackupStorageConfiguration.ProjectID = input.ProjectID;
+
             using (CurrentUnitOfWork.SetTenantId(getBackupStorageConfiguration.TenantId))
             {
                 backUpStorageID = await _backUpStorageConfiguationRepository.InsertOrUpdateAndGetIdAsync(getBackupStorageConfiguration);

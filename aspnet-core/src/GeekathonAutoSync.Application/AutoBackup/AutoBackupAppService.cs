@@ -981,10 +981,10 @@ namespace GeekathonAutoSync.AutoBackup
                     BackupStorageCount = configuredBackStorageCount,
                     ScheduleBackupCount = totalSchedule,
                     TotalBackupCount = totalBackupTaken,
-                    LastBackupItem = lastBackUp.SourceConfiguation.BackupName ??
+                    LastBackupItem =lastBackUp!=null?lastBackUp.SourceConfiguation.BackupName ??
                         (lastBackUp.SourceConfiguation.BackUPType.BackupTypeEnum == BackupTypeEnum.DataBase ? (lastBackUp.SourceConfiguation.ServerIP + " - " + lastBackUp.SourceConfiguation.DBInitialCatalog)
-                        : lastBackUp.SourceConfiguation.ServerIP + " - Application Files"),
-                    LastBackupStatus = lastBackUp.BackupLogStatus.ToString(),
+                        : lastBackUp.SourceConfiguation.ServerIP + " - Application Files"):"",
+                    LastBackupStatus = lastBackUp != null ? lastBackUp.BackupLogStatus.ToString():"",
                 };
 
                 foreach (var item in nextScheduleList)

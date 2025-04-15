@@ -16,6 +16,7 @@ import {
   BackUpStorageConfiguationServiceProxy,
   SourceConfiguationDto,
 } from "@shared/service-proxies/service-proxies";
+import Swal from "sweetalert2";
 
 @Component({
   selector: "app-storage-detail",
@@ -68,6 +69,10 @@ export class StorageDetailComponent implements OnChanges, OnInit {
     "nfS_AccessUserID",
     "nfS_Password",
     "nfS_LocationPath",
+    "endpoint",
+    "projectID",
+    "credentialFile",
+    "backupName",
   ];
   getFilteredKeys(entry: any): string[] {
     return Object.keys(entry).filter(
@@ -90,6 +95,10 @@ export class StorageDetailComponent implements OnChanges, OnInit {
       nfS_AccessUserID: "Access user ID",
       nfS_Password: "Password",
       nfS_LocationPath: "Location Path",
+      endpoint: "End Point",
+      projectID: "ProjectID",
+      credentialFile: "Credential File",
+      backupName: "backupName",
     };
 
     return (
@@ -115,10 +124,23 @@ export class StorageDetailComponent implements OnChanges, OnInit {
   }
 
   deleteEntryDetails(id: string) {
-    this.backUpStorageConfiguationService.delete(id).subscribe({
-      next: () => {
-        this.back.emit();
-      },
+    Swal.fire({
+      title: "Are you sure?",
+      text: "This will permanently delete the configuration!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        this.backUpStorageConfiguationService.delete(id).subscribe({
+          next: () => {
+            this.back.emit();
+          },
+        });
+        Swal.fire("Deleted!", "Configuration has been deleted.", "success");
+      }
     });
   }
 
@@ -181,7 +203,6 @@ export class StorageDetailComponent implements OnChanges, OnInit {
         },
         error: (err) => {
           this.downloadingIds.delete(key);
-          console.error("Download failed:", err);
         },
         complete: () => {
           this.downloadingIds.delete(key);
