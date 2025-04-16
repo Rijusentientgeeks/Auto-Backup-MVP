@@ -65,16 +65,17 @@ namespace GeekathonAutoSync.SpeechRecognitions
                 if (command.Contains("application files") || command.Contains("application file") || command.Contains("application"))
                 {
                     var backupType = await _backupTypeRepository.FirstOrDefaultAsync(i => i.BackupTypeEnum == BackupTypeEnum.ApplicationFiles);
-                    string digitsOnly = Regex.Replace(command, @"\D", "");
                     var serverIP = string.Empty;
-                    if(digitsOnly.Length > 10 && digitsOnly.Length < 13)
+                    MatchCollection matches = Regex.Matches(command, @"[-+]?[0-9]*\.?[0-9]+");
+                    List<string> ipNumber = [];
+                    foreach (var item in matches)
                     {
-                        serverIP = string.Format("{0}.{1}.{2}.{3}",
-                            digitsOnly.Substring(0, 3),
-                            digitsOnly.Substring(3, 3),
-                            digitsOnly.Substring(6, 3),
-                            digitsOnly.Substring(9, (digitsOnly.Length - 9))
-                        );
+                        string[] parts = item.ToString().Split(new[] { '.' });
+                        ipNumber.AddRange(parts);
+                    }
+                    if(ipNumber.Count == 4)
+                    {
+                        serverIP = string.Join(".", ipNumber);
                         var getSourceConfiguration = _sourceConfiguationRepository.GetAll().FirstOrDefault(i => i.BackUPTypeId == backupType.Id && i.ServerIP == serverIP);
                         if (getSourceConfiguration != null)
                         {
@@ -93,24 +94,54 @@ namespace GeekathonAutoSync.SpeechRecognitions
                         resultDetails = "Your command is '" + command + "', it's a invalid command, so we cann't execute it.";
                         IsValidCommand = false;
                     }
+
+                    //string digitsOnly = Regex.Replace(command, @"\D", "");
+                    //if(digitsOnly.Length > 10 && digitsOnly.Length < 13)
+                    //{
+                    //    serverIP = string.Format("{0}.{1}.{2}.{3}",
+                    //        digitsOnly.Substring(0, 3),
+                    //        digitsOnly.Substring(3, 3),
+                    //        digitsOnly.Substring(6, 3),
+                    //        digitsOnly.Substring(9, (digitsOnly.Length - 9))
+                    //    );
+                    //    var getSourceConfiguration = _sourceConfiguationRepository.GetAll().FirstOrDefault(i => i.BackUPTypeId == backupType.Id && i.ServerIP == serverIP);
+                    //    if (getSourceConfiguration != null)
+                    //    {
+                    //        resultDetails = await _autoBackupService.CreateBackup(getSourceConfiguration.Id.ToString());
+                    //        resultDetails = "Your command is '" + command + "', it's successfully executed and backup created successfully";
+                    //        IsValidCommand = true;
+                    //    }
+                    //    else
+                    //    {
+                    //        resultDetails = "Your command is '" + command + "', it's a invalid command, so we cann't execute it.";
+                    //        IsValidCommand = false;
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    resultDetails = "Your command is '" + command + "', it's a invalid command, so we cann't execute it.";
+                    //    IsValidCommand = false;
+                    //}
                 }
                 else if (command.Contains("database"))
                 {
                     var backupType = await _backupTypeRepository.FirstOrDefaultAsync(i => i.BackupTypeEnum == BackupTypeEnum.DataBase);
-                    string digitsOnly = Regex.Replace(command, @"\D", "");
                     var serverIP = string.Empty;
-                    if (digitsOnly.Length > 10 && digitsOnly.Length < 13)
+                    MatchCollection matches = Regex.Matches(command, @"[-+]?[0-9]*\.?[0-9]+");
+                    List<string> ipNumber = [];
+                    foreach (var item in matches)
                     {
-                        serverIP = string.Format("{0}.{1}.{2}.{3}",
-                            digitsOnly.Substring(0, 3),
-                            digitsOnly.Substring(3, 3),
-                            digitsOnly.Substring(6, 3),
-                            digitsOnly.Substring(9, (digitsOnly.Length - 9))
-                        );
+                        string[] parts = item.ToString().Split(new[] { '.' });
+                        ipNumber.AddRange(parts);
+                    }
+                    if (ipNumber.Count == 4)
+                    {
+                        serverIP = string.Join(".", ipNumber);
                         var getSourceConfiguration = _sourceConfiguationRepository.GetAll().FirstOrDefault(i => i.BackUPTypeId == backupType.Id && i.ServerIP == serverIP);
                         if (getSourceConfiguration != null)
                         {
                             resultDetails = await _autoBackupService.CreateBackup(getSourceConfiguration.Id.ToString());
+                            resultDetails = "Your command is '" + command + "', it's successfully executed and backup created successfully";
                             IsValidCommand = true;
                         }
                         else
@@ -124,6 +155,33 @@ namespace GeekathonAutoSync.SpeechRecognitions
                         resultDetails = "Your command is '" + command + "', it's a invalid command, so we cann't execute it.";
                         IsValidCommand = false;
                     }
+                    //string digitsOnly = Regex.Replace(command, @"\D", "");
+                    //var serverIP = string.Empty;
+                    //if (digitsOnly.Length > 10 && digitsOnly.Length < 13)
+                    //{
+                    //    serverIP = string.Format("{0}.{1}.{2}.{3}",
+                    //        digitsOnly.Substring(0, 3),
+                    //        digitsOnly.Substring(3, 3),
+                    //        digitsOnly.Substring(6, 3),
+                    //        digitsOnly.Substring(9, (digitsOnly.Length - 9))
+                    //    );
+                    //    var getSourceConfiguration = _sourceConfiguationRepository.GetAll().FirstOrDefault(i => i.BackUPTypeId == backupType.Id && i.ServerIP == serverIP);
+                    //    if (getSourceConfiguration != null)
+                    //    {
+                    //        resultDetails = await _autoBackupService.CreateBackup(getSourceConfiguration.Id.ToString());
+                    //        IsValidCommand = true;
+                    //    }
+                    //    else
+                    //    {
+                    //        resultDetails = "Your command is '" + command + "', it's a invalid command, so we cann't execute it.";
+                    //        IsValidCommand = false;
+                    //    }
+                    //}
+                    //else
+                    //{
+                    //    resultDetails = "Your command is '" + command + "', it's a invalid command, so we cann't execute it.";
+                    //    IsValidCommand = false;
+                    //}
                 }
                 else
                 {
